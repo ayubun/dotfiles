@@ -1,0 +1,22 @@
+;
+; hiyu im ayu :3
+;
+[user]
+        name = Ayu
+        email = ayu@ayu.dev
+
+;
+; Replace https://
+;
+[url "\"git@github.com:\""]
+        insteadOf = \"https://github.com/\"
+
+;
+; Automatically colorize console output
+;
+[color]
+    diff = auto
+    status = auto
+    branch = auto
+    branchdfh = auto
+    grep = auto
