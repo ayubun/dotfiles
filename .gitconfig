@@ -20,3 +20,9 @@
     branch = auto
     branchdfh = auto
     grep = auto
+
+;
+; Uses rebases for pulls
+;
+[pull]
+        rebase = true
