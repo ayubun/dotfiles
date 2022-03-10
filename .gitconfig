@@ -1,28 +1,26 @@
-;
 ; hiyu im ayu :3
-;
 [user]
-        name = Ayu
-        email = ayu@ayu.dev
+  name = Ayu
+  email = ayu@ayu.dev
 
-;
-; Replace https://
-;
-[url "\"git@github.com:\""]
-        insteadOf = \"https://github.com/\"
+[github]
+  user = AyuAi
 
-;
-; Automatically colorize console output
-;
-[color]
-    diff = auto
-    status = auto
-    branch = auto
-    branchdfh = auto
-    grep = auto
-
-;
-; Uses rebases for pulls
-;
 [pull]
-        rebase = true
+  rebase = true
+[init]
+  defaultBranch = main
+[core]
+  editor = code --wait
+
+; Replace https://
+[url "\"git@github.com:\""]
+  insteadOf = \"https://github.com/\"
+
+; Automatically colorize console output
+[color]
+  diff = auto
+  status = auto
+  branch = auto
+  branchdfh = auto
+  grep = auto
