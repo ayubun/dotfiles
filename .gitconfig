@@ -24,3 +24,8 @@
   branch = auto
   branchdfh = auto
   grep = auto
+
+; Cool aliases owo
+[alias]
+  pu = push -u origin HEAD
+  cam = 'commit -am '
