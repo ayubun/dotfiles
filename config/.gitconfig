@@ -8,8 +8,10 @@
 
 [pull]
   rebase = true
+
 [init]
   defaultBranch = main
+
 [core]
   editor = code --wait
 
@@ -28,4 +30,4 @@
 ; Cool aliases owo
 [alias]
   pu = push -u origin HEAD
-  cam = 'commit -am '
+  cam = commit -am
