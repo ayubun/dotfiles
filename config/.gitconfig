@@ -29,5 +29,17 @@
 
 ; Cool aliases owo
 [alias]
+  ; "push upstream -> pu"
   pu = push -u origin HEAD
-  cam = commit -am
+  ; "force push upstream -> fpu"
+  fpu = push -f -u origin HEAD
+  ; "force push -> fp"
+  fp = push -f
+  ; "add all -> aa"
+  aa = add --all
+  ; "commit w/ message -> cm"
+  cm = commit -am
+  ; "commit amend -> ca"
+  ca = commit -a --amend --no-edit
+  ; "commit amend w/ message -> cam"
+  cam = commit -a --amend -m
