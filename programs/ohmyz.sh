@@ -3,11 +3,11 @@
 # Clean up any old (3+ days) backup files
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     find ~/. -mindepth 1 -maxdepth 1 -type f -mtime +2 \
-        -regextype egrep -regex '.*/\.zshrc\.pre-oh-my-zsh(-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})?$' \
+        -regextype egrep -regex '.*\.pre-oh-my-zsh(-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})?$' \
         -delete
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     find -E ~/. -mindepth 1 -maxdepth 1 -mtime +2 \
-        -regex '.*/\.zshrc\.pre-oh-my-zsh(-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})?$' \
+        -regex '.*\.pre-oh-my-zsh(-[0-9]{4}-[0-9]{2}-[0-9]{2}_[0-9]{2}-[0-9]{2}-[0-9]{2})?$' \
         -delete
 fi
 # Remove any old installation, if present
