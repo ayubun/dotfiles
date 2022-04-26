@@ -6,5 +6,6 @@ rustup self uninstall -y &>/dev/null
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 # Configure current shell
 source $HOME/.cargo/env &>/dev/null
-# For Mac:
-xcode-select --install &>/dev/null
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    xcode-select --install &>/dev/null
+fi

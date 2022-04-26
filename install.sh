@@ -20,12 +20,12 @@ DOTFILES_FOLDER=$HOME/dotfiles
 
 echo ""
 
-find $DOTFILES_FOLDER/config -maxdepth 1 -mindepth 1 -type f -print | \
+find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f -print | \
 while read file; do
     file=$(basename ${file})
     echo "${RESET}${YELLOW_TEXT}[${BOLD}Dotfiles${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Symlinking ${UNDERLINE}${file}${RESET}" 
     rm -rf $HOME/$file
-    ln -s $DOTFILES_FOLDER/config/$file $HOME/$file
+    ln -s $DOTFILES_FOLDER/configs/$file $HOME/$file
 done
 
 # OS-Independent programs
@@ -35,8 +35,6 @@ while read file; do
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
     source $DOTFILES_FOLDER/programs/$file
 done
-
-echo "$OSTYPE"
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Ubuntu programs
@@ -58,5 +56,8 @@ fi
 
 echo ""
 echo ""
-echo "${RESET}${GREEN_TEXT}${BOLD}Installation is complete! (* ^ ω ^)" 
+echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)" 
+echo ""
+echo "${RESET}${YELLOW_TEXT}  Be sure to install the necessary fonts for Powerlevel10k:"
+echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md"
 echo ""
