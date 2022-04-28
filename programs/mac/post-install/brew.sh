@@ -4,3 +4,6 @@
 
 echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> $HOME/.zprofile
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# Install some nice thingies
+brew install htop
