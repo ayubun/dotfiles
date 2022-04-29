@@ -7,3 +7,4 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # Install some nice thingies
 brew install htop
+brew install neofetch

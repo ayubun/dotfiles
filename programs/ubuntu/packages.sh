@@ -7,3 +7,4 @@ sudo apt-get upgrade -y
 sudo apt-get install build-essential -y
 sudo apt-get install manpages-dev -y
 sudo apt-get install dnsutils -y
+sudo apt-get install neofetch -y

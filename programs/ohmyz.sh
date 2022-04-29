@@ -29,4 +29,10 @@ cat <<EOF >> ~/.zshrc
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# Run neofetch on terminal login! (just looks kinda cool :3)
+echo ""
+neofetch
+echo ""
+
 EOF
