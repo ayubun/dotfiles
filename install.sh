@@ -32,8 +32,11 @@ done
 find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -print | \
 while read file; do
     file=$(basename ${file})
+    if [ $file == "brew.sh" ]; then
+        continue
+    fi
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-    source $DOTFILES_FOLDER/programs/$file
+    source $DOTFILES_FOLDER/programs/$file &
 done
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -42,7 +45,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         while read file; do
             file=$(basename ${file})
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/ubuntu/$file
+            source $DOTFILES_FOLDER/programs/ubuntu/$file &
         done
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac programs
@@ -50,9 +53,13 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         while read file; do
             file=$(basename ${file})
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/mac/$file
+            source $DOTFILES_FOLDER/programs/mac/$file &
         done
 fi
+
+source $DOTFILES_FOLDER/programs/brew.sh
+
+wait
 
 echo ""
 echo ""

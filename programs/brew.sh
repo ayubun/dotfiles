@@ -22,3 +22,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     source $DOTFILES_FOLDER/programs/mac/post-install/brew.sh
 fi
+# Packages! :3
+brew install gcc
+brew install htop
+brew install neofetch

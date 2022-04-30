@@ -4,4 +4,3 @@
 
 echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.zprofile
 eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-brew install gcc
