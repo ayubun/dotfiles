@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Install Zsh if missing (Ubuntu)
+sudo apt-get install zsh -y &>/dev/null
+# Make it default
+sudo chsh -s $(which zsh) &>/dev/null
+
 # Clean up any old (3+ days) backup files
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     find ~/. -mindepth 1 -maxdepth 1 -type f -mtime +2 \
