@@ -36,6 +36,9 @@ cat <<EOF >> ~/.zshrc
 # To customize prompt, run p10k configure or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# Exit virtualenv if present (this is just because I cant find where its activating.......)
+deactivate &>/dev/null
+
 # Run neofetch on terminal login! (just looks kinda cool :3)
 echo ""
 neofetch
