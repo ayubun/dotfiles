@@ -1,5 +1,14 @@
 #!/bin/bash
 
+extras_flag=''
+verbose='false'
+
+while getopts 'e:v' flag; do
+  case "${flag}" in
+    e) extras_flag='true' ;;
+    v) verbose='true' ;;
+  esac
+done
 
 # 0 to 7 = black, red, green, yellow, blue, magenta, cyan, white
 MOVE_UP=`tput cuu 1`
@@ -32,12 +41,17 @@ done
 find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -print | \
 while read file; do
     file=$(basename ${file})
-    if [ $file == "brew.sh" ]; then
-        continue
-    fi
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
     source $DOTFILES_FOLDER/programs/$file &
 done
+if [ "extras_flag" = true ] ; then
+    find $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -print | \
+    while read file; do
+        file=$(basename ${file})
+        echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
+        source $DOTFILES_FOLDER/programs/$file &
+    done
+fi
 
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         # Ubuntu programs
@@ -47,24 +61,41 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
             source $DOTFILES_FOLDER/programs/ubuntu/$file &
         done
+        if [ "extras_flag" = true ] ; then
+            find $DOTFILES_FOLDER/programs/ubuntu/extras -maxdepth 1 -mindepth 1 -type f -print | \
+            while read file; do
+                file=$(basename ${file})
+                echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
+                source $DOTFILES_FOLDER/programs/ubuntu/$file &
+            done
+        fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
         # Mac programs
         find $DOTFILES_FOLDER/programs/mac -maxdepth 1 -mindepth 1 -type f -print | \
         while read file; do
             file=$(basename ${file})
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/mac/$file &
+            source $DOTFILES_FOLDER/programs/mac/$file & 
         done
+        if [ "extras_flag" = true ] ; then
+            find $DOTFILES_FOLDER/programs/mac/extras -maxdepth 1 -mindepth 1 -type f -print | \
+            while read file; do
+                file=$(basename ${file})
+                echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
+                source $DOTFILES_FOLDER/programs/mac/$file &
+            done
+        fi
 fi
-
-source $DOTFILES_FOLDER/programs/brew.sh
 
 wait
 
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)" 
+if [ "$extras_flag" = true ] ; then
+    echo "${RESET}${GREEN_TEXT}     ヽ(*・ω・)ﾉ Extra programs have been included"
+fi
 echo ""
 echo "${RESET}${YELLOW_TEXT}  Be sure to install the necessary fonts for Powerlevel10k:"
 echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md"
-echo ""
+echo "${RESET}"
