@@ -42,14 +42,14 @@ find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -print | \
 while read file; do
     file=$(basename ${file})
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-    source $DOTFILES_FOLDER/programs/$file &
+    source $DOTFILES_FOLDER/programs/$file
 done
 if [ "extras_flag" = true ] ; then
     find $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -print | \
     while read file; do
         file=$(basename ${file})
         echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-        source $DOTFILES_FOLDER/programs/$file &
+        source $DOTFILES_FOLDER/programs/$file
     done
 fi
 
@@ -59,14 +59,14 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
         while read file; do
             file=$(basename ${file})
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/ubuntu/$file &
+            source $DOTFILES_FOLDER/programs/ubuntu/$file
         done
         if [ "extras_flag" = true ] ; then
             find $DOTFILES_FOLDER/programs/ubuntu/extras -maxdepth 1 -mindepth 1 -type f -print | \
             while read file; do
                 file=$(basename ${file})
                 echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-                source $DOTFILES_FOLDER/programs/ubuntu/$file &
+                source $DOTFILES_FOLDER/programs/ubuntu/$file
             done
         fi
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -75,19 +75,17 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         while read file; do
             file=$(basename ${file})
             echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/mac/$file & 
+            source $DOTFILES_FOLDER/programs/mac/$file
         done
         if [ "extras_flag" = true ] ; then
             find $DOTFILES_FOLDER/programs/mac/extras -maxdepth 1 -mindepth 1 -type f -print | \
             while read file; do
                 file=$(basename ${file})
                 echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-                source $DOTFILES_FOLDER/programs/mac/$file &
+                source $DOTFILES_FOLDER/programs/mac/$file
             done
         fi
 fi
-
-wait
 
 echo ""
 echo ""
