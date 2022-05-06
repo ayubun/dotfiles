@@ -16,7 +16,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         -delete
 fi
 # Remove any old installation, if present
-rm -r $HOME/.oh-my-zsh
+sudo rm -r $HOME/.oh-my-zsh
 # Install Oh My Zsh
 export RUNZSH=no
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
