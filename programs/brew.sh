@@ -27,4 +27,3 @@ brew install gcc
 brew install htop
 brew install neofetch
 brew install nano
-

@@ -19,29 +19,13 @@ fi
 sudo rm -r $HOME/.oh-my-zsh
 # Install Oh My Zsh
 export RUNZSH=no
-sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+export KEEP_ZSHRC=yes
+sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --keep-zshrc
 # Install Powerlevel10k theme (https://github.com/romkatv/powerlevel10k)
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
-# Edit the config to set the ZSH_THEME to powerlevel10k
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    sed -i 's/^ZSH_THEME=".*"$/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Mac OS sed seems to require a backup, so we will just rm it after
-    sed -i'.sed-backup' -e 's/^ZSH_THEME=".*"$/ZSH_THEME="powerlevel10k\/powerlevel10k"/' ~/.zshrc
-    rm ~/.zshrc.sed-backup
+
+if ! grep -q "# To customize prompt, run p10k configure or edit ~/.p10k.zsh." ~/.zshrc ; then
+    echo "[Error] .zshrc file has been overridden by ohmyz.sh installation. Re-symlinking..."
+    rm -rf $HOME/.zshrc
+    ln -s $DOTFILES_FOLDER/configs/.zshrc $HOME/.zshrc
 fi
-
-cat <<EOF >> ~/.zshrc
-
-# To customize prompt, run p10k configure or edit ~/.p10k.zsh.
-[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
-
-# Exit virtualenv if present (this is just because I cant find where its activating.......)
-deactivate &>/dev/null
-
-# Run neofetch on terminal login! (just looks kinda cool :3)
-echo ""
-neofetch
-echo ""
-
-EOF

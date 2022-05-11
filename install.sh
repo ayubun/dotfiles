@@ -104,6 +104,7 @@ echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)" 
 if [ "$extras_flag" = true ] ; then
+    echo ""
     echo "${RESET}${GREEN_TEXT}     ヽ(*・ω・)ﾉ Extra programs have been included"
 fi
 echo ""
