@@ -24,11 +24,11 @@ CYAN_TEXT=`tput setaf 6`
 WHITE_TEXT=`tput setaf 7`
 RESET=`tput sgr0`
 
-if [ "$EUID" -eq 0 ] ; then 
-    echo ""
-    echo "${RESET}${RED_TEXT}${BOLD}[ERROR]${RESET} ${RED_TEXT}${UNDERLINE}Please do not run this script as root!${RESET}"
-    exit 1
-fi
+# if [ "$EUID" -eq 0 ] ; then 
+#     echo ""
+#     echo "${RESET}${RED_TEXT}${BOLD}[ERROR]${RESET} ${RED_TEXT}${UNDERLINE}Please do not run this script as root!${RESET}"
+#     exit 1
+# fi
 
 # echo ""
 # stty -echo
