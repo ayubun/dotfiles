@@ -110,3 +110,8 @@ deactivate &>/dev/null
 echo ""
 neofetch
 echo ""
+
+# Check for work aliases
+if [ -f $HOME/work/.zshrc_aliases ]; then
+    . $HOME/work/.zshrc_aliases
+fi
