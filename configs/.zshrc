@@ -111,7 +111,16 @@ echo ""
 neofetch
 echo ""
 
-# Check for work aliases
+DOTFILES_FOLDER=$HOME/dotfiles
+
+# Load any dependencies in the dependencies directory
+find $HOME/dotfiles/configs/dependencies -maxdepth 1 -mindepth 1 -type f -print | \
+while read file; do
+    file=$(basename ${file})
+    source $HOME/dotfiles/configs/dependencies/$file
+done
+
+# Load any private work aliases
 if [ -f $HOME/work/.zshrc_aliases ]; then
     . $HOME/work/.zshrc_aliases
 fi
