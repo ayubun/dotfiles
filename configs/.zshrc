@@ -105,12 +105,6 @@ source $ZSH/oh-my-zsh.sh
 
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
-
-# Run neofetch on terminal login! (just looks kinda cool :3)
-echo ""
-neofetch
-echo ""
-
 DOTFILES_FOLDER=$HOME/dotfiles
 
 # Load any dependencies in the dependencies directory
@@ -120,7 +114,17 @@ while read file; do
     source $HOME/dotfiles/configs/dependencies/$file
 done
 
+# Kubectl autocomplete
+[[ $commands[kubectl] ]] && source <(kubectl completion zsh)  # setup autocomplete
+alias k=kubectl
+complete -o default -F __start_kubectl k
+
 # Load any private work aliases
 if [ -f $HOME/work/.zshrc_aliases ]; then
     . $HOME/work/.zshrc_aliases
 fi
+
+# Run neofetch on terminal login! (just looks kinda cool :3)
+echo ""
+neofetch
+echo ""
