@@ -4,7 +4,7 @@
   email = ayu@ayu.dev
 
 [github]
-  user = AyuAi
+  user = ayubun
 
 [pull]
   rebase = true
@@ -17,7 +17,7 @@
 
 ; Replace https://
 [url "\"git@github.com:\""]
-  insteadOf = \"https://github.com/\"
+	insteadOf = \"https://github.com/\"
 
 ; Automatically colorize console output
 [color]
