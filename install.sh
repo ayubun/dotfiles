@@ -66,7 +66,7 @@ if [ "extras_flag" = true ] ; then
     done
 fi
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+if [[ "$OSTYPE" == "linux-gnu"* ]]; thfasdfaen
         # Ubuntu programs
         find $DOTFILES_FOLDER/programs/ubuntu -maxdepth 1 -mindepth 1 -type f -print | \
         while read file; do
