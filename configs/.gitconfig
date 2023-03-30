@@ -1,6 +1,6 @@
 ; hiyu im ayu :3
 [user]
-  name = Ayu
+  name = ayu
   email = ayu@ayu.dev
 
 [github]
@@ -14,6 +14,10 @@
 
 [core]
   editor = code --wait
+
+[rerere]
+  enabled = true
+  autoupdate = true
 
 ; Replace https://
 [url "\"git@github.com:\""]
