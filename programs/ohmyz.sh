@@ -26,6 +26,6 @@ git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$
 
 if ! grep -q "# To customize prompt, run p10k configure or edit ~/.p10k.zsh." ~/.zshrc ; then
     echo "[Error] .zshrc file has been overridden by ohmyz.sh installation. Re-symlinking..."
-    rm -rf $HOME/.zshrc
+    rm -f $HOME/.zshrc
     ln -s $DOTFILES_FOLDER/configs/.zshrc $HOME/.zshrc
 fi

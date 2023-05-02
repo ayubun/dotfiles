@@ -1,14 +1,20 @@
 #!/bin/bash
 
-extras_flag=''
-verbose='false'
+# https://unix.stackexchange.com/questions/196603/can-someone-explain-in-detail-what-set-m-does
+set -m
 
-while getopts 'e:v' flag; do
+EXTRAS=false
+VERBOSE=false
+
+while getopts 'ev' flag; do
   case "${flag}" in
-    e) extras_flag='true' ;;
-    v) verbose='true' ;;
+    e) EXTRAS=true ;;
+    v) VERBOSE=true ;;
   esac
 done
+
+rm -rf ./tmp
+mkdir ./tmp
 
 # 0 to 7 = black, red, green, yellow, blue, magenta, cyan, white
 MOVE_UP=`tput cuu 1`
@@ -24,25 +30,37 @@ CYAN_TEXT=`tput setaf 6`
 WHITE_TEXT=`tput setaf 7`
 RESET=`tput sgr0`
 
-# if [ "$EUID" -eq 0 ] ; then 
-#     echo ""
-#     echo "${RESET}${RED_TEXT}${BOLD}[ERROR]${RESET} ${RED_TEXT}${UNDERLINE}Please do not run this script as root!${RESET}"
-#     exit 1
-# fi
-
-# echo ""
-# stty -echo
-# printf "Type your password for sudo access: "
-# read PASSWORD
-# stty echo
-# echo "${MOVE_UP}${CLEAR_LINE}\n"
-
-
 DOTFILES_FOLDER=$HOME/dotfiles
+# TODO: Add a check to verify the install script is being run in the home directory
 
 echo ""
 
-find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f -print | \
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    OS_PATH=ubuntu
+    OS_NAME=Ubuntu
+elif [[ "$OSTYPE" == "darwin"* ]]; then
+    OS_PATH=mac
+    OS_NAME=Mac
+else
+    echo "Unsupported OS"
+    exit 1
+fi
+
+# Install dependencies (i.e. GNU parallel)
+find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
+while read file; do
+    file=$(basename ${file})
+    echo "${RESET}${YELLOW_TEXT}[${BOLD}Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}" 
+    . $DOTFILES_FOLDER/dependencies/$file
+done
+find $DOTFILES_FOLDER/dependencies/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
+while read file; do
+    file=$(basename ${file})
+    echo "${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}" 
+    . $DOTFILES_FOLDER/dependencies/$OS_PATH/$file
+done
+
+find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f -name ".*" -print | \
 while read file; do
     file=$(basename ${file})
     echo "${RESET}${YELLOW_TEXT}[${BOLD}Dotfiles${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Symlinking ${UNDERLINE}${file}${RESET}" 
@@ -51,59 +69,29 @@ while read file; do
 done
 
 # OS-Independent programs
-find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -print | \
-while read file; do
-    file=$(basename ${file})
-    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-    source $DOTFILES_FOLDER/programs/$file
-done
-if [ "extras_flag" = true ] ; then
-    find $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -print | \
-    while read file; do
-        file=$(basename ${file})
-        echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-        source $DOTFILES_FOLDER/programs/$file
-    done
+if [[ $EXTRAS = true ]] ; then
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+else
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
 fi
 
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-        # Ubuntu programs
-        find $DOTFILES_FOLDER/programs/ubuntu -maxdepth 1 -mindepth 1 -type f -print | \
-        while read file; do
-            file=$(basename ${file})
-            echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/ubuntu/$file
-        done
-        if [ "extras_flag" = true ] ; then
-            find $DOTFILES_FOLDER/programs/ubuntu/extras -maxdepth 1 -mindepth 1 -type f -print | \
-            while read file; do
-                file=$(basename ${file})
-                echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ubuntu${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-                source $DOTFILES_FOLDER/programs/ubuntu/$file
-            done
-        fi
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-        # Mac programs
-        find $DOTFILES_FOLDER/programs/mac -maxdepth 1 -mindepth 1 -type f -print | \
-        while read file; do
-            file=$(basename ${file})
-            echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-            source $DOTFILES_FOLDER/programs/mac/$file
-        done
-        if [ "extras_flag" = true ] ; then
-            find $DOTFILES_FOLDER/programs/mac/extras -maxdepth 1 -mindepth 1 -type f -print | \
-            while read file; do
-                file=$(basename ${file})
-                echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac${RESET}${YELLOW_TEXT}][${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}\n" 
-                source $DOTFILES_FOLDER/programs/mac/$file
-            done
-        fi
+# OS-specific programs
+if [[ $EXTRAS = true ]] ; then
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs/$OS_PATH $DOTFILES_FOLDER/programs/$OS_PATH/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+else
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
 fi
+
+rm -rf ./tmp
 
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)" 
-if [ "$extras_flag" = true ] ; then
+if [[ $EXTRAS = true ]] ; then
     echo ""
     echo "${RESET}${GREEN_TEXT}     ヽ(*・ω・)ﾉ Extra programs have been included"
 fi

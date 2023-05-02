@@ -111,7 +111,7 @@ DOTFILES_FOLDER=$HOME/dotfiles
 find $HOME/dotfiles/configs/dependencies -maxdepth 1 -mindepth 1 -type f -print | \
 while read file; do
     file=$(basename ${file})
-    source $HOME/dotfiles/configs/dependencies/$file
+    . $HOME/dotfiles/configs/dependencies/$file
 done
 
 # Kubectl autocomplete
