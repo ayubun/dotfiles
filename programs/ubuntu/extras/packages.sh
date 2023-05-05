@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Wait to acquire apt lock
+while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
+    sleep 1
+done
+
 fix-apt() {
     sudo apt-fast --fix-broken install -y &>/dev/null
     sudo apt-fast --fix-missing install -y &>/dev/null
@@ -8,41 +13,35 @@ fix-apt() {
 export -f fix-apt
 
 packages=(
-    'build-essential'
-    'manpages-dev'
-    'dnsutils'
-    'neofetch'
-    'google-cloud-sdk-pubsub-emulator'  # discord
-    'net-tools'
-    'htop'
-    'nano'
-    'python3.8'
+  'docker-ce'
+  'docker-ce-cli' 
+  'containerd.io'
 )
 apt_repositories=(
-    'ppa:deadsnakes/ppa'  # python3.8
 )
-
-# Wait to acquire apt lock
-while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
-    sleep 1
-done
 
 # Clean
 sudo apt-fast -y remove "${packages[@]}"
 
+# Repository setups
+docker_repository_setup() {
+  sudo apt-fast install \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release -y
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --yes --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  echo \
+    "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu \
+    $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+}
+docker_repository_setup
 for repository in ${apt_repositories[@]}; do
     sudo add-apt-repository -y $repository
 done
+
 sudo apt-fast update -y
 sudo apt-fast upgrade -y
-
-install_package() {
-    if ! sudo apt-fast -y install $1; then
-        fix-apt
-        sudo apt-fast -y install $1
-    fi
-}
-export -f install_package
 
 install_all_packages() {
     ATTEMPTS=0
