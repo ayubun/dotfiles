@@ -1,25 +1,26 @@
 #!/bin/bash
 
-# This script attempts to install all "essential" (for me :3) packages on Ubuntu
+packages=(
+    'build-essential'
+    'manpages-dev'
+    'dnsutils'
+    'neofetch'
+    'google-cloud-sdk-pubsub-emulator'  # discord
+    'net-tools'
+    'htop'
+    'nano'
+    'python3.8'
+)
+apt_repositories=(
+    'ppa:deadsnakes/ppa'  # python3.8
+)
 
-sudo apt-get update -y
-sudo apt-get upgrade -y
+# Clean
+sudo apt-fast -y remove "${packages[@]}"
 
-sudo apt-get install build-essential -y
-sudo apt-get install manpages-dev -y
-sudo apt-get install dnsutils -y
-sudo apt-get install neofetch -y
-sudo apt-get install google-cloud-sdk-pubsub-emulator -y
-sudo apt-get install net-tools -y
-
-# python 3.8
-# sudo apt install software-properties-common -y
-# sudo add-apt-repository ppa:deadsnakes/ppa -y 
-# sudo apt update -y 
-# sudo apt install python3.8
-
-# cleanup
-# sudo apt update -y
-# sudo apt upgrade -y
-# sudo apt --fix-broken install -y 
-# sudo apt autoremove -y
+for repository in ${apt_repositories[@]}; do
+    sudo add-apt-repository -y $repository
+done
+sudo apt-fast update -y
+sudo apt-fast upgrade -y
+sudo apt-fast -y install "${packages[@]}"

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+CURRENT_DIR=$(pwd)
+
 # Clean any old Java installations
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     # Remove old JDK(s) / alternatives
@@ -16,9 +18,7 @@ fi
 # Make a temp directory and curl JDK
 JDK_VERSION="18.0.1"
 
-mkdir java-install-dir
-cd java-install-dir
-TMP_DIR_PATH=$(pwd)
+cd $HOME/dotfiles/tmp
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     INSTALL_OS="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -43,5 +43,4 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     sudo mv "jdk-${JDK_VERSION}.jdk" /Library/Java/JavaVirtualMachines/
 fi
 
-# Cleanup temp directory used earlier
-sudo rm -rf $TMP_DIR_PATH
+cd $CURRENT_DIR
