@@ -16,10 +16,8 @@ packages=(
     'net-tools'
     'htop'
     'nano'
-    'python3.8'
 )
 apt_repositories=(
-    'ppa:deadsnakes/ppa'  # python3.8
 )
 
 # Wait to acquire apt lock

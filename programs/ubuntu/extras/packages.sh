@@ -16,8 +16,10 @@ packages=(
   'docker-ce'
   'docker-ce-cli' 
   'containerd.io'
+  'python3.8'
 )
 apt_repositories=(
+  'ppa:deadsnakes/ppa'  # python3.8
 )
 
 # Clean
