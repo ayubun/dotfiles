@@ -13,9 +13,6 @@ while getopts 'ev' flag; do
   esac
 done
 
-rm -rf ./tmp
-mkdir ./tmp
-
 # 0 to 7 = black, red, green, yellow, blue, magenta, cyan, white
 MOVE_UP=`tput cuu 1`
 CLEAR_LINE=`tput el 1`
@@ -30,8 +27,22 @@ CYAN_TEXT=`tput setaf 6`
 WHITE_TEXT=`tput setaf 7`
 RESET=`tput sgr0`
 
-DOTFILES_FOLDER=$HOME/dotfiles
-# TODO: Add a check to verify the install script is being run in the home directory
+# https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script
+SOURCE=${BASH_SOURCE[0]}
+while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symlink
+  DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+  SOURCE=$(readlink "$SOURCE")
+  [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
+done
+DOTFILES_FOLDER=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+if [[ $DOTFILES_FOLDER != "$HOME/dotfiles" ]] ; then
+    # if the current script is not being run from the home directory, we want to move to the home directory.
+    rm -rf $HOME/dotfiles
+    git clone https://github.com/ayubun/dotfiles.git $HOME/dotfiles
+    cd $HOME/dotfiles
+    ./install.sh
+    exit 0
+fi
 
 echo ""
 
@@ -45,6 +56,9 @@ else
     echo "Unsupported OS"
     exit 1
 fi
+
+rm -rf $DOTFILES_FOLDER/tmp
+mkdir $DOTFILES_FOLDER/tmp
 
 # Install dependencies (i.e. GNU parallel)
 find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
@@ -86,7 +100,7 @@ else
     find $DOTFILES_FOLDER/programs/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
 fi
 
-rm -rf ./tmp
+rm -rf $DOTFILES_FOLDER/tmp
 
 echo ""
 echo ""

@@ -11,7 +11,7 @@ sudo DEBIAN_FRONTEND=noninteractive apt install -y apt-fast
 # Apply new config
 DOTFILES_FOLDER=$HOME/dotfiles
 sudo rm -f /etc/apt-fast.conf
-sudo ln -s $DOTFILES_FOLDER/configs/packages/apt-fast.conf /etc/apt-fast.conf
+sudo ln -s $HOME/dotfiles/configs/packages/apt-fast.conf /etc/apt-fast.conf
 
 # We need gnu parallel to run our dotfiles faster (async)
 # https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
