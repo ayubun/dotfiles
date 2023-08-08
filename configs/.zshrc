@@ -129,7 +129,10 @@ if [ -f $HOME/work/.zshrc_aliases ]; then
     . $HOME/work/.zshrc_aliases
 fi
 
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    # Add code cmd (only works on mac)
+    pathadd "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+else
+
 # Run neofetch on terminal login! (just looks kinda cool :3)
-echo ""
 neofetch
-echo ""
