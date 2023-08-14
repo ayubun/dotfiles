@@ -132,7 +132,7 @@ fi
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Add code cmd (only works on mac)
     pathadd "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
-else
+fi
 
 # Run neofetch on terminal login! (just looks kinda cool :3)
 neofetch
