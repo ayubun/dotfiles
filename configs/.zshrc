@@ -129,9 +129,12 @@ if [ -f $HOME/work/.zshrc_aliases ]; then
     . $HOME/work/.zshrc_aliases
 fi
 
+
+add_discord_bin_to_usr_local_bin "coder2" "coder"
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Add code cmd (only works on mac)
-    pathadd "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
+    add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 fi
 
 # Run neofetch on terminal login! (just looks kinda cool :3)
