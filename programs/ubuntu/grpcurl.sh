@@ -7,7 +7,7 @@ cd $HOME/dotfiles/tmp
 VERSION=1.8.7
 mkdir grpcurl  # Temp dir for this binary
 curl -L "https://github.com/fullstorydev/grpcurl/releases/download/v${VERSION}/grpcurl_${VERSION}_linux_x86_64.tar.gz" | tar xz -C grpcurl
-mv -f grpcurl/grpcurl /usr/bin/
-rm -rf grpcurl  # Remove temp dir
+sudo mv -f grpcurl/grpcurl /usr/bin/
+sudo rm -rf grpcurl  # Remove temp dir
 
 cd $CURRENT_DIR
