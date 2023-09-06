@@ -13,6 +13,7 @@ packages=(
     'docker --cask'
     'docker-compose'
     'google-cloud-sdk --cask'  # discord
+    'grpcurl'  # https://github.com/fullstorydev/grpcurl
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior
