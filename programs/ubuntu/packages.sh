@@ -12,7 +12,6 @@ packages=(
     'manpages-dev'
     'dnsutils'
     'neofetch'
-    'google-cloud-sdk-pubsub-emulator'  # discord
     'net-tools'
     'htop'
     'nano'
