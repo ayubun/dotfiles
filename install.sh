@@ -74,7 +74,7 @@ while read file; do
     . $DOTFILES_FOLDER/dependencies/$OS_PATH/$file
 done
 
-find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f -name ".*" -print | \
+find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -name "personalize" \) -print | \
 while read file; do
     file=$(basename ${file})
     echo "${RESET}${YELLOW_TEXT}[${BOLD}Dotfiles${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Symlinking ${UNDERLINE}${file}${RESET}" 
