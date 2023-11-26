@@ -1,6 +1,7 @@
 #!/bin/bash
 
 fix-apt() {
+    unlock-apt
     sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null
     sudo apt-fast --fix-broken install -y &>/dev/null
     sudo apt-fast --fix-missing install -y &>/dev/null
