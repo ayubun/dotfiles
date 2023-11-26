@@ -62,6 +62,8 @@ mkdir $DOTFILES_FOLDER/tmp
 
 
 unlock-apt() {
+    sudo rm -f /tmp/apt-fast.lock &>/dev/null
+    sudo rm -f $HOME/dotfiles/tmp/apt.lock &>/dev/null
     sudo rm -f /var/lib/apt/lists/lock &>/dev/null
     sudo rm -f /var/cache/apt/archives/lock &>/dev/null
     sudo rm -f /var/lib/dpkg/lock* &>/dev/null
@@ -69,11 +71,11 @@ unlock-apt() {
 export -f unlock-apt
 # hacky solution for libpam issues
 safer-apt() {
-    timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt
+    timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt
 }
 export -f safer-apt
 safer-apt-fast() {
-    timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt
+    timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt
 }
 export -f safer-apt-fast
 

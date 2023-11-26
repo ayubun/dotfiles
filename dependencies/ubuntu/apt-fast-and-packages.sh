@@ -12,7 +12,6 @@ config-apt-fast() {
 }
 config-apt-fast
 safer-apt install apt-fast
-config-apt-fast  # We do this twice in case apt fast overrides on install (too lazy to check)
 
 # We need gnu parallel to run our dotfiles faster (async)
 # https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
