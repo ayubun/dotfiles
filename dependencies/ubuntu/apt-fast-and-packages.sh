@@ -10,8 +10,8 @@ config-apt-fast() {
     sudo rm -f /etc/apt-fast.conf
     sudo ln -s $HOME/dotfiles/configs/packages/apt-fast.conf /etc/apt-fast.conf
 }
-config-apt-fast
 safer-apt install apt-fast
+config-apt-fast
 
 # We need gnu parallel to run our dotfiles faster (async)
 # https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
