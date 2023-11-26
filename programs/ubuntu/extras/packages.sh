@@ -5,15 +5,6 @@ while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
     sleep 1
 done
 
-fix-apt() {
-    unlock-apt
-    sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null
-    sudo apt-fast --fix-broken install -y &>/dev/null
-    sudo apt-fast --fix-missing install -y &>/dev/null
-    sudo apt-fast install -f -y &>/dev/null
-}
-export -f fix-apt
-
 packages=(
   'docker-ce'
   'docker-ce-cli' 
@@ -23,6 +14,8 @@ packages=(
 apt_repositories=(
   'ppa:deadsnakes/ppa'  # python3.8
 )
+
+fix-apt
 
 # Clean
 safer-apt-fast remove "${packages[@]}"
@@ -46,21 +39,7 @@ done
 
 safer-apt-fast update
 safer-apt-fast upgrade
-
-install_all_packages() {
-    ATTEMPTS=0
-    while ! timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast -y install "${packages[@]}"; do
-        ATTEMPTS=$ATTEMPTS+1
-        fix-apt
-        if [[ $ATTEMPTS > 4 ]]; then
-            echo "Max apt install attempts reached"
-            exit 1
-        fi
-    done
-}
-export -f install_all_packages
-
-install_all_packages
+safer-apt-fast install "${packages[@]}"
 safer-apt-fast autoremove
 
 # Unlock apt lock

@@ -69,13 +69,18 @@ unlock-apt() {
     sudo rm -f /var/lib/dpkg/lock* &>/dev/null
 }
 export -f unlock-apt
-# hacky solution for libpam issues
+fix-apt() {
+    sudo apt --fix-broken install -y &>/dev/null
+    sudo apt --fix-missing install -y &>/dev/null
+    sudo apt install -f -y &>/dev/null
+}
+export -f fix-apt
 safer-apt() {
-    timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt
+    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt
 }
 export -f safer-apt
 safer-apt-fast() {
-    timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 300 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt
+    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
 }
 export -f safer-apt-fast
 
