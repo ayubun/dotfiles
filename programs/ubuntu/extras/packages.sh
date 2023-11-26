@@ -49,13 +49,13 @@ safer-apt-fast upgrade
 
 install_all_packages() {
     ATTEMPTS=0
-    while ! timeout -t 600 sudo apt-fast -y install "${packages[@]}"; do
+    while ! timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast -y install "${packages[@]}"; do
         ATTEMPTS=$ATTEMPTS+1
+        fix-apt
         if [[ $ATTEMPTS > 4 ]]; then
             echo "Max apt install attempts reached"
             exit 1
         fi
-        fix-apt
     done
 }
 export -f install_all_packages

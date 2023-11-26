@@ -30,7 +30,7 @@ done
 safer-apt-fast remove "${packages[@]}"
 
 for repository in ${apt_repositories[@]}; do
-    sudo add-apt-repository -y $repository
+    sudo DEBIAN_FRONTEND=noninteractive add-apt-repository -y $repository
 done
 safer-apt-fast update
 safer-apt-fast upgrade
@@ -45,7 +45,7 @@ export -f install_package
 
 install_all_packages() {
     ATTEMPTS=0
-    while ! timeout -t 600 sudo apt-fast -y install "${packages[@]}"; do
+    while ! timeout -t 600 sudo DEBIAN_FRONTEND=noninteractive apt-fast -y install "${packages[@]}"; do
         ATTEMPTS=$ATTEMPTS+1
         if [[ $ATTEMPTS > 4 ]]; then
             echo "Max apt install attempts reached"
