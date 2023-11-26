@@ -1,18 +1,19 @@
 #!/bin/bash
 
-sudo apt update -y
+safer-apt update
 # software-properties-common adds `add-apt-repository` 
-sudo apt install software-properties-common -y
+safer-apt install software-properties-common
 # https://github.com/ilikenwf/apt-fast
-sudo add-apt-repository -y 'ppa:apt-fast/stable'
-sudo apt update -y
-sudo DEBIAN_FRONTEND=noninteractive apt install -y apt-fast
-
-# Apply new config
-DOTFILES_FOLDER=$HOME/dotfiles
-sudo rm -f /etc/apt-fast.conf
-sudo ln -s $HOME/dotfiles/configs/packages/apt-fast.conf /etc/apt-fast.conf
+sudo DEBIAN_FRONTEND=noninteractive add-apt-repository -y 'ppa:apt-fast/stable'
+safer-apt update
+config-apt-fast() {
+    sudo rm -f /etc/apt-fast.conf
+    sudo ln -s $HOME/dotfiles/configs/packages/apt-fast.conf /etc/apt-fast.conf
+}
+config-apt-fast
+safer-apt install apt-fast
+config-apt-fast  # We do this twice in case apt fast overrides on install (too lazy to check)
 
 # We need gnu parallel to run our dotfiles faster (async)
 # https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
-sudo apt-fast install parallel -y
+safer-apt-fast install parallel

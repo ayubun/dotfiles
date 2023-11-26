@@ -60,6 +60,17 @@ fi
 rm -rf $DOTFILES_FOLDER/tmp
 mkdir $DOTFILES_FOLDER/tmp
 
+
+# hacky solution for libpam issues
+safer-apt() {
+    DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt "$@" -y || sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt "$@" -y
+}
+export -f safer-apt
+safer-apt-fast() {
+    DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt-fast "$@" -y || sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt-fast "$@" -y
+}
+export -f safer-apt-fast
+
 # Install dependencies (i.e. GNU parallel)
 find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
 while read file; do
