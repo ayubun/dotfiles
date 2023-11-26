@@ -69,11 +69,11 @@ unlock-apt() {
 export -f unlock-apt
 # hacky solution for libpam issues
 safer-apt() {
-    DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt "$@" -y || unlock-apt
+    timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y || unlock-apt
 }
 export -f safer-apt
 safer-apt-fast() {
-    DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt-fast "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && DEBIAN_FRONTEND=noninteractive timeout -t 180 sudo apt-fast "$@" -y || unlock-apt
+    timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt && sudo dpkg-reconfigure -f noninteractive -plow libpam-modules &>/dev/null && timeout -t 180 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || unlock-apt
 }
 export -f safer-apt-fast
 
