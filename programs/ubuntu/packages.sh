@@ -8,6 +8,7 @@ packages=(
     'net-tools'
     'htop'
     'nano'
+    'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
 )
 apt_repositories=(
 )
