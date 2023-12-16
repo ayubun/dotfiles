@@ -21,7 +21,7 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 
 # Install node v16 (will also install yarn)
-nvm install 'lts/gallium' --reinstall-packages-from=current
+nvm install 'lts/hydrogen' --reinstall-packages-from=current
 # Update npm to newer major version
 npm install -g npm@9.6.6
 

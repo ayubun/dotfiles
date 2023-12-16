@@ -10,10 +10,11 @@ packages=(
     'neofetch'
     'htop'
     'gcc'
-    'docker --cask'
-    'docker-compose'
-    'google-cloud-sdk --cask'  # discord
+    '--cask docker'
     'grpcurl'  # https://github.com/fullstorydev/grpcurl
+    '--cask signal'
+    '--cask telegram'
+    '--cask arc'
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior
