@@ -47,3 +47,8 @@
   ca = commit -a --amend --no-edit
   ; "commit amend w/ message -> cam"
   cam = commit -a --amend -m
+
+; https://bun.sh/docs/install/lockfile
+[diff "lockb"]
+	textconv = bun
+	binary = true
