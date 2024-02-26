@@ -136,6 +136,9 @@ if [ -f $HOME/work/.zshrc_aliases ]; then
     . $HOME/work/.zshrc_aliases
 fi
 
+# Other aliases
+alias uptime="uptime -p \"$@\""
+
 # Bins
 add_to_path "~/discord/.local/bin"
 add_to_path "~/.local/bin"
