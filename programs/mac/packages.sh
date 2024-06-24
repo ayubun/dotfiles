@@ -7,7 +7,8 @@
 packages=(
     'kubectl'
     'nano'
-    'neofetch'
+    'neofetch'  # TODO: switch off neofetch
+    'onefetch'
     'htop'
     'gcc'
     '--cask docker'

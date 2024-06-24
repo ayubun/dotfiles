@@ -124,6 +124,15 @@ export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
 
+# pnpm
+export PNPM_HOME="/home/discord/.local/share/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+# pnpm end
+export PATH=/home/discord/.local/bin/:$PATH
+
 # bun completions
 [ -s "/Users/ayu/.bun/_bun" ] && source "/Users/ayu/.bun/_bun"
 
@@ -149,5 +158,27 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 fi
 
+# git repository greeter https://github.com/o2sh/onefetch/wiki/getting-started
+last_repository=
+check_directory_for_new_repository() {
+	current_repository=$(git rev-parse --show-toplevel 2> /dev/null)
+	
+	if [ "$current_repository" ] && \
+	   [ "$current_repository" != "$last_repository" ]; then
+		onefetch
+	fi
+	last_repository=$current_repository
+}
+cd() {
+	builtin cd "$@"
+	check_directory_for_new_repository
+}
+# end git repository greeter
+
 # Run neofetch on terminal login! (just looks kinda cool :3)
+# TODO: Migrate off of neofetch since it is not maintained anymore :(
 neofetch
+
+# optional, greet also when opening shell directly in repository directory
+# adds time to startup
+check_directory_for_new_repository

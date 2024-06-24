@@ -4,13 +4,15 @@ packages=(
     'build-essential'
     'manpages-dev'
     'dnsutils'
-    'neofetch'
+    'neofetch'  # TODO: switch off neofetch
+    'onefetch'
     'net-tools'
     'htop'
     'nano'
     'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
 )
 apt_repositories=(
+    'ppa:o2sh/onefetch'
 )
 
 # Wait to acquire apt lock
