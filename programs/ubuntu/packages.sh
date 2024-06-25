@@ -2,6 +2,7 @@
 
 packages=(
     'build-essential'
+    'unzip'
     'manpages-dev'
     'dnsutils'
     'neofetch'  # TODO: switch off neofetch

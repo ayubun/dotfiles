@@ -153,6 +153,10 @@ add_to_path "~/discord/.local/bin"
 add_to_path "~/.local/bin"
 add_discord_bin_to_usr_local_bin "coder2" "coder"
 
+# asdf
+. "$HOME/.asdf/asdf.sh"
+. "$HOME/.asdf/completions/asdf.bash"
+
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Add code cmd (only works on mac)
     add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
