@@ -10,7 +10,7 @@ packages=(
     'net-tools'
     'htop'
     'nano'
-    'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
+    # 'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'
