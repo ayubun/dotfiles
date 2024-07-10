@@ -16,6 +16,7 @@ packages=(
     '--cask signal'
     '--cask telegram'
     '--cask arc'
+    'koekeishiya/formulae/skhd'
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior

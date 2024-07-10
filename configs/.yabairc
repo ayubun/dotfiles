@@ -6,4 +6,5 @@ yabai -m config window_opacity on
 yabai -m config active_window_opacity 1.0
 yabai -m config normal_window_opacity 0.8
 
-yabai -m config layout bsp
+# Defaults to float
+yabai -m config layout float
