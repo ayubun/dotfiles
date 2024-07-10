@@ -1,0 +1,9 @@
+# New window spawns to the left if vertical split, or top if horizontal split
+yabai -m config window_placement first_child
+
+# render all unfocused windows with 80% opacity
+yabai -m config window_opacity on
+yabai -m config active_window_opacity 1.0
+yabai -m config normal_window_opacity 0.8
+
+yabai -m config layout bsp

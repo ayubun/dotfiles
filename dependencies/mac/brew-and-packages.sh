@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Add local bin and local man directories (if missing)
+mkdir $HOME/.local/bin &>/dev/null
+mkdir $HOME/.local/man &>/dev/null
+
 # This install script works on both MacOS and Linux, but I moved it to a mac-specific
 # installation path in order to move away from multiple package managers on a single OS.
 
