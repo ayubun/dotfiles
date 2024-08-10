@@ -17,6 +17,8 @@ packages=(
     '--cask telegram'
     '--cask arc'
     'koekeishiya/formulae/skhd'
+    'bat'
+    'difftastic'
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior

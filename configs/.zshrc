@@ -103,6 +103,9 @@ source $ZSH/oh-my-zsh.sh
 # To customize prompt, run p10k configure or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
+# starship
+# eval "$(starship init zsh)"
+
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
 DOTFILES_FOLDER=$HOME/dotfiles
@@ -147,6 +150,7 @@ fi
 
 # Other aliases
 alias uptime="uptime -p \"$@\""
+alias cat="bat"
 
 # Bins
 add_to_path "~/discord/.local/bin"
@@ -154,8 +158,8 @@ add_to_path "~/.local/bin"
 add_discord_bin_to_usr_local_bin "coder2" "coder"
 
 # asdf
-. "$HOME/.asdf/asdf.sh"
-. "$HOME/.asdf/completions/asdf.bash"
+. "$HOME/.asdf/asdf.sh" &>/dev/null
+. "$HOME/.asdf/completions/asdf.bash" &>/dev/null
 
 if [[ "$OSTYPE" == "darwin"* ]]; then
     # Add code cmd (only works on mac)

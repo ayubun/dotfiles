@@ -2,6 +2,7 @@
 
 packages=(
     'build-essential'
+    'fail2ban'
     'unzip'
     'manpages-dev'
     'dnsutils'
