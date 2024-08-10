@@ -106,6 +106,9 @@ source $ZSH/oh-my-zsh.sh
 # starship
 # eval "$(starship init zsh)"
 
+# specifying term to fix ghostty incompatibilities
+TERM=xterm-256
+
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
 DOTFILES_FOLDER=$HOME/dotfiles
