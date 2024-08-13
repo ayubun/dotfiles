@@ -107,7 +107,7 @@ source $ZSH/oh-my-zsh.sh
 # eval "$(starship init zsh)"
 
 # specifying term to fix ghostty incompatibilities
-TERM=xterm-256
+TERM=xterm-256color
 
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
