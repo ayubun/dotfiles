@@ -16,15 +16,17 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
 fi
 
 # Make a temp directory and curl JDK
-JDK_VERSION="18.0.1"
+JDK_VERSION="22.0.2"
 
+mkdir $HOME/dotfiles/tmp &>/dev/null
 cd $HOME/dotfiles/tmp
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     INSTALL_OS="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     INSTALL_OS="macos"
 fi
-curl -O "https://download.java.net/java/GA/jdk${JDK_VERSION}/3f48cabb83014f9fab465e280ccf630b/10/GPL/openjdk-${JDK_VERSION}_${INSTALL_OS}-x64_bin.tar.gz"
+# Likely have to update this because of the hash in the URL
+curl -O "https://download.java.net/java/GA/jdk${JDK_VERSION}/c9ecb94cd31b495da20a27d4581645e8/9/GPL/openjdk-${JDK_VERSION}_${INSTALL_OS}-x64_bin.tar.gz"
 tar xvf "openjdk-${JDK_VERSION}_${INSTALL_OS}-x64_bin.tar.gz"
 
 # Apply the installation (OS-specific)
