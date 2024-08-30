@@ -13,7 +13,7 @@
   defaultBranch = main
 
 [core]
-  editor = code --wait
+  editor = nano
 
 [rerere]
   enabled = true
