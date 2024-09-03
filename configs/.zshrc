@@ -153,7 +153,7 @@ fi
 
 # Other aliases
 alias uptime="uptime -p \"$@\""
-alias cat="bat"
+# alias cat="bat"
 
 # Bins
 add_to_path "~/discord/.local/bin"
