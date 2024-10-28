@@ -12,6 +12,7 @@ packages=(
     'htop'
     'nano'
     # 'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
+    'bat'
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'

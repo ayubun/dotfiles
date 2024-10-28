@@ -13,7 +13,7 @@
   defaultBranch = main
 
 [core]
-  editor = nano
+  editor = vim
 
 [rerere]
   enabled = true
