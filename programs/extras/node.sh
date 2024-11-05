@@ -10,7 +10,7 @@ sudo apt-fast remove npm &>/dev/null
 cd ~/
 git clone https://github.com/nvm-sh/nvm.git .nvm
 cd ~/.nvm
-git checkout v0.39.3
+git checkout v0.40.1
 # Populate the default packages for node
 echo "yarn" > ~/.nvm/default-packages
 # Activate nvm
@@ -22,8 +22,10 @@ export NVM_DIR="$HOME/.nvm"
 
 # Install node v16 (will also install yarn)
 nvm install 'lts/hydrogen' --reinstall-packages-from=current
+# Install node v20
+nvm install 'lts/iron' --reinstall-packages-from=current
 # Update npm to newer major version
-npm install -g npm@9.6.6
+npm install -g npm@10.9.1
 
 # Return to original dir before cd-ing during script
 cd $CURRENT_DIR

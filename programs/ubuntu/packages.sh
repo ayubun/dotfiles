@@ -13,6 +13,10 @@ packages=(
     'nano'
     # 'google-cloud-sdk-gke-gcloud-auth-plugin'  # weeeee
     'bat'
+    'neovim'
+    'python3-neovim'
+    'httpie'  # https://github.com/httpie/cli?tab=readme-ov-file
+    'ripgrep'
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'

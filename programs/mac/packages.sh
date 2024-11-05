@@ -19,6 +19,11 @@ packages=(
     'koekeishiya/formulae/skhd'
     'bat'
     'difftastic'
+    'neovim'
+    'httpie'
+    'ripgrep'
+    'python@3.12'
+    'jesseduffield/lazygit/lazygit'
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior

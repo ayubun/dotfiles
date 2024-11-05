@@ -20,6 +20,9 @@ endif
 " Get the defaults that most users want.
 source $VIMRUNTIME/defaults.vim
 
+set swapfile
+set dir=~/.vimtmp
+
 syntax on
 
 if has("vms")
