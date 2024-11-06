@@ -24,9 +24,15 @@ packages=(
     'ripgrep'
     'python@3.12'
     'jesseduffield/lazygit/lazygit'
+    'fd' 
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior
 rm -rf /Applications/Docker.app
 parallel -j+0 --no-notice --colsep ' ' brew fetch --quiet --force ::: "${packages[@]}"
 parallel -j 1 --no-notice --colsep ' ' brew install ::: "${packages[@]}"
+
+# https://github.com/jesseduffield/lazygit/issues/2187#issuecomment-12592436460
+rm -f ~/Library/Application\ Support/lazygit/config.yml
+ln -s ~/dotfiles/configs/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
+

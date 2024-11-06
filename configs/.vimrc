@@ -22,6 +22,7 @@ source $VIMRUNTIME/defaults.vim
 
 set swapfile
 set dir=~/.vimtmp
+let mapleader = ","
 
 syntax on
 

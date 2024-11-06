@@ -16,7 +16,8 @@ packages=(
     'neovim'
     'python3-neovim'
     'httpie'  # https://github.com/httpie/cli?tab=readme-ov-file
-    'ripgrep'
+    'ripgrep'  # https://github.com/BurntSushi/ripgrep
+    'fd'  # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'

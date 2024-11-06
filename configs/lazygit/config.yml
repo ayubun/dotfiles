@@ -1,0 +1,7 @@
+customCommands:
+  - key: O
+    context: commits
+    description: open files in commit
+    command: git diff -z --name-only {{.SelectedLocalCommit.ParentRefName}} {{.SelectedLocalCommit.Sha}} | xargs -0 lvim --
+    subprocess: true
+

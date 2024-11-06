@@ -156,7 +156,9 @@ fi
 
 # Other aliases
 alias uptime="uptime -p \"$@\""
-# alias cat="bat"
+alias cat="bat"
+alias lg="lazygit"
+alias lgit="lazygit"
 
 # Bins
 add_to_path "~/discord/.local/bin"
