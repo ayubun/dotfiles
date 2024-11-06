@@ -161,8 +161,8 @@ alias lg="lazygit"
 alias lgit="lazygit"
 
 # Bins
-add_to_path "~/discord/.local/bin"
-add_to_path "~/.local/bin"
+add_to_path "$HOME/discord/.local/bin"
+add_to_path "$HOME/.local/bin"
 add_discord_bin_to_usr_local_bin "coder2" "coder"
 
 # asdf
