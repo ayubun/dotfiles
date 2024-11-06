@@ -80,9 +80,10 @@ safer-apt() {
 }
 export -f safer-apt
 safer-apt-fast() {
-    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
+    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
 }
 export -f safer-apt-fast
+
 
 # Install dependencies (i.e. GNU parallel)
 find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
@@ -106,14 +107,6 @@ while read file; do
     ln -s $DOTFILES_FOLDER/configs/$file $HOME/$file
 done
 
-# OS-Independent programs
-if [[ $EXTRAS = true ]] ; then
-    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
-else
-    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
-fi
 
 # OS-specific programs
 if [[ $EXTRAS = true ]] ; then
@@ -124,7 +117,19 @@ else
     find $DOTFILES_FOLDER/programs/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
 fi
 
+
+# OS-independent programs
+if [[ $EXTRAS = true ]] ; then
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+else
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
+    find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+fi
+
+
 rm -rf $DOTFILES_FOLDER/tmp
+
 
 echo ""
 echo ""
@@ -137,3 +142,4 @@ echo ""
 echo "${RESET}${YELLOW_TEXT}  Be sure to install the necessary fonts for Powerlevel10k:"
 echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md"
 echo "${RESET}"
+
