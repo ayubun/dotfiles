@@ -32,7 +32,7 @@ rm -rf /Applications/Docker.app
 parallel -j+0 --no-notice --colsep ' ' brew fetch --quiet --force ::: "${packages[@]}"
 parallel -j 1 --no-notice --colsep ' ' brew install ::: "${packages[@]}"
 
-# https://github.com/jesseduffield/lazygit/issues/2187#issuecomment-12592436460
+# https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#user-config
 rm -f ~/Library/Application\ Support/lazygit/config.yml
 ln -s ~/dotfiles/configs/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
 
