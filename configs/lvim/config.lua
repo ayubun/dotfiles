@@ -4,8 +4,11 @@
 -- Forum: https://www.reddit.com/r/lunarvim/
 -- Discord: https://discord.com/invite/Xb9B4Ny
 
--- keybinds
+-- configs 
 lvim.builtin.lir.show_hidden_files = true
+lvim.colorscheme = "nordfox"
+
+-- keybinds
 lvim.keys.normal_mode["gt"] = ":BufferLineCycleNext<CR>"
 lvim.keys.normal_mode["gT"] = ":BufferLineCyclePrev<CR>"
 
@@ -18,7 +21,7 @@ lvim.builtin.which_key.mappings["t"] = {
 }
 
 -- copilot tutorial: https://medium.com/aimonks/a-guide-to-integrating-lunarvim-github-copilot-61d92f764913
-lvim.plugins = {  
+lvim.plugins = {
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",
@@ -31,6 +34,35 @@ lvim.plugins = {
       require("copilot_cmp").setup()
     end,
   },
+  {
+    "f-person/git-blame.nvim",
+    event = "BufRead",
+    config = function()
+      vim.cmd "highlight default link gitblame SpecialComment"
+      vim.g.gitblame_enabled = 1
+    end,
+  },
+  { "EdenEast/nightfox.nvim" },
+  -- {
+  --   "simrat39/rust-tools.nvim",
+  --   ft = { "rust" },
+  --   config = function()
+  --     require("rust-tools").setup {
+  --       tools = {
+  --         autoSetHints = true,
+  --         hover_with_actions = true,
+  --         runnables = {
+  --           use_telescope = true,
+  --         },
+  --         inlay_hints = {
+  --           show_parameter_hints = true,
+  --            parameter_hints_prefix = " <- ",
+  --           other_hints_prefix = " => ",
+  --         },
+  --       },
+  --     }
+  --   end,
+  -- },
 }
 
 local ok, copilot = pcall(require, "copilot")
