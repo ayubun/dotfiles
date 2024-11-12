@@ -43,6 +43,8 @@ lvim.plugins = {
     end,
   },
   { "EdenEast/nightfox.nvim" },
+  { "easymotion/vim-easymotion" },
+  -- { "Shatur/neovim-ayu" },
   -- {
   --   "simrat39/rust-tools.nvim",
   --   ft = { "rust" },
