@@ -156,7 +156,17 @@ fi
 
 # Other aliases
 alias uptime="uptime -p \"$@\""
-alias cat="bat"
+which bat &> /dev/null
+if [ $? -eq 0 ]; then
+  alias cat="bat"
+else
+  which batcat &> /dev/null
+  if [ $? -eq 0 ]; then
+    alias cat="batcat"
+  else
+    echo 'bat could not be found on this system'
+  fi
+fi
 alias lg="lazygit"
 alias lgit="lazygit"
 
