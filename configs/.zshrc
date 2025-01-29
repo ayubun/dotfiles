@@ -209,3 +209,6 @@ neofetch
 # optional, greet also when opening shell directly in repository directory
 # adds time to startup
 check_directory_for_new_repository
+
+# Added by Windsurf
+export PATH="/Users/ayu/.codeium/windsurf/bin:$PATH"
