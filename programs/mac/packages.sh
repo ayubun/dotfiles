@@ -24,7 +24,8 @@ packages=(
     'ripgrep'
     'python@3.12'
     'jesseduffield/lazygit/lazygit'
-    'fd' 
+    'fd'
+    'tmux'
 )
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior

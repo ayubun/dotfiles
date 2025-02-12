@@ -23,6 +23,7 @@ packages=(
     'ripgrep'  # https://github.com/BurntSushi/ripgrep
     'fd-find'  # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
     'google-cloud-cli-bigtable-emulator'
+    'tmux'
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'

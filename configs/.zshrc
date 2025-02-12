@@ -196,10 +196,10 @@ check_directory_for_new_repository() {
 	fi
 	last_repository=$current_repository
 }
-cd() {
-	builtin cd "$@"
-	check_directory_for_new_repository
-}
+# cd() {
+# 	builtin cd "$@"
+# 	check_directory_for_new_repository
+# }
 # end git repository greeter
 
 # Run neofetch on terminal login! (just looks kinda cool :3)
@@ -208,7 +208,7 @@ neofetch
 
 # optional, greet also when opening shell directly in repository directory
 # adds time to startup
-check_directory_for_new_repository
+# check_directory_for_new_repository &>/dev/null
 
 # Added by Windsurf
 export PATH="/Users/ayu/.codeium/windsurf/bin:$PATH"
