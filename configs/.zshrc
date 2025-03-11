@@ -151,24 +151,12 @@ export PATH="$BUN_INSTALL/bin:$PATH"
 
 # Load any private work aliases
 if [ -f $HOME/work/.zshrc_aliases ]; then
-    . $HOME/work/.zshrc_aliases
+  . $HOME/work/.zshrc_aliases
 fi
-
-# Other aliases
-alias uptime="uptime -p \"$@\""
-which bat &> /dev/null
-if [ $? -eq 0 ]; then
-  alias cat="bat"
-else
-  which batcat &> /dev/null
-  if [ $? -eq 0 ]; then
-    alias cat="batcat"
-  else
-    echo 'bat could not be found on this system'
-  fi
+# Load any pre-configured aliases
+if [ -f $HOME/dotfiles/configs/dependencies/.zshrc_aliases ]; then
+  . $HOME/dotfiles/dependencies/.zshrc_aliases
 fi
-alias lg="lazygit"
-alias lgit="lazygit"
 
 # Bins
 add_to_path "$HOME/discord/.local/bin"
