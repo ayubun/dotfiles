@@ -5,17 +5,25 @@
 # and brew fetch for async optimization.
 
 packages=(
+    # casks
+    '--cask docker'
+    '--cask signal'
+    '--cask telegram'
+    '--cask arc'
+    '--cask ghostty'
+    '--cask cursor'
+    '--cask discord'
+    '--cask discord@canary'
+    '--cask raycast'
+    '--cask spotify'
+    #
     'kubectl'
     'nano'
     'neofetch'  # TODO: switch off neofetch
     'onefetch'
     'htop'
     'gcc'
-    '--cask docker'
     'grpcurl'  # https://github.com/fullstorydev/grpcurl
-    '--cask signal'
-    '--cask telegram'
-    '--cask arc'
     'koekeishiya/formulae/skhd'
     'bat'
     'difftastic'
