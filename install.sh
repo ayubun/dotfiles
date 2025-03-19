@@ -107,6 +107,13 @@ while read file; do
     ln -s $DOTFILES_FOLDER/configs/$file $HOME/$file
 done
 
+# Symlink ghostty config for mac
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  rm -rf ${HOME}/.config/ghostty/config
+  ln -s $DOTFILES_FOLDER/configs/ghostty/config ${HOME}/.config/ghostty/config
+fi
+
+
 
 # OS-specific programs
 if [[ $EXTRAS = true ]] ; then

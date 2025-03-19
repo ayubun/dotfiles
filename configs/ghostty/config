@@ -1,0 +1,17 @@
+macos-option-as-alt = left
+keybind = cmd+right=text:\x05
+keybind = cmd+left=text:\x01
+
+keybind = super+left=text:\x01
+keybind = super+right=text:\x05
+keybind = alt+left=esc:b
+keybind = alt+right=esc:f
+keybind = super+backspace=text:\x15
+keybind = alt+backspace=text:\x1b\x7f
+
+clipboard-read-command=cat
+clipboard-read-file=/tmp/ghostty-clipboard-socket
+clipboard-write-command=cat > 
+clipboard-write-file=/tmp/ghostty-clipboard-socket
+ssh-forward-clipboard=yes
+
