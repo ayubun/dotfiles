@@ -20,6 +20,29 @@ lvim.builtin.which_key.mappings["t"] = {
   h = { "<cmd>2ToggleTerm size=30 direction=horizontal<cr>", "Split horizontal" },
 }
 
+-- Configure clipboard provider
+vim.g.clipboard = {
+  name = 'OSC 52',
+  copy = {
+    ['+'] = {
+      'bash', '-c',
+      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
+    },
+    ['*'] = {
+      'bash', '-c',
+      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
+    },
+  },
+  paste = {
+    ['+'] = {'bash', '-c', 'ghostty clipboard read'},
+    ['*'] = {'bash', '-c', 'ghostty clipboard read'},
+  },
+  cache_enabled = 0,
+}
+
+-- Ensure neovim uses system clipboard
+vim.opt.clipboard = "unnamedplus"
+
 -- copilot tutorial: https://medium.com/aimonks/a-guide-to-integrating-lunarvim-github-copilot-61d92f764913
 lvim.plugins = {
   {

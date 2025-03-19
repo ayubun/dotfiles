@@ -109,11 +109,14 @@ done
 
 # Symlink ghostty config for mac
 if [[ "$OSTYPE" == "darwin"* ]]; then
+  echo "${RESET}${YELLOW_TEXT}[${BOLD}Ghostty${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default Ghostty config${RESET}" 
   rm -rf ${HOME}/.config/ghostty/config
   ln -s $DOTFILES_FOLDER/configs/ghostty/config ${HOME}/.config/ghostty/config
 fi
 
-
+echo "${RESET}${YELLOW_TEXT}[${BOLD}SSH${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default SSH configs${RESET}" 
+# Configure default SSH stuffs
+. $DOTFILES_FOLDER/configs/ssh/setup.sh
 
 # OS-specific programs
 if [[ $EXTRAS = true ]] ; then

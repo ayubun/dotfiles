@@ -24,6 +24,10 @@ packages=(
     'fd-find'  # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
     'google-cloud-cli-bigtable-emulator'
     'tmux'
+    # for remote clipboard integration on lvim
+    'xsel'
+    'xclip'
+    #
 )
 apt_repositories=(
     'ppa:o2sh/onefetch'
