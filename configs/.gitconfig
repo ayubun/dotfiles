@@ -39,8 +39,8 @@
   fpu = push -f -u origin HEAD
   ; "force push -> fp"
   fp = push -f
-  ; "add all -> aa"
-  aa = add --all
+  ; "add all"
+  a = add --all
   ; "commit w/ message -> cm"
   cm = commit -am
   ; "commit amend -> ca"
@@ -51,6 +51,14 @@
   c = checkout
   ; "checkout new"
   cb = checkout -b
+  ; "status"
+  s = status
+  ; "pull"
+  p = pull
+  ; "rebase"
+  r = rebase
+  ; "delete branch"
+  bd = branch -D
 
 ; https://bun.sh/docs/install/lockfile
 [diff "lockb"]
