@@ -21,20 +21,20 @@ lvim.builtin.which_key.mappings["t"] = {
 }
 
 vim.g.clipboard = {
-  name = 'Ghostty Clipboard',
+  name = 'Direct OSC 52',
   copy = {
     ['+'] = {
-      'bash', '-c',
-      'base64 | xargs -0 printf "\\033]52;c;%s\\007"'
+      'sh', '-c', 
+      'text=$(cat | base64); echo -ne "\\033]52;c;${text}\\007"'
     },
     ['*'] = {
-      'bash', '-c',
-      'base64 | xargs -0 printf "\\033]52;c;%s\\007"'
+      'sh', '-c', 
+      'text=$(cat | base64); echo -ne "\\033]52;c;${text}\\007"'
     },
   },
   paste = {
-    ['+'] = {'bash', '-c', 'nc localhost 2224'},
-    ['*'] = {'bash', '-c', 'nc localhost 2224'},
+    ['+'] = {'sh', '-c', 'echo "paste not supported"'},
+    ['*'] = {'sh', '-c', 'echo "paste not supported"'},
   },
   cache_enabled = 0,
 }
