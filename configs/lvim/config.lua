@@ -25,11 +25,11 @@ vim.g.clipboard = {
   copy = {
     ['+'] = {
       'bash', '-c',
-      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
+      'base64 | xargs -0 printf "\\033]52;c;%s\\007"'
     },
     ['*'] = {
       'bash', '-c',
-      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
+      'base64 | xargs -0 printf "\\033]52;c;%s\\007"'
     },
   },
   paste = {
