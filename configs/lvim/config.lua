@@ -21,20 +21,20 @@ lvim.builtin.which_key.mappings["t"] = {
 }
 
 vim.g.clipboard = {
-  name = 'Direct OSC 52',
+  name = 'Debug OSC 52',
   copy = {
     ['+'] = {
-      'sh', '-c', 
-      'text=$(cat | base64); echo -ne "\\033]52;c;${text}\\007"'
+      'bash', '-c',
+      'TMP=$(mktemp); cat > $TMP; echo "Copied $(wc -c < $TMP) bytes" >&2; base64 < $TMP | tee /tmp/clipboard_debug.b64 | tr -d "\n" | awk \'{print "\\033]52;c;" $0 "\\007"}\'; rm $TMP'
     },
     ['*'] = {
-      'sh', '-c', 
-      'text=$(cat | base64); echo -ne "\\033]52;c;${text}\\007"'
+      'bash', '-c',
+      'TMP=$(mktemp); cat > $TMP; echo "Copied $(wc -c < $TMP) bytes" >&2; base64 < $TMP | tee /tmp/clipboard_debug.b64 | tr -d "\n" | awk \'{print "\\033]52;c;" $0 "\\007"}\'; rm $TMP'
     },
   },
   paste = {
-    ['+'] = {'sh', '-c', 'echo "paste not supported"'},
-    ['*'] = {'sh', '-c', 'echo "paste not supported"'},
+    ['+'] = {'bash', '-c', 'echo "paste not supported"'},
+    ['*'] = {'bash', '-c', 'echo "paste not supported"'},
   },
   cache_enabled = 0,
 }
