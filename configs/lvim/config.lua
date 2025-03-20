@@ -20,29 +20,18 @@ lvim.builtin.which_key.mappings["t"] = {
   h = { "<cmd>2ToggleTerm size=30 direction=horizontal<cr>", "Split horizontal" },
 }
 
-vim.g.clipboard = {
-  name = 'Debug OSC 52',
-  copy = {
-    ['+'] = {
-      'bash', '-c',
-      'TMP=$(mktemp); cat > $TMP; echo "Copied $(wc -c < $TMP) bytes" >&2; base64 < $TMP | tee /tmp/clipboard_debug.b64 | tr -d "\n" | awk \'{print "\\033]52;c;" $0 "\\007"}\'; rm $TMP'
-    },
-    ['*'] = {
-      'bash', '-c',
-      'TMP=$(mktemp); cat > $TMP; echo "Copied $(wc -c < $TMP) bytes" >&2; base64 < $TMP | tee /tmp/clipboard_debug.b64 | tr -d "\n" | awk \'{print "\\033]52;c;" $0 "\\007"}\'; rm $TMP'
-    },
-  },
-  paste = {
-    ['+'] = {'bash', '-c', 'echo "paste not supported"'},
-    ['*'] = {'bash', '-c', 'echo "paste not supported"'},
-  },
-  cache_enabled = 0,
-}
-
 vim.opt.clipboard = "unnamedplus"
 
 -- copilot tutorial: https://medium.com/aimonks/a-guide-to-integrating-lunarvim-github-copilot-61d92f764913
 lvim.plugins = {
+  {
+    'ibhagwan/smartyank.nvim',
+    opts = {
+      highlight = {
+        enabled = false,
+      },
+    },
+  },
   {
     "zbirenbaum/copilot.lua",
     cmd = "Copilot",

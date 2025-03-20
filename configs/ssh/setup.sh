@@ -4,6 +4,9 @@ set -e
 
 SSH_CONFIG_PATH="$HOME/.ssh/config"
 
+# this file is disabled for now since I don't need the default host block~
+return 0
+
 NEW_HOST_BLOCK="Host *
   RemoteForward 2224 /tmp/ghostty-clipboard-socket"
 
