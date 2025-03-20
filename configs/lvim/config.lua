@@ -20,46 +20,25 @@ lvim.builtin.which_key.mappings["t"] = {
   h = { "<cmd>2ToggleTerm size=30 direction=horizontal<cr>", "Split horizontal" },
 }
 
--- -- Configure clipboard provider
--- vim.g.clipboard = {
---   name = 'OSC 52',
---   copy = {
---     ['+'] = {
---       'bash', '-c',
---       'base64 | xargs printf "\\033]52;c;%s\\033\\"'
---     },
---     ['*'] = {
---       'bash', '-c',
---       'base64 | xargs printf "\\033]52;c;%s\\033\\"'
---     },
---   },
---   paste = {
---     ['+'] = {'bash', '-c', 'ghostty clipboard read'},
---     ['*'] = {'bash', '-c', 'ghostty clipboard read'},
---   },
---   cache_enabled = 0,
--- }
 vim.g.clipboard = {
-  name = 'OSC 52 (Universal)',
+  name = 'Ghostty Clipboard',
   copy = {
     ['+'] = {
-      'sh', '-c',
-      -- This sends the OSC 52 sequence directly to the terminal
-      "printf '\\033]52;c;%s\\033\\\\' \"$(cat | base64)\""
+      'bash', '-c',
+      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
     },
     ['*'] = {
-      'sh', '-c',
-      "printf '\\033]52;c;%s\\033\\\\' \"$(cat | base64)\""
+      'bash', '-c',
+      'base64 | xargs printf "\\033]52;c;%s\\033\\"'
     },
   },
   paste = {
-    ['+'] = {'sh', '-c', 'echo "OSC 52 paste not supported"'},
-    ['*'] = {'sh', '-c', 'echo "OSC 52 paste not supported"'},
+    ['+'] = {'bash', '-c', 'nc localhost 2224'},
+    ['*'] = {'bash', '-c', 'nc localhost 2224'},
   },
   cache_enabled = 0,
 }
 
--- Ensure neovim uses system clipboard
 vim.opt.clipboard = "unnamedplus"
 
 -- copilot tutorial: https://medium.com/aimonks/a-guide-to-integrating-lunarvim-github-copilot-61d92f764913
