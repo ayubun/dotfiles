@@ -59,6 +59,8 @@
   r = rebase
   ; "delete branch"
   bd = branch -D
+  ; "log"
+  l = log
 
 ; https://bun.sh/docs/install/lockfile
 [diff "lockb"]
