@@ -61,6 +61,8 @@
   bd = branch -D
   ; "log"
   l = log
+  ; "rebase origin/main"
+  rm = rebase origin/main
 
 ; https://bun.sh/docs/install/lockfile
 [diff "lockb"]
