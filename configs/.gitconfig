@@ -62,7 +62,9 @@
   ; "log"
   l = log
   ; "rebase origin/main"
-  rm = rebase origin/main
+  rom = rebase origin/main
+  ; "rebase origin/master"
+  roma = rebase origin/master
 
 ; https://bun.sh/docs/install/lockfile
 [diff "lockb"]
