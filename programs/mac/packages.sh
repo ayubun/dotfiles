@@ -16,6 +16,7 @@ packages=(
     '--cask discord@canary'
     '--cask raycast'
     '--cask spotify'
+    '--cask batfi'
     #
     'kubectl'
     'nano'
