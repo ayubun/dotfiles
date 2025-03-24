@@ -22,7 +22,7 @@ git clone https://github.com/LazyVim/starter ~/.config/nvim
 
 rm -rf ~/.config/nvim/.git
 
-# TODO: Setup config step
-# rm -f ~/.config/nvim/config.lua &>/dev/null
-# ln -s ~/dotfiles/configs/nvim/config.lua ~/.config/nvim/config.lua
+# Clean pre-installed configs & symlink dotfiles
+rm -rf ~/.config/nvim/lua
+ln -s ~/dotfiles/configs/nvim ~/.config/nvim/lua
 
