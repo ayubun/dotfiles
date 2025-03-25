@@ -10,15 +10,15 @@
 -- * override the configuration of LazyVim plugins
 return {
   -- add gruvbox
-  { "ellisonleao/gruvbox.nvim" },
+  -- { "ellisonleao/gruvbox.nvim" },
 
   -- Configure LazyVim to load gruvbox
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "gruvbox",
-    },
-  },
+  -- {
+  --   "LazyVim/LazyVim",
+  --   opts = {
+  --     colorscheme = "gruvbox",
+  --   },
+  -- },
 
   -- change trouble config
   {
@@ -72,6 +72,32 @@ return {
       servers = {
         -- pyright will be automatically installed with mason and loaded with lspconfig
         pyright = {},
+        ruff = {
+          cmd_env = { RUFF_TRACE = "messages" },
+          init_options = {
+            settings = {
+              logLevel = "error",
+            },
+          },
+          keys = {
+            {
+              "<leader>co",
+              LazyVim.lsp.action["source.organizeImports"],
+              desc = "Organize Imports",
+            },
+          },
+        },
+        ruff_lsp = {
+          keys = {
+            {
+              "<leader>co",
+              LazyVim.lsp.action["source.organizeImports"],
+              desc = "Organize Imports",
+            },
+          },
+        },
+      },
+      setup = {
       },
     },
   },
@@ -107,6 +133,19 @@ return {
         end,
         -- Specify * to use this function as a fallback for any server
         -- ["*"] = function(server, opts) end,
+        -- [ruff] = function()
+        --   LazyVim.lsp.on_attach(function(client, _)
+        --     -- Disable hover in favor of Pyright
+        --     client.server_capabilities.hoverProvider = false
+        --   end, ruff)
+        -- end,
+        ["*"] = function(_, opts)
+          local servers = { "pyright", "basedpyright", "ruff", "ruff_lsp", ruff, lsp }
+          for _, server in ipairs(servers) do
+            opts.servers[server] = opts.servers[server] or {}
+            opts.servers[server].enabled = server == lsp or server == ruff
+          end
+        end,
       },
     },
   },
@@ -135,6 +174,8 @@ return {
         "vim",
         "yaml",
         "rust",
+        "ninja",
+        "rst",
       },
     },
   },
