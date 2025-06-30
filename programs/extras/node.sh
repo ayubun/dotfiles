@@ -20,12 +20,12 @@ source nvm.sh
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
 
-# Install node v16 (will also install yarn)
+# Install node v18 (will also install yarn)
 nvm install 'lts/hydrogen' --reinstall-packages-from=current
 # Install node v20
 nvm install 'lts/iron' --reinstall-packages-from=current
 # Update npm to newer major version
-npm install -g npm@10.9.1
+npm install -g npm@11.4.2
 
 # Return to original dir before cd-ing during script
 cd $CURRENT_DIR
