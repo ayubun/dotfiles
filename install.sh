@@ -13,19 +13,48 @@ while getopts 'ev' flag; do
   esac
 done
 
+# Safe tput function that falls back to empty strings if tput fails
+safe_tput() {
+    if command -v tput >/dev/null 2>&1 && tput "$@" 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # 0 to 7 = black, red, green, yellow, blue, magenta, cyan, white
-MOVE_UP=`tput cuu 1`
-CLEAR_LINE=`tput el 1`
-BOLD=`tput bold`
-UNDERLINE=`tput smul`
-RED_TEXT=`tput setaf 1`
-GREEN_TEXT=`tput setaf 2`
-YELLOW_TEXT=`tput setaf 3`
-BLUE_TEXT=`tput setaf 4`
-MAGENTA_TEXT=`tput setaf 5`
-CYAN_TEXT=`tput setaf 6`
-WHITE_TEXT=`tput setaf 7`
-RESET=`tput sgr0`
+# Use safe tput with fallbacks
+MOVE_UP=$(safe_tput cuu 1 || echo "")
+CLEAR_LINE=$(safe_tput el 1 || echo "")
+BOLD=$(safe_tput bold || echo "")
+UNDERLINE=$(safe_tput smul || echo "")
+RED_TEXT=$(safe_tput setaf 1 || echo "")
+GREEN_TEXT=$(safe_tput setaf 2 || echo "")
+YELLOW_TEXT=$(safe_tput setaf 3 || echo "")
+BLUE_TEXT=$(safe_tput setaf 4 || echo "")
+MAGENTA_TEXT=$(safe_tput setaf 5 || echo "")
+CYAN_TEXT=$(safe_tput setaf 6 || echo "")
+WHITE_TEXT=$(safe_tput setaf 7 || echo "")
+DIM_TEXT=$(safe_tput dim || echo "")
+RESET=$(safe_tput sgr0 || echo "")
+
+# If tput is completely broken, disable all formatting
+if ! safe_tput cols >/dev/null 2>&1; then
+    echo "Warning: Terminal formatting disabled due to tput issues"
+    MOVE_UP=""
+    CLEAR_LINE=""
+    BOLD=""
+    UNDERLINE=""
+    RED_TEXT=""
+    GREEN_TEXT=""
+    YELLOW_TEXT=""
+    BLUE_TEXT=""
+    MAGENTA_TEXT=""
+    CYAN_TEXT=""
+    WHITE_TEXT=""
+    DIM_TEXT=""
+    RESET=""
+fi
 
 # https://stackoverflow.com/questions/59895/how-do-i-get-the-directory-where-a-bash-script-is-located-from-within-the-script
 SOURCE=${BASH_SOURCE[0]}
@@ -60,6 +89,84 @@ fi
 rm -rf $DOTFILES_FOLDER/tmp
 mkdir $DOTFILES_FOLDER/tmp
 
+# Initialize failure tracking
+FAILURE_LOG="$DOTFILES_FOLDER/tmp/failed_scripts.log"
+touch "$FAILURE_LOG"
+
+# Function to safely run a script and track failures
+safe_run_script() {
+    local script_path="$1"
+    local script_name=$(basename "$script_path")
+    local script_type="${2:-Script}"
+    
+    if [[ $VERBOSE = true ]] ; then
+        echo "${RESET}${YELLOW_TEXT}[${BOLD}${script_type}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${script_name}${RESET}" 
+    fi
+    
+    # Run the script and capture exit code
+    local temp_output=$(mktemp)
+    if . "$script_path" >"$temp_output" 2>&1; then
+        local exit_code=0
+    else
+        local exit_code=$?
+    fi
+    
+    # Some scripts may return non-zero but still succeed (like mkdir for existing dirs)
+    # Check if this is a "soft failure" by looking for specific patterns
+    local is_soft_failure=false
+    if [[ $exit_code -ne 0 ]]; then
+        # Check for common soft failure patterns
+        if grep -qi "file exists\|already exists\|directory exists" "$temp_output" 2>/dev/null; then
+            is_soft_failure=true
+        elif [[ "$script_name" =~ (create-dirs|mkdir) ]]; then
+            is_soft_failure=true
+        fi
+    fi
+    
+    if [[ $exit_code -eq 0 ]] || [[ $is_soft_failure == true ]]; then
+        if [[ $VERBOSE = true ]] ; then
+            echo "${RESET}${GREEN_TEXT}[${BOLD}✓${RESET}${GREEN_TEXT}] ${script_name} completed successfully${RESET}"
+        fi
+        rm -f "$temp_output"
+        return 0
+    else
+        echo "${RESET}${RED_TEXT}[${BOLD}✗${RESET}${RED_TEXT}] ${script_name} failed${RESET}"
+        if [[ $VERBOSE = true ]] && [[ -s "$temp_output" ]]; then
+            echo "${RESET}${RED_TEXT}Error output: $(cat "$temp_output")${RESET}"
+        fi
+        echo "$script_path" >> "$FAILURE_LOG"
+        rm -f "$temp_output"
+        return 1
+    fi
+}
+
+# Simplified function for parallel execution
+run_script_parallel() {
+    local script_path="$1"
+    local script_name=$(basename "$script_path")
+    
+    # Create a temporary output file for this script
+    local temp_output="/tmp/script_output_$$_$(basename "$script_path").log"
+    
+    # Completely disable terminal formatting for child scripts
+    # This prevents individual scripts from corrupting the terminal
+    export TERM=dumb
+    export NO_COLOR=1
+    export DISABLE_COLORS=1
+    
+    # Run the script and capture exit code, suppressing all terminal control sequences
+    if env TERM=dumb NO_COLOR=1 . "$script_path" >"$temp_output" 2>&1; then
+        echo "[OK] $script_name completed successfully"
+        rm -f "$temp_output"
+        return 0
+    else
+        local exit_code=$?
+        echo "[FAIL] $script_name failed (exit code: $exit_code)"
+        echo "$script_path" >> "$FAILURE_LOG"
+        rm -f "$temp_output"
+        return 1
+    fi
+}
 
 unlock-apt() {
     sudo rm -f /tmp/apt-fast.lock &>/dev/null
@@ -84,20 +191,149 @@ safer-apt-fast() {
 }
 export -f safer-apt-fast
 
+# Export the parallel function
+export -f run_script_parallel
+export FAILURE_LOG
+export DOTFILES_FOLDER
+
+# Function to show spinning animation while a script runs
+show_spinner() {
+    local pid=$1
+    local script_name="$2"
+    local script_path="$3"
+    local log_file="$4"
+    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    
+    # Get relative path from dotfiles folder
+    local rel_path=${script_path#$DOTFILES_FOLDER/}
+    local dir_path=$(dirname "$rel_path")
+    
+    local last_shown_content=""
+    local spinner_shown=false
+    local header_shown=false
+    
+    while kill -0 $pid 2>/dev/null; do
+        # Get last 25 lines from log
+        if [[ -f "$log_file" && -s "$log_file" ]]; then
+            local current_content=$(tail -n 25 "$log_file" 2>/dev/null)
+            
+            # Only update if content changed
+            if [[ "$current_content" != "$last_shown_content" ]]; then
+                # Show header only when we first have content
+                if [[ $header_shown == false ]]; then
+                    # Clear spinner if shown before displaying header
+                    if [[ $spinner_shown == true ]]; then
+                        printf "\r\033[K"
+                        spinner_shown=false
+                    fi
+                    printf "${RESET}${MAGENTA_TEXT}--- Captured stdout ---${RESET}\n\n"
+                    header_shown=true
+                fi
+                
+                # Clear spinner if shown (for subsequent updates)
+                if [[ $spinner_shown == true ]]; then
+                    printf "\r\033[K"
+                    spinner_shown=false
+                fi
+                
+                # Clear previous content and show new
+                if [[ -n "$last_shown_content" ]]; then
+                    # Count lines to clear (last content + empty line)
+                    local lines_to_clear=$(echo -n "$last_shown_content" | grep -c $'\n')
+                    lines_to_clear=$((lines_to_clear + 1))
+                    for ((j=0; j<lines_to_clear; j++)); do
+                        printf "\033[1A\033[2K"
+                    done
+                    # Small delay to ensure clearing completes
+                    sleep 0.02
+                fi
+                
+                # Show current content
+                printf "${DIM_TEXT}%s${RESET}\n" "$current_content"
+                last_shown_content="$current_content"
+            fi
+        fi
+        
+        # Show spinner
+        if [[ $spinner_shown == false ]]; then
+            printf "\n${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}"
+            spinner_shown=true
+        else
+            printf "\r${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}"
+        fi
+        
+        i=$(( (i+1) % ${#spin} ))
+        sleep 0.1
+    done
+    
+    # Clear spinner and last content, show completion
+    if [[ $spinner_shown == true ]]; then
+        printf "\r\033[K"
+    fi
+    if [[ -n "$last_shown_content" ]]; then
+        local lines_to_clear=$(echo -n "$last_shown_content" | grep -c $'\n')
+        lines_to_clear=$((lines_to_clear + 1))
+        for ((j=0; j<lines_to_clear; j++)); do
+            printf "\033[1A\033[2K"
+        done
+    fi
+    
+    # Also clear the header line if it was shown
+    if [[ $header_shown == true ]]; then
+        # Clear 2 lines: header + blank line below
+        printf "\033[1A\033[2K"
+        printf "\033[1A\033[2K"
+    fi
+    
+    # Show completion message
+    printf "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${GREEN_TEXT}completed successfully!${RESET}\n"
+}
 
 # Install dependencies (i.e. GNU parallel)
+echo "${RESET}${YELLOW_TEXT}[${BOLD}Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Installing dependencies...${RESET}"
+
 find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
 while read file; do
-    file=$(basename ${file})
-    echo "${RESET}${YELLOW_TEXT}[${BOLD}Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}" 
-    . $DOTFILES_FOLDER/dependencies/$file
+    script_name=$(basename "$file")
+    script_log="/tmp/dep_output_$$_$(basename "$file").log"
+    env TERM=dumb NO_COLOR=1 bash "$file" > "$script_log" 2>&1 &
+    script_pid=$!
+    show_spinner $script_pid "$script_name" "$file" "$script_log"
+    wait $script_pid
+    exit_code=$?
+    
+    if [[ $exit_code -ne 0 ]]; then
+        printf "\033[1A\033[2K"
+        script_dir=$(dirname "${file#$DOTFILES_FOLDER/}")
+        printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+        echo "$file" >> "$FAILURE_LOG" 2>/dev/null || true
+    fi
+    
+    rm -f "$script_log" 2>/dev/null
 done
-find $DOTFILES_FOLDER/dependencies/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
-while read file; do
-    file=$(basename ${file})
-    echo "${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running ${UNDERLINE}${file}${RESET}" 
-    . $DOTFILES_FOLDER/dependencies/$OS_PATH/$file
-done
+
+if [ -d "$DOTFILES_FOLDER/dependencies/$OS_PATH" ]; then
+    find $DOTFILES_FOLDER/dependencies/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
+    while read file; do
+        script_name=$(basename "$file")
+        script_log="/tmp/dep_output_$$_$(basename "$file").log"
+        env TERM=dumb NO_COLOR=1 bash "$file" > "$script_log" 2>&1 &
+        script_pid=$!
+        show_spinner $script_pid "$script_name" "$file" "$script_log"
+        wait $script_pid
+        exit_code=$?
+        
+        if [[ $exit_code -ne 0 ]]; then
+            printf "\033[1A\033[2K"
+            script_dir=$(dirname "${file#$DOTFILES_FOLDER/}")
+            printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+            echo "$file" >> "$FAILURE_LOG" 2>/dev/null || true
+        fi
+        
+        rm -f "$script_log" 2>/dev/null
+    done
+fi
 
 find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -name "personalize" \) -print | \
 while read file; do
@@ -118,38 +354,151 @@ echo "${RESET}${YELLOW_TEXT}[${BOLD}SSH${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${B
 # Configure default SSH stuffs
 . $DOTFILES_FOLDER/configs/ssh/setup.sh
 
-# OS-specific programs
+# OS-specific programs with better error handling
 if [[ $EXTRAS = true ]] ; then
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs/$OS_PATH $DOTFILES_FOLDER/programs/$OS_PATH/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+    
+    # Use simpler sequential execution with background processes for reliability
+    shopt -s nullglob  # Make globs that don't match return empty instead of literal
+    for script in $DOTFILES_FOLDER/programs/$OS_PATH/*.sh $DOTFILES_FOLDER/programs/$OS_PATH/extras/*.sh; do
+        if [[ -f "$script" ]]; then
+            script_name=$(basename "$script")
+            
+            # Run script in background with spinner
+            script_log="/tmp/script_output_$$_$(basename "$script").log"
+            env TERM=dumb NO_COLOR=1 bash "$script" > "$script_log" 2>&1 &
+            script_pid=$!
+            show_spinner $script_pid "$script_name" "$script" "$script_log"
+            wait $script_pid
+            exit_code=$?
+            
+            if [[ $exit_code -ne 0 ]]; then
+                # Override the success message for failures
+                printf "\033[1A\033[2K"  # Clear last line
+                script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
+                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
+            fi
+            
+            # Clean up log file
+            rm -f "$script_log" 2>/dev/null
+        fi
+    done
+    shopt -u nullglob  # Reset nullglob
 else
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}$OS_NAME${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs/$OS_PATH -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+    
+    shopt -s nullglob
+    for script in $DOTFILES_FOLDER/programs/$OS_PATH/*.sh; do
+        if [[ -f "$script" ]]; then
+            script_name=$(basename "$script")
+            
+            script_log="/tmp/script_output_$$_$(basename "$script").log"
+            env TERM=dumb NO_COLOR=1 bash "$script" > "$script_log" 2>&1 &
+            script_pid=$!
+            show_spinner $script_pid "$script_name" "$script" "$script_log"
+            wait $script_pid
+            exit_code=$?
+            
+            if [[ $exit_code -ne 0 ]]; then
+                printf "\033[1A\033[2K"
+                script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
+                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
+            fi
+            
+            rm -f "$script_log" 2>/dev/null
+        fi
+    done
+    shopt -u nullglob
 fi
 
 
 # OS-independent programs
 if [[ $EXTRAS = true ]] ; then
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}] [${BOLD}Extras${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs $DOTFILES_FOLDER/programs/extras -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+    
+    shopt -s nullglob
+    for script in $DOTFILES_FOLDER/programs/*.sh $DOTFILES_FOLDER/programs/extras/*.sh; do
+        if [[ -f "$script" ]]; then
+            script_name=$(basename "$script")
+            
+            script_log="/tmp/script_output_$$_$(basename "$script").log"
+            env TERM=dumb NO_COLOR=1 bash "$script" > "$script_log" 2>&1 &
+            script_pid=$!
+            show_spinner $script_pid "$script_name" "$script" "$script_log"
+            wait $script_pid
+            exit_code=$?
+            
+            if [[ $exit_code -ne 0 ]]; then
+                printf "\033[1A\033[2K"
+                script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
+                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
+            fi
+            
+            rm -f "$script_log" 2>/dev/null
+        fi
+    done
+    shopt -u nullglob
 else
     echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}OS-Independent${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Running scripts...${RESET}\n" 
-    find $DOTFILES_FOLDER/programs -maxdepth 1 -mindepth 1 -type f -name "*.sh" | parallel --tty -j+0 --no-notice -I% --max-args 1 . %
+    
+    shopt -s nullglob
+    for script in $DOTFILES_FOLDER/programs/*.sh; do
+        if [[ -f "$script" ]]; then
+            script_name=$(basename "$script")
+            
+            script_log="/tmp/script_output_$$_$(basename "$script").log"
+            env TERM=dumb NO_COLOR=1 bash "$script" > "$script_log" 2>&1 &
+            script_pid=$!
+            show_spinner $script_pid "$script_name" "$script" "$script_log"
+            wait $script_pid
+            exit_code=$?
+            
+            if [[ $exit_code -ne 0 ]]; then
+                printf "\033[1A\033[2K"
+                script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
+                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
+            fi
+            
+            rm -f "$script_log" 2>/dev/null
+        fi
+    done
+    shopt -u nullglob
 fi
 
+# Display failed scripts summary
+echo ""
+echo ""
+
+if [[ -s "$FAILURE_LOG" ]]; then
+    echo "${RESET}${RED_TEXT}${BOLD}⚠️  WARNING: The following scripts failed to install:${RESET}"
+    echo ""
+    while IFS= read -r failed_script; do
+        script_name=$(basename "$failed_script")
+        echo "${RESET}${RED_TEXT}${BOLD}    ✗ ${script_name}${RESET} ${RED_TEXT}(${failed_script})${RESET}"
+    done < "$FAILURE_LOG"
+    echo ""
+    echo "${RESET}${YELLOW_TEXT}You may want to check these scripts manually and re-run them if needed.${RESET}"
+    echo ""
+else
+    echo "${RESET}${GREEN_TEXT}${BOLD}🎉 All scripts completed successfully!${RESET}"
+    echo ""
+fi
 
 rm -rf $DOTFILES_FOLDER/tmp
 
-
 echo ""
 echo ""
-echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)" 
+echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}" 
 if [[ $EXTRAS = true ]] ; then
     echo ""
-    echo "${RESET}${GREEN_TEXT}     ヽ(*・ω・)ﾉ Extra programs have been included"
+    echo "${RESET}${GREEN_TEXT}     ヽ(*・ω・)ﾉ Extra programs have been included${RESET}"
 fi
 echo ""
 echo "${RESET}${YELLOW_TEXT}  Be sure to install the necessary fonts for Powerlevel10k:"
-echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md"
+echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md${RESET}"
 echo "${RESET}"
 
