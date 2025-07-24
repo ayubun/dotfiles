@@ -8,35 +8,44 @@ mkdir $HOME/.local/man &>/dev/null
 # installation path in order to move away from multiple package managers on a single OS.
 
 CURRENT_DIR=$(pwd)
-cd $HOME/dotfiles/tmp
 
-# Run pre-install scripts (OS-specific cleanups)
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    # Pre-installation script for Brew on Linux
-
-    # Uninstalls homebrew, if present
-    curl -O https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
-    NONINTERACTIVE=1 /bin/bash uninstall.sh --force
-    rm -f uninstall.sh
-    # Clean any remaining files
-    sudo rm -rf /home/linuxbrew
-    sudo rm -rf /opt/homebrew
-    # Remove .zprofile shellenv lines
-    sed -i '/eval "$(\/opt\/homebrew\/bin\/brew shellenv)"/d' ~/.zprofile
-    sed -i '/eval "$(\/home\/linuxbrew\/.linuxbrew\/bin\/brew shellenv)"/d' ~/.zprofile
-elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Pre-installation script for Brew on MacOS
-
-    # Uninstalls homebrew, if present
-    curl -O https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
-    /bin/bash uninstall.sh --force
-    rm -f uninstall.sh
-    # Clean any remaining files
-    sudo rm -rf /opt/homebrew
-    # Remove .zprofile shellenv lines
-    sed -i'.sed-backup' '/eval "$(\/opt\/homebrew\/bin\/brew shellenv)"/d' ~/.zprofile
-    rm ~/.zprofile.sed-backup
+# Create temp directory - prefer dotfiles/tmp if available, fallback to system tmp
+if [[ -d "$HOME/dotfiles" ]]; then
+    TMP_DIR="$HOME/dotfiles/tmp"
+    mkdir -p "$TMP_DIR" &>/dev/null
+else
+    TMP_DIR=$(mktemp -d)
 fi
+
+cd "$TMP_DIR"
+
+# # Run pre-install scripts (OS-specific cleanups)
+# if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+#     # Pre-installation script for Brew on Linux
+
+#     # Uninstalls homebrew, if present
+#     curl -O https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
+#     NONINTERACTIVE=1 /bin/bash uninstall.sh --force
+#     rm -f uninstall.sh
+#     # Clean any remaining files
+#     sudo rm -rf /home/linuxbrew
+#     sudo rm -rf /opt/homebrew
+#     # Remove .zprofile shellenv lines
+#     sed -i '/eval "$(\/opt\/homebrew\/bin\/brew shellenv)"/d' ~/.zprofile
+#     sed -i '/eval "$(\/home\/linuxbrew\/.linuxbrew\/bin\/brew shellenv)"/d' ~/.zprofile
+# elif [[ "$OSTYPE" == "darwin"* ]]; then
+#     # Pre-installation script for Brew on MacOS
+
+#     # Uninstalls homebrew, if present
+#     curl -O https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh
+#     /bin/bash uninstall.sh --force
+#     rm -f uninstall.sh
+#     # Clean any remaining files
+#     sudo rm -rf /opt/homebrew
+#     # Remove .zprofile shellenv lines
+#     sed -i'.sed-backup' '/eval "$(\/opt\/homebrew\/bin\/brew shellenv)"/d' ~/.zprofile
+#     rm ~/.zprofile.sed-backup
+# fi
 
 # Installs Homebrew for MacOS or Linux
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -62,4 +71,9 @@ fi
 # https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
 brew install parallel
 
-cd $CURRENT_DIR
+cd "$CURRENT_DIR"
+
+# Clean up if we used system tmp
+if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
+    rm -rf "$TMP_DIR"
+fi

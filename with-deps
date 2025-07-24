@@ -1,0 +1,270 @@
+#!/bin/bash
+
+# with-deps: A wrapper script that provides shared dependencies to individual dotfiles scripts
+# Usage: ./with-deps script1.sh [script2.sh ...]
+#
+# This script automatically runs dependency scripts first to ensure the environment is properly set up,
+# then executes the target scripts sequentially with all necessary shared functions available.
+
+set -e
+
+# Parse flags (keeping help functionality)
+SCRIPT_PATHS=()
+while [[ $# -gt 0 ]]; do
+    case $1 in
+        -h|--help)
+            echo "Usage: $0 <script-path> [script-path2] [script-path3] ..."
+            echo ""
+            echo "Options:"
+            echo "  -h, --help                Show this help message"
+            echo ""
+            echo "Examples:"
+            echo "  $0 programs/ubuntu/packages.sh"
+            echo "  $0 programs/ubuntu/lazygit.sh programs/ubuntu/kubectl.sh"
+            echo "  $0 dependencies/create-dirs.sh programs/ubuntu/packages.sh"
+            echo ""
+            echo "This wrapper automatically runs dependency scripts first, then provides"
+            echo "shared functions like safer-apt, fix-apt, etc. to the target scripts."
+            echo "Multiple scripts are run sequentially after dependencies are set up once."
+            exit 0
+            ;;
+        -*)
+            echo "Unknown option: $1"
+            echo "Use -h or --help for usage information."
+            exit 1
+            ;;
+        *)
+            SCRIPT_PATHS+=("$1")
+            shift
+            ;;
+    esac
+done
+
+# Check if script arguments are provided
+if [[ ${#SCRIPT_PATHS[@]} -eq 0 ]]; then
+    echo "Usage: $0 <script-path> [script-path2] [script-path3] ..."
+    echo ""
+    echo "Examples:"
+    echo "  $0 programs/ubuntu/packages.sh"
+    echo "  $0 programs/ubuntu/lazygit.sh programs/ubuntu/kubectl.sh"
+    echo "  $0 dependencies/create-dirs.sh programs/ubuntu/packages.sh"
+    echo ""
+    echo "This wrapper automatically runs dependency scripts first, then provides"
+    echo "shared functions like safer-apt, fix-apt, etc. to the target scripts."
+    echo "Multiple scripts are run sequentially after dependencies are set up once."
+    echo ""
+    echo "Use -h or --help for more information."
+    exit 1
+fi
+
+# Resolve paths relative to the dotfiles directory
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
+# Validate and resolve all script paths
+RESOLVED_SCRIPTS=()
+for script_path in "${SCRIPT_PATHS[@]}"; do
+    if [[ ! -f "$script_path" ]]; then
+        # Try relative to dotfiles directory
+        if [[ -f "$SCRIPT_DIR/$script_path" ]]; then
+            RESOLVED_SCRIPTS+=("$SCRIPT_DIR/$script_path")
+        else
+            echo "Error: Script not found: $script_path"
+            exit 1
+        fi
+    else
+        RESOLVED_SCRIPTS+=("$script_path")
+    fi
+    
+    # Make script executable if it isn't
+    if [[ ! -x "${RESOLVED_SCRIPTS[-1]}" ]]; then
+        chmod +x "${RESOLVED_SCRIPTS[-1]}" 2>/dev/null || true
+    fi
+done
+
+# Source the shared dependencies
+DEPS_FILE="$SCRIPT_DIR/dependencies/shared-functions.sh"
+if [[ -f "$DEPS_FILE" ]]; then
+    source "$DEPS_FILE"
+else
+    echo "Warning: Dependencies file not found at $DEPS_FILE"
+    echo "Some functions may not be available to the scripts."
+fi
+
+# Set up basic environment variables for better compatibility
+export DOTFILES_FOLDER="$SCRIPT_DIR"
+
+# Set up tracking for script execution
+SCRIPT_FAILURE_LOG="$SCRIPT_DIR/tmp/with-deps-failed-scripts.log"
+SCRIPT_SUCCESS_LOG="$SCRIPT_DIR/tmp/with-deps-success-scripts.log"
+
+# Function to run dependency scripts
+run_dependencies() {
+    echo "🔧 Running dependency scripts..."
+    echo ""
+    
+    # Detect OS for OS-specific dependencies
+    if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+        OS_PATH="ubuntu"
+        OS_NAME="Ubuntu"
+    elif [[ "$OSTYPE" == "darwin"* ]]; then
+        OS_PATH="mac"
+        OS_NAME="Mac"
+    else
+        echo "Warning: Unsupported OS for dependencies"
+        return 0
+    fi
+    
+    # Set up temp directory and failure log like install.sh does
+    mkdir -p "$SCRIPT_DIR/tmp" &>/dev/null || true
+    FAILURE_LOG="$SCRIPT_DIR/tmp/failed_scripts.log"
+    export FAILURE_LOG
+    touch "$FAILURE_LOG"
+    
+    # Initialize script tracking logs
+    touch "$SCRIPT_FAILURE_LOG"
+    touch "$SCRIPT_SUCCESS_LOG"
+    
+    # Run general dependencies first
+    if [[ -d "$SCRIPT_DIR/dependencies" ]]; then
+        echo "📦 Running general dependencies..."
+        for dep_script in "$SCRIPT_DIR/dependencies"/*.sh; do
+            if [[ -f "$dep_script" ]]; then
+                script_name=$(basename "$dep_script")
+                echo "  ▶ Running $script_name"
+                if bash "$dep_script"; then
+                    echo "  ✓ $script_name completed"
+                else
+                    echo "  ✗ $script_name failed"
+                    echo "$dep_script" >> "$FAILURE_LOG"
+                fi
+            fi
+        done
+        echo ""
+    fi
+    
+    # Run OS-specific dependencies
+    if [[ -d "$SCRIPT_DIR/dependencies/$OS_PATH" ]]; then
+        echo "📦 Running $OS_NAME dependencies..."
+        for dep_script in "$SCRIPT_DIR/dependencies/$OS_PATH"/*.sh; do
+            if [[ -f "$dep_script" ]]; then
+                script_name=$(basename "$dep_script")
+                echo "  ▶ Running $script_name"
+                if bash "$dep_script"; then
+                    echo "  ✓ $script_name completed"
+                else
+                    echo "  ✗ $script_name failed"
+                    echo "$dep_script" >> "$FAILURE_LOG"
+                fi
+            fi
+        done
+        echo ""
+    fi
+    
+    # Check for failures
+    if [[ -s "$FAILURE_LOG" ]]; then
+        echo "⚠️  Some dependency scripts failed:"
+        while IFS= read -r failed_script; do
+            echo "  ✗ $(basename "$failed_script")"
+        done < "$FAILURE_LOG"
+        echo ""
+        echo "Proceeding with main scripts, but some functionality may be missing..."
+        echo ""
+    else
+        echo "✅ All dependencies completed successfully!"
+        echo ""
+    fi
+}
+
+# Function to run a single script and track result
+run_script() {
+    local script_path="$1"
+    local script_name=$(basename "$script_path")
+    
+    echo "🚀 Running: $script_name"
+    echo ""
+    
+    if bash "$script_path"; then
+        echo ""
+        echo "✅ $script_name completed successfully!"
+        echo "$script_path" >> "$SCRIPT_SUCCESS_LOG"
+        return 0
+    else
+        echo ""
+        echo "❌ $script_name failed!"
+        echo "$script_path" >> "$SCRIPT_FAILURE_LOG"
+        return 1
+    fi
+}
+
+# Function to clean up temporary files
+cleanup() {
+    if [[ -f "$FAILURE_LOG" ]]; then
+        rm -f "$FAILURE_LOG" 2>/dev/null || true
+    fi
+    if [[ -f "$SCRIPT_FAILURE_LOG" ]]; then
+        rm -f "$SCRIPT_FAILURE_LOG" 2>/dev/null || true
+    fi
+    if [[ -f "$SCRIPT_SUCCESS_LOG" ]]; then
+        rm -f "$SCRIPT_SUCCESS_LOG" 2>/dev/null || true
+    fi
+}
+
+# Set up cleanup trap
+trap cleanup EXIT
+
+# Always run dependencies first
+run_dependencies
+
+# Show what we're about to run
+if [[ ${#RESOLVED_SCRIPTS[@]} -eq 1 ]]; then
+    echo "📋 Running 1 script..."
+else
+    echo "📋 Running ${#RESOLVED_SCRIPTS[@]} scripts..."
+fi
+echo ""
+
+# Run all scripts sequentially
+TOTAL_SUCCESS=0
+TOTAL_FAILED=0
+
+for script_path in "${RESOLVED_SCRIPTS[@]}"; do
+    if run_script "$script_path"; then
+        TOTAL_SUCCESS=$((TOTAL_SUCCESS + 1))
+    else
+        TOTAL_FAILED=$((TOTAL_FAILED + 1))
+    fi
+    echo ""
+done
+
+# Show final summary
+echo "📊 Execution Summary:"
+echo ""
+
+if [[ $TOTAL_SUCCESS -gt 0 ]]; then
+    echo "✅ Successfully completed scripts: $TOTAL_SUCCESS"
+    if [[ -s "$SCRIPT_SUCCESS_LOG" ]]; then
+        while IFS= read -r success_script; do
+            echo "  ✓ $(basename "$success_script")"
+        done < "$SCRIPT_SUCCESS_LOG"
+    fi
+    echo ""
+fi
+
+if [[ $TOTAL_FAILED -gt 0 ]]; then
+    echo "❌ Failed scripts: $TOTAL_FAILED"
+    if [[ -s "$SCRIPT_FAILURE_LOG" ]]; then
+        while IFS= read -r failed_script; do
+            echo "  ✗ $(basename "$failed_script")"
+        done < "$SCRIPT_FAILURE_LOG"
+    fi
+    echo ""
+fi
+
+# Overall result
+if [[ $TOTAL_FAILED -eq 0 ]]; then
+    echo "🎉 All scripts completed successfully!"
+    exit 0
+else
+    echo "⚠️  Some scripts failed. Check the output above for details."
+    exit 1
+fi 

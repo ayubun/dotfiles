@@ -34,25 +34,27 @@ apt_repositories=(
     'ppa:neovim-ppa/unstable'
 )
 
-# Wait to acquire apt lock
-while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
-    sleep 1
-done
+# Wait to acquire apt lock (only if running under install.sh wrapper)
+if [[ -d "$HOME/dotfiles/tmp" ]]; then
+    while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
+        sleep 1
+    done
+fi
 
 fix-apt
 
-batch_size=50
+batch_size=10
 total_packages=${#packages[@]}
 
 # Clean
-for (( i=0; i<total_packages; i+=batch_size )); do
-    batch=("${packages[@]:i:batch_size}")
-    echo ""
-    echo "${RESET}${YELLOW_TEXT}[${BOLD}Remove Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Removing ${UNDERLINE}${batch[*]}${RESET}"
-    echo ""
-    safer-apt-fast remove "${batch[@]}"
-    echo "${RESET}${YELLOW_TEXT}[${BOLD}Remove Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Done${RESET}"
-done
+# for (( i=0; i<total_packages; i+=batch_size )); do
+#     batch=("${packages[@]:i:batch_size}")
+#     echo ""
+#     echo "${RESET}${YELLOW_TEXT}[${BOLD}Remove Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Removing ${UNDERLINE}${batch[*]}${RESET}"
+#     echo ""
+#     safer-apt-fast remove "${batch[@]}"
+#     echo "${RESET}${YELLOW_TEXT}[${BOLD}Remove Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Done${RESET}"
+# done
 
 for repository in ${apt_repositories[@]}; do
     sudo DEBIAN_FRONTEND=noninteractive add-apt-repository -y $repository
@@ -72,5 +74,7 @@ done
 
 safer-apt-fast autoremove
 
-# Unlock apt lock
-rm -f $HOME/dotfiles/tmp/apt.lock
+# Unlock apt lock (only if we acquired it)
+if [[ -d "$HOME/dotfiles/tmp" ]]; then
+    rm -f $HOME/dotfiles/tmp/apt.lock
+fi

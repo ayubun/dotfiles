@@ -1,9 +1,11 @@
 #!/bin/bash
 
-# Wait to acquire apt lock
+# Wait to acquire apt lock (only if running under install.sh wrapper)
+if [[ -d "$HOME/dotfiles/tmp" ]]; then
 while ! { set -C; 2>/dev/null >$HOME/dotfiles/tmp/apt.lock; }; do
     sleep 1
 done
+fi
 
 packages=(
   'docker-ce'
@@ -18,7 +20,7 @@ apt_repositories=(
 fix-apt
 
 # Clean
-safer-apt-fast remove "${packages[@]}"
+# safer-apt-fast remove "${packages[@]}"
 
 # Repository setups
 docker_repository_setup() {
@@ -42,5 +44,7 @@ safer-apt-fast upgrade
 safer-apt-fast install "${packages[@]}"
 safer-apt-fast autoremove
 
-# Unlock apt lock
+# Unlock apt lock (only if we acquired it)
+if [[ -d "$HOME/dotfiles/tmp" ]]; then
 rm -f $HOME/dotfiles/tmp/apt.lock
+fi
