@@ -54,12 +54,22 @@ safer-apt-fast() {
     timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
 }
 
+# Safe tput function that falls back to empty strings if tput fails
+safe_tput() {
+    if command -v tput >/dev/null 2>&1 && tput "$@" 2>/dev/null; then
+        return 0
+    else
+        return 1
+    fi
+}
+
 # Export all functions for use in child scripts
 export -f run_script_parallel
 export -f unlock-apt
 export -f fix-apt
 export -f safer-apt
 export -f safer-apt-fast
+export -f safe_tput
 
 # Set up environment variables if not already set
 if [[ -z "$DOTFILES_FOLDER" ]]; then
