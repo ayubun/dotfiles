@@ -14,6 +14,15 @@ while getopts 'ev' flag; do
   esac
 done
 
+SELF="${BASH_SOURCE[0]}"
+[[ $SELF == */* ]] || SELF="./$SELF"
+SELF="$(cd "${SELF%/*}" && pwd -P)/${SELF##*/}"
+export PATH="/usr/bin:/bin:/usr/sbin:/sbin:${SELF%/*}:$PATH"
+
+auto_su() {
+    [[ $UID == 0 ]] || exec sudo -p "$PROGRAM must be run as root. Please enter the password for %u to continue: " -- "$BASH" -- "$SELF" "${ARGS[@]}"
+}
+
 # Safe tput function that falls back to empty strings if tput fails
 safe_tput() {
     if command -v tput >/dev/null 2>&1 && tput "$@" 2>/dev/null; then
