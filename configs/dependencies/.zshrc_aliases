@@ -15,4 +15,5 @@ else
 fi
 alias lg="lazygit"
 alias gcb="g c main && g p && g cb"
+alias l="ls -alh"
 

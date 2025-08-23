@@ -27,7 +27,7 @@ set dir=~/.vimtmp
 syntax on
 
 if has("vms")
-  set nobackup		" do not keep a backup file, use versions instead
+  set nobackup nowritebackup		" do not keep a backup file, use versions instead
 else
   set backup		" keep a backup file (restore to previous version)
   if has('persistent_undo')

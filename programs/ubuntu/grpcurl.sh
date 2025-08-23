@@ -1,7 +1,16 @@
 #!/bin/bash
 
 CURRENT_DIR=$(pwd)
-cd $HOME/dotfiles/tmp
+
+# Create temp directory - prefer dotfiles/tmp if available, fallback to system tmp
+if [[ -d "$HOME/dotfiles" ]]; then
+    TMP_DIR="$HOME/dotfiles/tmp"
+    mkdir -p "$TMP_DIR" &>/dev/null
+else
+    TMP_DIR=$(mktemp -d)
+fi
+
+cd "$TMP_DIR"
 
 # https://github.com/fullstorydev/grpcurl
 VERSION=1.8.7
@@ -10,4 +19,9 @@ curl -L "https://github.com/fullstorydev/grpcurl/releases/download/v${VERSION}/g
 sudo mv -f grpcurl/grpcurl /usr/bin/
 sudo rm -rf grpcurl  # Remove temp dir
 
-cd $CURRENT_DIR
+cd "$CURRENT_DIR"
+
+# Clean up if we used system tmp
+if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
+    rm -rf "$TMP_DIR"
+fi

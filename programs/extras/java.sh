@@ -18,8 +18,16 @@ fi
 # Make a temp directory and curl JDK
 JDK_VERSION="22.0.2"
 
-mkdir $HOME/dotfiles/tmp &>/dev/null
-cd $HOME/dotfiles/tmp
+# Create temp directory - prefer dotfiles/tmp if available, fallback to system tmp
+if [[ -d "$HOME/dotfiles" ]]; then
+    TMP_DIR="$HOME/dotfiles/tmp"
+    mkdir -p "$TMP_DIR" &>/dev/null
+else
+    TMP_DIR=$(mktemp -d)
+fi
+
+cd "$TMP_DIR"
+
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     INSTALL_OS="linux"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
@@ -45,4 +53,9 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     sudo mv "jdk-${JDK_VERSION}.jdk" /Library/Java/JavaVirtualMachines/
 fi
 
-cd $CURRENT_DIR
+cd "$CURRENT_DIR"
+
+# Clean up if we used system tmp
+if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
+    rm -rf "$TMP_DIR"
+fi

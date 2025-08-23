@@ -1,6 +1,3 @@
 #!/bin/bash
 
-mkdir ~/.vimtmp
-mkdir ~/.config
-mkdir ~/.config/lazygit
-
+mkdir -p ~/.vimtmp ~/.config ~/.config/lazygit

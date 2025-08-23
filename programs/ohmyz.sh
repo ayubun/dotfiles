@@ -5,6 +5,24 @@ sudo apt-get install zsh -y &>/dev/null
 # Make it default
 sudo chsh -s $(which zsh) &>/dev/null
 
+# # If we already have zsh just continue
+# if ! command -v zsh &>/dev/null; then
+#     if sudo -n true 2>/dev/null; then           # password-less sudo available
+#         sudo apt-get install -y zsh
+#     else
+#         echo "[ohmyz] Skipping zsh install – sudo not available non-interactively."
+#     fi
+# fi
+
+# # Only try to change the login shell if we can do it without a prompt
+# if [[ "$SHELL" != "$(which zsh)" ]]; then
+#     if sudo -n true 2>/dev/null; then
+#         sudo chsh -s "$(which zsh)" "$USER"
+#     else
+#         echo "[ohmyz] Skipping chsh – sudo not available non-interactively."
+#     fi
+# fi
+
 # Clean up any old (3+ days) backup files
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     find ~/. -mindepth 1 -maxdepth 1 -type f -mtime +6 \
