@@ -216,7 +216,8 @@ show_spinner() {
                     # Small delay to ensure clearing completes
                     sleep 0.01
                 fi
-                
+
+                shopt -u nullglob
                 # Show current content
                 printf "${DIM_TEXT}%s${RESET}\n" "$current_content"
                 last_shown_content="$current_content"
