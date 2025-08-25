@@ -96,8 +96,10 @@ else
     exit 1
 fi
 
-rm -rf $DOTFILES_FOLDER/tmp
-mkdir $DOTFILES_FOLDER/tmp
+rm -rf $DOTFILES_FOLDER/tmp || true
+mkdir $DOTFILES_FOLDER/tmp || true
+rm -rf $DOTFILES_FOLDER/logs || true
+mkdir $DOTFILES_FOLDER/logs || true
 
 # Initialize failure tracking
 FAILURE_LOG="$DOTFILES_FOLDER/tmp/failed_scripts.log"
@@ -117,7 +119,7 @@ run_script() {
     
     # Calculate persistent log file path: tmp/logs/script_path/script_name.log
     local relative_path="${script_path#$DOTFILES_FOLDER/}"
-    local log_dir="$DOTFILES_FOLDER/tmp/logs/$(dirname "$relative_path")"
+    local log_dir="$DOTFILES_FOLDER/logs/$(dirname "$relative_path")"
     local log_name="${script_name}.log"
     local log_file="$log_dir/$log_name"
     
@@ -125,6 +127,9 @@ run_script() {
     mkdir -p "$log_dir"
     
     echo "${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET}"
+    
+    # Capture start time in milliseconds
+    local start_time=$(date +%s%3N)
     
     # Add header to log file
     {
@@ -149,11 +154,26 @@ run_script() {
     # Copy output to persistent log
     cat "$temp_output" >> "$log_file"
     
+    # Calculate execution duration
+    local end_time=$(date +%s%3N)
+    local duration_ms=$((end_time - start_time))
+    
+    # Format duration: ms if < 1s, seconds with 2 decimals if >= 1s
+    local duration_display
+    if [[ $duration_ms -lt 1000 ]]; then
+        duration_display="${duration_ms}ms"
+    else
+        local seconds=$((duration_ms / 1000))
+        local millis=$((duration_ms % 1000))
+        duration_display=$(printf "%d.%02d" "$seconds" "$((millis / 10))")s
+    fi
+    
     # Add footer to log file
     {
         echo ""
         echo "=================================="
-        echo "Finished: $(date)"
+        echo "Finished in $duration_display"
+        echo ""
         echo "Exit Code: $exit_code"
     } >> "$log_file"
     
@@ -185,7 +205,7 @@ run_script() {
 }
 
 # Install dependencies (i.e. GNU parallel)
-echo "${RESET}${YELLOW_TEXT}[${BOLD}Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Installing dependencies...${RESET}"
+echo -e "${RESET}${YELLOW_TEXT}[${BOLD}Dependencies${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Installing dependencies...${RESET}\n"
 
 find $DOTFILES_FOLDER/dependencies -maxdepth 1 -mindepth 1 -type f -name "*.sh" -print | \
 while read file; do
@@ -199,6 +219,8 @@ if [ -d "$DOTFILES_FOLDER/dependencies/$OS_PATH" ]; then
     done
 fi
 
+echo ""
+
 find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -name "personalize" \) -print | \
 while read file; do
     file=$(basename ${file})
@@ -209,12 +231,12 @@ done
 
 # Symlink ghostty config for mac
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  echo "${RESET}${YELLOW_TEXT}[${BOLD}Ghostty${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default Ghostty config${RESET}" 
+  echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ghostty${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default Ghostty config${RESET}" 
   rm -rf ${HOME}/.config/ghostty/config
   ln -s $DOTFILES_FOLDER/configs/ghostty/config ${HOME}/.config/ghostty/config
 fi
 
-echo "${RESET}${YELLOW_TEXT}[${BOLD}SSH${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default SSH configs${RESET}" 
+echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}SSH${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default SSH configs${RESET}" 
 # Configure default SSH stuffs
 . $DOTFILES_FOLDER/configs/ssh/setup.sh
 
@@ -290,11 +312,12 @@ fi
 
 # Show log information
 echo "${RESET}${CYAN_TEXT}${BOLD}📁 Script execution logs have been saved to:${RESET}"
-echo "${RESET}${CYAN_TEXT}   $DOTFILES_FOLDER/tmp/logs/${RESET}"
+echo "${RESET}${CYAN_TEXT}   $DOTFILES_FOLDER/logs/${RESET}"
 echo ""
 
-# Clean up temporary files but preserve logs
+# Clean up temporary files
 rm -f "$FAILURE_LOG" 2>/dev/null || true
+rm -rf $DOTFILES_FOLDER/tmp || true
 
 echo ""
 echo ""
