@@ -133,11 +133,10 @@ run_script() {
     
     # Add header to log file
     {
-        echo "====== Script Execution Log ======"
-        echo "Script: $script_path"
-        echo "Started: $(date)"
-        echo "=================================="
+        echo "========== Script Execution Log =========="
+        echo "$script_path"
         echo ""
+        echo "Started at $(date)"
     } > "$log_file"
     
     # Run the script and capture exit code and output
@@ -150,9 +149,6 @@ run_script() {
         local exit_code=$?
     fi
     unset CAPTURE_OUTPUT
-    
-    # Copy output to persistent log
-    cat "$temp_output" >> "$log_file"
     
     # Calculate execution duration
     local end_time=$(date +%s%3N)
@@ -168,13 +164,9 @@ run_script() {
         duration_display=$(printf "%d.%02d" "$seconds" "$((millis / 10))")s
     fi
     
-    # Add footer to log file
     {
-        echo ""
-        echo "=================================="
         echo "Finished in $duration_display"
         echo ""
-        echo "Exit Code: $exit_code"
     } >> "$log_file"
     
     # Some scripts may return non-zero but still succeed (like mkdir for existing dirs)
@@ -191,17 +183,29 @@ run_script() {
     
     if [[ $exit_code -eq 0 ]] || [[ $is_soft_failure == true ]]; then
         echo "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${GREEN_TEXT}completed successfully!${RESET}"
-        echo "SUCCESS" >> "$log_file"
-        rm -f "$temp_output"
+        echo "Exit Code: $exit_code (SUCCESS)" >> "$log_file"
     else
         echo "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
         if [[ $VERBOSE = true ]] && [[ -s "$temp_output" ]]; then
             echo "${RESET}${RED_TEXT}Error output: $(cat "$temp_output")${RESET}"
         fi
-        echo "FAILED" >> "$log_file"
+        echo "Exit Code: $exit_code (FAILED)" >> "$log_file"
         echo "$script_path" >> "$FAILURE_LOG" 2>/dev/null || true
-        rm -f "$temp_output"
     fi
+
+    {
+        echo "=========================================="
+        echo ""
+    } >> "$log_file"
+
+    # Copy output to persistent log
+    cat "$temp_output" >> "$log_file"
+    rm -f "$temp_output"
+
+    {
+        echo ""
+        echo "=========================================="
+    } >> "$log_file"
 }
 
 # Install dependencies (i.e. GNU parallel)
