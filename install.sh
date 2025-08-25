@@ -195,7 +195,7 @@ show_spinner() {
                         printf "\r\033[K"
                         spinner_shown=false
                     fi
-                    printf "${RESET}${MAGENTA_TEXT}--- Captured stdout ---${RESET}\n\n"
+                    printf '%s\n\n' "${RESET}${MAGENTA_TEXT}--- Captured stdout ---${RESET}"
                     header_shown=true
                 fi
                 
@@ -231,10 +231,10 @@ show_spinner() {
         fi
         
         if [[ $spinner_shown == false ]]; then
-            printf "\n${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}${timeout_indicator}"
+            printf '%s' "\n${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}${timeout_indicator}"
             spinner_shown=true
         else
-            printf "\r${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}${timeout_indicator}"
+            printf '%s' "\r${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${BLUE_TEXT}${spin:$i:1}${RESET}${timeout_indicator}"
         fi
         
         i=$(( (i+1) % ${#spin} ))
@@ -269,8 +269,8 @@ show_spinner() {
         wait $pid 2>/dev/null || true
         
         # Show timeout message and prompt for interactive mode
-        printf "${RESET}${YELLOW_TEXT}[${BOLD}${WHITE_TEXT}⏰${RESET}${YELLOW_TEXT}]${RESET} ${BOLD}${YELLOW_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${YELLOW_TEXT}timed out - likely needs input${RESET}\n"
-        printf "${RESET}${CYAN_TEXT}[${BOLD}Interactive${RESET}${CYAN_TEXT}]${RESET} Running ${BOLD}${script_name}${RESET} interactively...\n"
+        printf '%s\n' "${RESET}${YELLOW_TEXT}[${BOLD}${WHITE_TEXT}⏰${RESET}${YELLOW_TEXT}]${RESET} ${BOLD}${YELLOW_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${YELLOW_TEXT}timed out - likely needs input${RESET}"
+        printf '%s\n' "${RESET}${CYAN_TEXT}[${BOLD}Interactive${RESET}${CYAN_TEXT}]${RESET} Running ${BOLD}${script_name}${RESET} interactively..."
         
         # Log that this script required prompting
         echo "$script_path" >> "$PROMPTED_LOG" 2>/dev/null || true
@@ -299,7 +299,7 @@ show_spinner() {
     fi
     
     # Show completion message
-    printf "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${GREEN_TEXT}completed successfully!${RESET}\n"
+    printf '%s\n' "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${dir_path})${RESET} ${GREEN_TEXT}completed successfully!${RESET}"
     return 0
 }
 
@@ -333,7 +333,7 @@ while read file; do
     if [[ $exit_code -ne 0 ]]; then
         printf "\033[1A\033[2K"
         script_dir=$(dirname "${file#$DOTFILES_FOLDER/}")
-        printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+        printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
         echo "$file" >> "$FAILURE_LOG" 2>/dev/null || true
     fi
     
@@ -367,7 +367,7 @@ if [ -d "$DOTFILES_FOLDER/dependencies/$OS_PATH" ]; then
         if [[ $exit_code -ne 0 ]]; then
             printf "\033[1A\033[2K"
             script_dir=$(dirname "${file#$DOTFILES_FOLDER/}")
-            printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+            printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
             echo "$file" >> "$FAILURE_LOG" 2>/dev/null || true
         fi
         
@@ -427,7 +427,7 @@ if [[ $EXTRAS = true ]] ; then
                 # Override the success message for failures
                 printf "\033[1A\033[2K"  # Clear last line
                 script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
-                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
                 echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
             fi
             
@@ -465,7 +465,7 @@ else
             if [[ $exit_code -ne 0 ]]; then
                 printf "\033[1A\033[2K"
                 script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
-                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
                 echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
             fi
             
@@ -506,7 +506,7 @@ if [[ $EXTRAS = true ]] ; then
             if [[ $exit_code -ne 0 ]]; then
                 printf "\033[1A\033[2K"
                 script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
-                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
                 echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
             fi
             
@@ -543,7 +543,7 @@ else
             if [[ $exit_code -ne 0 ]]; then
                 printf "\033[1A\033[2K"
                 script_dir=$(dirname "${script#$DOTFILES_FOLDER/}")
-                printf "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}\n"
+                printf '%s\n' "${RESET}${RED_TEXT}[${BOLD}${WHITE_TEXT}✗${RESET}${RED_TEXT}]${RESET} ${BOLD}${RED_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${RED_TEXT}failed!${RESET}"
                 echo "$script" >> "$FAILURE_LOG" 2>/dev/null || true
             fi
             
