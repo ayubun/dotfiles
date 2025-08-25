@@ -118,7 +118,7 @@ run_script() {
     # Calculate persistent log file path: tmp/logs/script_path/script_name.log
     local relative_path="${script_path#$DOTFILES_FOLDER/}"
     local log_dir="$DOTFILES_FOLDER/tmp/logs/$(dirname "$relative_path")"
-    local log_name="${script_name%.*}.log"  # Remove .sh extension, add .log
+    local log_name="${script_name}.log"
     local log_file="$log_dir/$log_name"
     
     # Create log directory structure
@@ -128,7 +128,7 @@ run_script() {
     
     # Add header to log file
     {
-        echo "===== Script Execution Log ====="
+        echo "====== Script Execution Log ======"
         echo "Script: $script_path"
         echo "Started: $(date)"
         echo "=================================="
@@ -137,11 +137,14 @@ run_script() {
     
     # Run the script and capture exit code and output
     local temp_output=$(mktemp)
+    export CAPTURE_OUTPUT=1
+    export DOTFILES_FOLDER="$DOTFILES_FOLDER"  # Ensure DOTFILES_FOLDER is available to child process
     if bash "$script_path" >"$temp_output" 2>&1; then
         local exit_code=0
     else
         local exit_code=$?
     fi
+    unset CAPTURE_OUTPUT
     
     # Copy output to persistent log
     cat "$temp_output" >> "$log_file"
@@ -167,7 +170,7 @@ run_script() {
     # fi
     
     if [[ $exit_code -eq 0 ]] || [[ $is_soft_failure == true ]]; then
-        echo "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET} ${GREEN_TEXT}completed successfully!${RESET}"
+        echo "${RESET}${GREEN_TEXT}[${BOLD}${WHITE_TEXT}✓${RESET}${GREEN_TEXT}]${RESET} ${BOLD}${GREEN_TEXT}${script_name}${RESET} ${GREEN_TEXT}completed successfully!${RESET}"
         echo "SUCCESS" >> "$log_file"
         rm -f "$temp_output"
     else

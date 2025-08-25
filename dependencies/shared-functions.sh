@@ -47,11 +47,16 @@ fix-apt() {
 }
 
 safer-apt() {
-    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt
+    "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt
 }
 
 safer-apt-fast() {
-    timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV 2>/dev/null || unlock-apt && fix-apt && timeout -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
+    # If we're capturing logs (CAPTURE_OUTPUT is set), don't redirect to /dev/null
+    if [[ -n "$CAPTURE_OUTPUT" ]]; then
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || unlock-apt
+    else
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
+    fi
 }
 
 # Safe tput function that falls back to empty strings if tput fails
@@ -73,11 +78,5 @@ export -f safe_tput
 
 # Set up environment variables if not already set
 if [[ -z "$DOTFILES_FOLDER" ]]; then
-    SOURCE=${BASH_SOURCE[0]}
-    while [ -L "$SOURCE" ]; do
-        DIR=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
-        SOURCE=$(readlink "$SOURCE")
-        [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE
-    done
-    export DOTFILES_FOLDER=$( cd -P "$( dirname "$SOURCE" )" >/dev/null 2>&1 && pwd )
+    export DOTFILES_FOLDER=$HOME/dotfiles
 fi
