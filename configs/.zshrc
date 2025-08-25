@@ -155,7 +155,7 @@ if [ -f $HOME/work/.zshrc_aliases ]; then
 fi
 # Load any pre-configured aliases
 if [ -f $HOME/dotfiles/configs/dependencies/.zshrc_aliases ]; then
-  . $HOME/dotfiles/dependencies/.zshrc_aliases
+  . $HOME/dotfiles/configs/dependencies/.zshrc_aliases
 fi
 
 # Bins
