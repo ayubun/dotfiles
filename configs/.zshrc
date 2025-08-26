@@ -112,6 +112,13 @@ export TERM=xterm-256color
 export VISUAL=vim
 export EDITOR=vim
 
+# modify zsh to not bind to ctrl + h,j,k,l (i want them for vim/tmux)
+bindkey -r "^H"
+bindkey -r "^J"
+bindkey -r "^K"
+bindkey -r "^L"
+
+
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
 DOTFILES_FOLDER=$HOME/dotfiles
