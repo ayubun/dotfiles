@@ -19,8 +19,22 @@ SELF="${BASH_SOURCE[0]}"
 SELF="$(cd "${SELF%/*}" && pwd -P)/${SELF##*/}"
 export PATH="/usr/bin:/bin:/usr/sbin:/sbin:${SELF%/*}:$PATH"
 
+# Capture original user information before escalating to root
+if [[ $UID != 0 ]]; then
+    export ORIGINAL_USER="$USER"
+    export ORIGINAL_UID="$UID"
+    export ORIGINAL_HOME="$HOME"
+    export SUDO_USER="$USER"
+else
+    # If already root, try to get original user from environment
+    export ORIGINAL_USER="${SUDO_USER:-root}"
+    export ORIGINAL_UID="${SUDO_UID:-0}"
+    export ORIGINAL_HOME="${SUDO_USER:+$(eval echo ~$SUDO_USER)}"
+    [[ -z "$ORIGINAL_HOME" ]] && export ORIGINAL_HOME="$HOME"
+fi
+
 auto_su() {
-    [[ $UID == 0 ]] || exec sudo -p "$PROGRAM must be run as root. Please enter the password for %u to continue: " -- "$BASH" -- "$SELF" "${ARGS[@]}"
+    [[ $UID == 0 ]] || exec sudo -p "Dotfiles must be run as root. Please enter the password for %u to continue: " -- "$BASH" -- "$SELF" "${ARGS[@]}"
 }
 
 auto_su
@@ -130,21 +144,39 @@ run_script() {
     
     echo "${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET}"
     
-    # Capture start time in milliseconds
-    local start_time=$(date +%s%3N)
+    # Capture start time (cross-platform compatible)
+    local start_time
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: Use seconds only (BSD date doesn't support nanoseconds)
+        start_time=$(date +%s)
+    else
+        # Linux: Use GNU date with millisecond precision
+        start_time=$(date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000)))
+    fi
     
     # Add header to log file
     {
         echo "========== Script Execution Log =========="
         echo "$script_path"
         echo ""
-        echo "Started at $(date)"
+        echo "Started $(date)"
     } > "$log_file"
     
     # Run the script and capture exit code and output
     local temp_output=$(mktemp)
     export CAPTURE_OUTPUT=1
     export DOTFILES_FOLDER="$DOTFILES_FOLDER"  # Ensure DOTFILES_FOLDER is available to child process
+    
+    # Export original user information for child scripts
+    export ORIGINAL_USER="$ORIGINAL_USER"
+    export ORIGINAL_UID="$ORIGINAL_UID"
+    export ORIGINAL_HOME="$ORIGINAL_HOME"
+    
+    # Set global environment variables for non-interactive operations
+    export HOMEBREW_NO_ANALYTICS=1
+    export HOMEBREW_NO_AUTO_UPDATE=1
+    export HOMEBREW_NO_INSTALL_CLEANUP=1
+    export DEBIAN_FRONTEND=noninteractive
     if bash "$script_path" >"$temp_output" 2>&1; then
         local exit_code=0
     else
@@ -152,9 +184,29 @@ run_script() {
     fi
     unset CAPTURE_OUTPUT
     
-    # Calculate execution duration
-    local end_time=$(date +%s%3N)
-    local duration_ms=$((end_time - start_time))
+    # Calculate execution duration (cross-platform compatible)
+    local end_time
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: Use seconds only (BSD date doesn't support nanoseconds)
+        end_time=$(date +%s)
+    else
+        # Linux: Use GNU date with millisecond precision
+        end_time=$(date +%s%3N 2>/dev/null || echo $(($(date +%s) * 1000)))
+    fi
+    
+    # Ensure we have valid numbers and calculate duration safely
+    start_time=$((10#${start_time:-0}))
+    end_time=$((10#${end_time:-0}))
+    
+    # Calculate duration based on platform precision
+    local duration_ms
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # macOS: Duration in seconds, convert to ms for display consistency
+        duration_ms=$(((end_time - start_time) * 1000))
+    else
+        # Linux: Duration already in milliseconds
+        duration_ms=$((end_time - start_time))
+    fi
     
     # Format duration: ms if < 1s, seconds with 2 decimals if >= 1s
     local duration_display
