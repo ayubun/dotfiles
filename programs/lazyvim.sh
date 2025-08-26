@@ -31,3 +31,8 @@ mkdir -p ~/.config/nvim/lua
 ln -s ~/dotfiles/configs/nvim/config ~/.config/nvim/lua/config
 ln -s ~/dotfiles/configs/nvim/plugins ~/.config/nvim/lua/plugins
 
+# Fix ownership so the original user can write to nvim config files
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER" 2>/dev/null || echo staff)" ~/.config/nvim 2>/dev/null || true
+fi
+
