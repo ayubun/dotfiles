@@ -11,12 +11,14 @@ rm -rf ~/.config/nvim.bak
 mv ~/.config/nvim{,.bak}
 
 # optional but recommended
-rm -rf ~/.local/share/nvim.bak
-rm -rf ~/.local/state/nvim.bak
-rm -rf ~/.cache/nvim.bak
-mv ~/.local/share/nvim{,.bak}
-mv ~/.local/state/nvim{,.bak}
-mv ~/.cache/nvim{,.bak}
+# note: i'm disabling these so that we don't have to reinstall plugins every
+# workspace restart...
+# rm -rf ~/.local/share/nvim.bak
+# rm -rf ~/.local/state/nvim.bak
+# rm -rf ~/.cache/nvim.bak
+# mv ~/.local/share/nvim{,.bak}
+# mv ~/.local/state/nvim{,.bak}
+# mv ~/.cache/nvim{,.bak}
 
 mkdir -p ~/.config/nvim
 git clone https://github.com/LazyVim/starter ~/.config/nvim
@@ -26,5 +28,6 @@ rm -rf ~/.config/nvim/.git
 # Clean pre-installed configs & symlink dotfiles
 rm -rf ~/.config/nvim/lua
 mkdir -p ~/.config/nvim/lua
-ln -s ~/dotfiles/configs/nvim ~/.config/nvim/lua
+ln -s ~/dotfiles/configs/nvim/config ~/.config/nvim/lua/config
+ln -s ~/dotfiles/configs/nvim/plugins ~/.config/nvim/lua/plugins
 
