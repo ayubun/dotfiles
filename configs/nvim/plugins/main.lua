@@ -9,6 +9,10 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
+  {
+    "christoomey/vim-tmux-navigator",
+    lazy = false,
+  },
   -- https://github.com/ibhagwan/smartyank.nvim
   -- yank thru ssh / tmux / etc
   {
