@@ -9,3 +9,9 @@ keybind = alt+right=esc:f
 keybind = super+backspace=text:\x15
 keybind = alt+backspace=text:\x1b\x7f
 
+# unbind possibly conflicting keys with tmux/neovim
+keybind = ctrl+h=unbind
+keybind = ctrl+j=unbind
+keybind = ctrl+k=unbind
+keybind = ctrl+l=unbind
+
