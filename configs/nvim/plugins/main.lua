@@ -180,20 +180,6 @@ return {
 		end,
 	},
 
-	-- Show dotfiles in neo-tree file explorer
-	{
-		"nvim-neo-tree/neo-tree.nvim",
-		opts = {
-			filesystem = {
-				filtered_items = {
-					visible = true, -- Show hidden/dotfiles
-					hide_dotfiles = false,
-					hide_gitignored = false,
-				},
-			},
-		},
-	},
-
 	-- Show dotfiles in Telescope
 	{
 		"nvim-telescope/telescope.nvim",
