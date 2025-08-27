@@ -59,13 +59,13 @@ return {
 	{
 		"nvim-telescope/telescope.nvim",
 		keys = {
-      -- add a keymap to browse plugin files
-      -- stylua: ignore
-      {
-        "<leader>fp",
-        function() require("telescope.builtin").find_files({ cwd = require("lazy.core.config").options.root }) end,
-        desc = "Find Plugin File",
-      },
+		-- add a keymap to browse plugin files
+		-- stylua: ignore
+		{
+			"<leader>fp",
+			function() require("telescope.builtin").find_files({ cwd = require("lazy.core.config").options.root }) end,
+			desc = "Find Plugin File",
+		},
 		},
 		-- change some options
 		opts = {
@@ -144,6 +144,41 @@ return {
 
 	-- use mini.starter instead of alpha
 	-- { import = "lazyvim.plugins.extras.ui.mini-starter" },
+
+	-- Show dotfiles in neo-tree file explorer
+	{
+		"nvim-neo-tree/neo-tree.nvim",
+		opts = {
+			filesystem = {
+				filtered_items = {
+					visible = true, -- Show hidden/dotfiles
+					hide_dotfiles = false,
+					hide_gitignored = false,
+				},
+			},
+		},
+	},
+
+	-- Show dotfiles in Telescope
+	{
+		"nvim-telescope/telescope.nvim",
+		opts = {
+			defaults = {
+				file_ignore_patterns = {
+					-- Remove patterns that hide dotfiles, keep only what you actually want to ignore
+					"%.git/",
+					"node_modules/",
+					"%.cache/",
+				},
+				hidden = true, -- Show hidden files
+			},
+			pickers = {
+				find_files = {
+					hidden = true, -- Show hidden files in find_files
+				},
+			},
+		},
+	},
 
 	-- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
 
