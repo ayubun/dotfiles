@@ -118,7 +118,6 @@ return {
 
 	-- for typescript, LazyVim also includes extra specs to properly setup lspconfig,
 	-- treesitter, mason and typescript.nvim. So instead of the above, you can use:
-	{ import = "lazyvim.plugins.extras.lang.typescript" },
 
 	-- since `vim.tbl_deep_extend`, can only merge tables and not lists, the code above
 	-- would overwrite `ensure_installed` with the new value.
@@ -147,7 +146,6 @@ return {
 	-- { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
 	-- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
-	{ import = "lazyvim.plugins.extras.lang.json" },
 
 	-- add any tools you want to have installed below
 	{
@@ -161,4 +159,5 @@ return {
 			},
 		},
 	},
+
 }
