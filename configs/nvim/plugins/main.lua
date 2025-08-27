@@ -36,6 +36,9 @@ return {
       highlight = {
         enabled = false,
       },
+      osc52 = {
+        escseq = 'tmux',
+      },
     },
   },
 	-- change trouble config
