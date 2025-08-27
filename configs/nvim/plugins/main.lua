@@ -148,6 +148,38 @@ return {
 	-- use mini.starter instead of alpha
 	-- { import = "lazyvim.plugins.extras.ui.mini-starter" },
 
+	-- EasyMotion for quick navigation (like VSCode vim)
+	{
+		"easymotion/vim-easymotion",
+		keys = {
+			{ "<leader><leader>s", "<Plug>(easymotion-s)", desc = "Search" },
+			{ "<leader><leader>f", "<Plug>(easymotion-f)", desc = "Find forward" },
+			{ "<leader><leader>F", "<Plug>(easymotion-F)", desc = "Find backward" },
+			{ "<leader><leader>w", "<Plug>(easymotion-w)", desc = "Word forward" },
+			{ "<leader><leader>b", "<Plug>(easymotion-b)", desc = "Word backward" },
+			{ "<leader><leader>j", "<Plug>(easymotion-j)", desc = "Line down" },
+			{ "<leader><leader>k", "<Plug>(easymotion-k)", desc = "Line up" },
+		},
+		config = function()
+			-- Configure EasyMotion like VSCode vim
+			vim.g.EasyMotion_smartcase = 1
+			vim.g.EasyMotion_startofline = 0 -- keep cursor column when JK motion
+		end,
+	},
+
+	{
+		"folke/which-key.nvim",
+		opts = function(_, opts)
+			opts.spec = opts.spec or {}
+			table.insert(opts.spec, {
+				"<leader><leader>", 
+				group = "+EasyMotion",
+				icon = "🏃"
+			})
+			return opts
+		end,
+	},
+
 	-- Show dotfiles in neo-tree file explorer
 	{
 		"nvim-neo-tree/neo-tree.nvim",
@@ -198,5 +230,13 @@ return {
 			},
 		},
 	},
+
+	-- {
+	-- 	"easymotion/vim-easymotion",
+	-- 	keys = {
+	-- 	  { "<leader><leader>", "<Plug>(easymotion-prefix)", desc = "Easymotion" },
+	-- 	},
+	-- }
+
 
 }
