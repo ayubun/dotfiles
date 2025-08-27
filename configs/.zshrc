@@ -113,11 +113,10 @@ export VISUAL=vim
 export EDITOR=vim
 
 # modify zsh to not bind to ctrl + h,j,k,l (i want them for vim/tmux)
-bindkey -r "^H"
-bindkey -r "^J"
-bindkey -r "^K"
-bindkey -r "^L"
-
+bindkey -r "^H" &>/dev/null
+bindkey -r "^J" &>/dev/null
+bindkey -r "^K" &>/dev/null
+bindkey -r "^L" &>/dev/null
 
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
