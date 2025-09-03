@@ -178,6 +178,14 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
     add_to_path "/Applications/Visual Studio Code.app/Contents/Resources/app/bin"
 fi
 
+# tmux dead session checker lol
+if [[ "$TMUX" ]]; then
+  export TMUX_SESSION_NAME="$(tmux display-message -p '#S')"
+  if [[ "$TMUX_SESSION_NAME" != "ghostty" ]]; then
+    tmux set-hook -g after-attach 'run-shell "~/dotfiles/configs/dependencies/tmux-monitor.sh"'
+  fi
+fi
+
 # git repository greeter https://github.com/o2sh/onefetch/wiki/getting-started
 last_repository=
 check_directory_for_new_repository() {
