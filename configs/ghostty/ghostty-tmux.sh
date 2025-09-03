@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-session='love'
+session='ghostty'
 # Check if the session already exists
 tmux has-session -t $session 2>/dev/null
 

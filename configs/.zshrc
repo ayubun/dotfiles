@@ -123,11 +123,14 @@ deactivate &>/dev/null
 DOTFILES_FOLDER=$HOME/dotfiles
 
 # Load any dependencies in the dependencies directory
-find $HOME/dotfiles/configs/dependencies -maxdepth 1 -mindepth 1 -type f -print | \
-while read file; do
-    file=$(basename ${file})
-    . $HOME/dotfiles/configs/dependencies/$file
-done
+# NOTE(ayubun): erm, this breaks because i repurposed the depedencies folder to include scripts that shouldn't be run without commands,
+# i.e. tmux-love.sh, which is a helper script to attach to an existing tmux session if present (else create it). point is, we dont want
+# to run all the scripts in that dir anymore lol
+# find $HOME/dotfiles/configs/dependencies -maxdepth 1 -mindepth 1 -type f -print | \
+# while read file; do
+#     file=$(basename ${file})
+#     . $HOME/dotfiles/configs/dependencies/$file
+# done
 
 # Kubectl autocomplete
 [[ $commands[kubectl] ]] && source <(kubectl completion zsh)  # setup autocomplete
@@ -155,13 +158,17 @@ export PATH=/home/discord/.local/bin/:$PATH
 export BUN_INSTALL="$HOME/.bun"
 export PATH="$BUN_INSTALL/bin:$PATH"
 
+# Load any pre-configured functions
+if [ -f "$DOTFILES_FOLDER/configs/dependencies/functions.sh" ]; then
+  source "$DOTFILES_FOLDER/configs/dependencies/functions.sh"
+fi
+# Load any pre-configured aliases
+if [ -f $DOTFILES_FOLDER/configs/dependencies/.zshrc_aliases ]; then
+  . $DOTFILES_FOLDER/configs/dependencies/.zshrc_aliases
+fi
 # Load any private work aliases
 if [ -f $HOME/work/.zshrc_aliases ]; then
   . $HOME/work/.zshrc_aliases
-fi
-# Load any pre-configured aliases
-if [ -f $HOME/dotfiles/configs/dependencies/.zshrc_aliases ]; then
-  . $HOME/dotfiles/configs/dependencies/.zshrc_aliases
 fi
 
 # Bins

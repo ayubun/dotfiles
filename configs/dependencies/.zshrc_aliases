@@ -1,7 +1,7 @@
 #!/bin/bash
 
-alias g='git'
-alias uptime="uptime -p \"$@\""
+# dynamic aliasing (safe fallbacks)
+
 which bat &> /dev/null
 if [ $? -eq 0 ]; then
   alias cat="bat"
@@ -10,13 +10,26 @@ else
   if [ $? -eq 0 ]; then
     alias cat="batcat"
   else
-    echo 'bat could not be found on this system'
+    echo 'bat could not be found on this system (cat will remain unaliased)'
   fi
 fi
+
+which lsd &> /dev/null
+if [ $? -eq 0 ]; then
+  alias ls="lsd"
+else
+  echo 'lsd could not be found on this system (ls will remain unaliased)'
+fi
+
+#
+
+alias g="git"
+alias uptime="uptime -p \"$@\""
 alias lg="lazygit"
 alias gcb="g c main && g p && g cb"
-alias l="ls -alh"
 alias ll="ls -alh"
+alias l="ll"
+alias lt="ls --tree"
 alias vim="nvim"
 alias love=". $HOME/dotfiles/configs/dependencies/tmux-love.sh"
 
