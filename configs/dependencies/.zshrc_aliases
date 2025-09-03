@@ -16,4 +16,7 @@ fi
 alias lg="lazygit"
 alias gcb="g c main && g p && g cb"
 alias l="ls -alh"
+alias ll="ls -alh"
 alias vim="nvim"
+alias love=". $HOME/dotfiles/configs/dependencies/tmux-love.sh"
+

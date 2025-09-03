@@ -16,5 +16,4 @@ if [ -f "$log_file" ]; then
 fi
 
 mkdir -p ~/.tmux_monitor
-echo \$(date +%s) > $log_file
-
+echo $(date +%s) >$log_file
