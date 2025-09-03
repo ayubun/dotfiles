@@ -21,10 +21,10 @@ add_discord_bin_to_usr_local_bin() {
   fi
   # Check if the path is not already in the PATH variable
   if ! echo "$PATH" | grep -E -q "(^|:)$OLD_BIN_NAME($|:)"; then
+    symlink="/usr/local/bin/$NEW_BIN_NAME"
     if [ ! -f $HOME/discord/.local/bin/$OLD_BIN_NAME ]; then
       echo "~/discord/.local/bin/$OLD_BIN_NAME not found! Please clone the Discord repo in the home directory."
-    elif [ -e "/usr/local/bin/$NEW_BIN_NAME" ] | [ -L "/usr/local/bin/$NEW_BIN_NAME" ]; then
-      symlink="/usr/local/bin/$NEW_BIN_NAME"
+    elif [[ -e "$symlink" || -L "$symlink" ]]; then
       if [ -L "$symlink" ]; then
         # Get the target file of the symlink
         target_file=$(readlink -f "$symlink")
@@ -53,7 +53,7 @@ add_discord_bin_to_usr_local_bin() {
         echo "WARNING: $symlink *FILE* already exists!"
       fi
     else
-      ln -s $HOME/discord/.local/bin/$OLD_BIN_NAME /usr/local/bin/$NEW_BIN_NAME
+      ln -s $HOME/discord/.local/bin/$OLD_BIN_NAME $symlink
     fi
   else
     # Debug
