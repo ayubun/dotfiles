@@ -29,6 +29,7 @@ packages=(
   'xclip'
   #
   'lsd' # https://github.com/lsd-rs/lsd
+  'python3-pip'
 )
 apt_repositories=(
   'ppa:o2sh/onefetch'

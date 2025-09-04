@@ -37,6 +37,7 @@ packages=(
   'tmux'
   'wireguard-tools'
   'lsd' # https://github.com/lsd-rs/lsd
+  'python'
 )
 
 # Set environment variables for non-interactive brew operations
