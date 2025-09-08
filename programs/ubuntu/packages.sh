@@ -22,13 +22,13 @@ packages=(
   'httpie'  # https://github.com/httpie/cli?tab=readme-ov-file
   'ripgrep' # https://github.com/BurntSushi/ripgrep
   'fd-find' # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
-  'google-cloud-cli-bigtable-emulator'
   'tmux'
   # for remote clipboard integration on lvim
   'xsel'
   'xclip'
   #
   'lsd' # https://github.com/lsd-rs/lsd
+  # ^ this doesnt work pre-ubuntu 23.. see programs/ubuntu/lsd.sh
   'python3-pip'
 )
 apt_repositories=(
