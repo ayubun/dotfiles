@@ -27,7 +27,7 @@ packages=(
   'xsel'
   'xclip'
   #
-  'lsd' # https://github.com/lsd-rs/lsd
+  # 'lsd' # https://github.com/lsd-rs/lsd
   # ^ this doesnt work pre-ubuntu 23.. see programs/ubuntu/lsd.sh
   'python3-pip'
 )
