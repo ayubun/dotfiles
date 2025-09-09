@@ -38,6 +38,7 @@ packages=(
   'wireguard-tools'
   'lsd' # https://github.com/lsd-rs/lsd
   'python'
+  'tlrc' # https://github.com/tldr-pages/tlrc
 )
 
 # Set environment variables for non-interactive brew operations

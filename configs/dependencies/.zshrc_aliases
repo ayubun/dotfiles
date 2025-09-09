@@ -31,5 +31,6 @@ alias ll="ls -alh"
 alias l="ll"
 alias lt="ls --tree"
 alias vim="nvim"
+# alias tldr="tldr -t ocean"
 alias love=". $HOME/dotfiles/configs/dependencies/tmux-love.sh"
 
