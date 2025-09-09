@@ -220,8 +220,10 @@ check_directory_for_new_repository() {
 # end git repository greeter
 
 # Run neofetch on terminal login! (just looks kinda cool :3)
-# TODO: Migrate off of neofetch since it is not maintained anymore :(
-neofetch
+if ! [[ "$TMUX" ]]; then
+  # it's kind of annoying to run this when panes are smaller so ill only run it if it's not a tmux session :o
+  neofetch
+fi
 
 # optional, greet also when opening shell directly in repository directory
 # adds time to startup
