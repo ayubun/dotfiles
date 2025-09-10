@@ -112,6 +112,7 @@ else
   exit 1
 fi
 
+# clean up temp files from prev runs
 rm -rf $DOTFILES_FOLDER/tmp || true
 mkdir $DOTFILES_FOLDER/tmp || true
 rm -rf $DOTFILES_FOLDER/logs || true
