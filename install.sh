@@ -298,7 +298,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
   echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Mac Keyboard Setup${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring long keypress behaviour${RESET}"
   defaults write -g ApplePressAndHoldEnabled -bool false
   # make the repeat speed the fastest possible
-  defaults write -g KeyRepeat -int 1
+  defaults write -g KeyRepeat -int 3
   # adjust the repeat start speed
   # defaults write -g InitialKeyRepeat -int 10
 fi
