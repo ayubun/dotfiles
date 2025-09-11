@@ -33,8 +33,12 @@ else
   [[ -z "$ORIGINAL_HOME" ]] && export ORIGINAL_HOME="$HOME"
 fi
 
+
 auto_su() {
   [[ $UID == 0 ]] || exec sudo -p "Dotfiles must be run as root. Please enter the password for %u to continue: " -- "$BASH" -- "$SELF" "${ARGS[@]}"
+
+  # override home with original home
+  export HOME="$ORIGINAL_HOME"
 }
 
 auto_su
@@ -99,6 +103,7 @@ if [[ "$DOTFILES_FOLDER" != "$HOME/dotfiles" ]]; then
   ./install.sh
   exit 0
 fi
+
 
 echo ""
 
