@@ -90,7 +90,8 @@ while [ -L "$SOURCE" ]; do # resolve $SOURCE until the file is no longer a symli
   [[ $SOURCE != /* ]] && SOURCE=$DIR/$SOURCE # if $SOURCE was a relative symlink, we need to resolve it relative to the path where the symlink file was located
 done
 DOTFILES_FOLDER=$(cd -P "$(dirname "$SOURCE")" >/dev/null 2>&1 && pwd)
-if [[ $DOTFILES_FOLDER != "$HOME/dotfiles" ]]; then
+if [[ "$DOTFILES_FOLDER" != "$HOME/dotfiles" ]]; then
+  echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Non-Home Dotfiles${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Ensuring dotfiles are installed in ~/dotfiles...${RESET}"
   # if the current script is not being run from the home directory, we want to move to the home directory.
   rm -rf $HOME/dotfiles
   git clone https://github.com/ayubun/dotfiles.git $HOME/dotfiles
@@ -283,10 +284,20 @@ if ! [[ "$OSTYPE" == "darwin"* ]]; then
   echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring dotfiles auto-updater${RESET}"
   RELATIVE_SCRIPT_PATH=updaters/dotfiles.sh
   SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
-  # Remove any existing entry in the crontab
-  crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null
-  # Add updater to crontab
-  (crontab -l 2>/dev/null; echo "*/5 * * * * ${SCRIPT_PATH}") | crontab -
+
+  if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+      # Run as original user using sudo -u
+      sudo -u "$ORIGINAL_USER" -H bash -c "crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null"
+      sudo -u "$ORIGINAL_USER" -H bash -c "(crontab -l 2>/dev/null; echo \"*/5 * * * * ${SCRIPT_PATH}\") | crontab -"
+      # maybe could replace with this oneline?: (crontab -l ; echo "0 * * * * your_command") | sort - | uniq - | crontab -
+  else
+      echo "${RESET}${RED_TEXT}${BOLD}⚠️WARNING: Because install.sh was run as a root user (no original user), the auto-updater cron will be added to the root crontab${RESET}"
+      # Remove any existing entry in the crontab
+      sudo crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | sudo crontab - &>/dev/null
+      # Add updater to crontab
+      (sudo crontab -l 2>/dev/null; echo "*/5 * * * * ${SCRIPT_PATH}") | sudo crontab -
+  fi
+
 fi
 
 echo ""
