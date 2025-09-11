@@ -278,6 +278,19 @@ fi
 
 echo ""
 
+# for non-mac, we want all the remote servers to auto update
+if ! [[ "$OSTYPE" == "darwin"* ]]; then
+  echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring dotfiles auto-updater${RESET}"
+  RELATIVE_SCRIPT_PATH=updaters/dotfiles.sh
+  SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
+  # Remove any existing entry in the crontab
+  crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null
+  # Add updater to crontab
+  (crontab -l 2>/dev/null; echo "*/5 * * * * ${SCRIPT_PATH}") | crontab -
+fi
+
+echo ""
+
 find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -name "personalize" \) -print |
   while read file; do
     file=$(basename ${file})
