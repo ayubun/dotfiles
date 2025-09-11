@@ -8,6 +8,11 @@
 -- Disable space key's default behavior (moving cursor forward) in normal mode
 -- This prevents conflicts when space is used as leader key
 vim.keymap.set("n", "<Space>", "<Nop>", { silent = true })
+
+vim.keymap.set("n", "<A-Up>", "<cmd>resize +2<cr>", { desc = "Increase Window Height" })
+vim.keymap.set("n", "<A-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window Height" })
+vim.keymap.set("n", "<A-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
+vim.keymap.set("n", "<A-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 -- local M = {}
 --
 -- M.general = {
