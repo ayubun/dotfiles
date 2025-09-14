@@ -1,7 +1,7 @@
 #!/bin/bash
 
 cd ~/dotfiles
-if [[ -z "$(git status -s)" ]]; then
+if [[ -n "$(git status -s)" ]]; then
   git add --all
   git stash
 fi
