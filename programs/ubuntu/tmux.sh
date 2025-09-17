@@ -16,22 +16,28 @@ fi
 cd "$TMP_DIR"
 # sudo rm -rf ./tmux &/dev/null
 
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-  # Run as original user using sudo -u
-  #
-  sudo -u "$ORIGINAL_USER" -H bash -c "git clone https://github.com/tmux/tmux.git"
-  cd tmux
+git clone https://github.com/tmux/tmux.git
+cd tmux
+git checkout tmux-3.5a
+sh autogen.sh
+./configure && make
 
-  sudo -u "$ORIGINAL_USER" -H bash -c "sh autogen.sh"
-  sudo -u "$ORIGINAL_USER" -H bash -c "./configure && make"
-else
-  echo "⚠️WARNING: the dotfiles were run as a root user, meaning tmux cannot be installed as non-root. Installing as root..." 
-
-  git clone https://github.com/tmux/tmux.git
-  cd tmux
-  sh autogen.sh
-  ./configure && make
-fi
+# if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+#   # Run as original user using sudo -u
+#   #
+#   sudo -u "$ORIGINAL_USER" -H bash -c "git clone https://github.com/tmux/tmux.git"
+#   cd tmux
+#
+#   sudo -u "$ORIGINAL_USER" -H bash -c "sh autogen.sh"
+#   sudo -u "$ORIGINAL_USER" -H bash -c "./configure && make"
+# else
+#   echo "⚠️WARNING: the dotfiles were run as a root user, meaning tmux cannot be installed as non-root. Installing as root..." 
+#
+#   git clone https://github.com/tmux/tmux.git
+#   cd tmux
+#   sh autogen.sh
+#   ./configure && make
+# fi
 
 sudo mv -f ./tmux /usr/bin/
 
