@@ -15,7 +15,6 @@ else
   echo "⚠️WARNING: the dotfiles were run as a root user, meaning tpm cannot be installed as non-root. Installing as root..." 
   mkdir -p ~/.tmux/plugins/tpm || true
   git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
-
 fi
 
 echo ""
