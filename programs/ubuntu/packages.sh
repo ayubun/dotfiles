@@ -16,6 +16,7 @@ packages=(
   'onefetch'
   'net-tools'
   'htop'
+  'btop'
   'nano'
   'bat'
   'neovim'

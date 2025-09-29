@@ -23,6 +23,7 @@ packages=(
   'neofetch' # TODO: switch off neofetch
   'onefetch'
   'htop'
+  'btop'
   'gcc'
   'grpcurl' # https://github.com/fullstorydev/grpcurl
   'koekeishiya/formulae/skhd'
