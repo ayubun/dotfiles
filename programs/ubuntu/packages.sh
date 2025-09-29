@@ -34,7 +34,7 @@ packages=(
 )
 apt_repositories=(
   'ppa:o2sh/onefetch'
-  'ppa:neovim-ppa/unstable'
+  'ppa:neovim-ppa/stable'
   # 'ppa:pi-rho/dev'
 )
 
