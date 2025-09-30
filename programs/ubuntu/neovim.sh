@@ -20,7 +20,9 @@ else
 fi
 
 # mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
-mv -f ./nvim-linux-x86_64/* /usr/local/
+mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
+mv -f ./nvim-linux-x86_64/lib/nvim /usr/local/lib
+mv -f ./nvim-linux-x86_64/share/nvim /usr/local/share
 
 echo ""
 echo "neovim is now installed~"
