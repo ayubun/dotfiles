@@ -1,0 +1,33 @@
+#!/bin/bash
+
+
+# Create temp directory - prefer dotfiles/tmp if available, fallback to system tmp
+if [[ -d "$HOME/dotfiles" ]]; then
+  TMP_DIR="$HOME/dotfiles/tmp"
+  mkdir -p "$TMP_DIR" &>/dev/null
+else
+  TMP_DIR=$(mktemp -d)
+fi
+
+cd "$TMP_DIR"
+
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+  # Run as original user using sudo -u
+  sudo -u "$ORIGINAL_USER" -H bash -c "curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xzf nvim-linux-x86_64.tar.gz"
+else
+  echo "⚠️WARNING: the dotfiles were run as a root user, meaning tpm cannot be installed as non-root. Installing as root..." 
+  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xzf nvim-linux-x86_64.tar.gz
+fi
+
+ln -s ./nvim-linux-x86_64/bin/nvim /usr/local/bin
+
+echo ""
+echo "neovim is now installed~"
+
+cd ..
+
+# Clean up if we used system tmp
+if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
+  rm -rf "$TMP_DIR"
+fi
+

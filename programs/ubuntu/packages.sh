@@ -19,7 +19,7 @@ packages=(
   'btop'
   'nano'
   'bat'
-  'neovim'
+  # 'neovim'
   'httpie'  # https://github.com/httpie/cli?tab=readme-ov-file
   'ripgrep' # https://github.com/BurntSushi/ripgrep
   'fd-find' # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
