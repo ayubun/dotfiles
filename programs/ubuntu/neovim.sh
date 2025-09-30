@@ -13,10 +13,10 @@ cd "$TMP_DIR"
 
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
   # Run as original user using sudo -u
-  sudo -u "$ORIGINAL_USER" -H bash -c "curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xzf nvim-linux-x86_64.tar.gz"
+  sudo -u "$ORIGINAL_USER" -H bash -c "curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xz"
 else
   echo "⚠️WARNING: the dotfiles were run as a root user, meaning tpm cannot be installed as non-root. Installing as root..." 
-  curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xzf nvim-linux-x86_64.tar.gz
+  curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xz
 fi
 
 mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
