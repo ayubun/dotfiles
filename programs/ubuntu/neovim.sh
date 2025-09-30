@@ -19,7 +19,8 @@ else
   curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xz
 fi
 
-mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
+# mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
+mv -f ./nvim-linux-x86_64/* /usr/local/
 
 echo ""
 echo "neovim is now installed~"
