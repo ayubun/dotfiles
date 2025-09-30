@@ -11,18 +11,20 @@ fi
 
 cd "$TMP_DIR"
 
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-  # Run as original user using sudo -u
-  sudo -u "$ORIGINAL_USER" -H bash -c "curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xz"
-else
-  echo "⚠️WARNING: the dotfiles were run as a root user, meaning tpm cannot be installed as non-root. Installing as root..." 
-  curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | tar -xz
-fi
+rm -rf ./nvim-linux-x86_64.tar.gz
 
+sudo curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | sudo tar -xz
 # mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
 sudo mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
 sudo mv -f ./nvim-linux-x86_64/lib/nvim /usr/local/lib
 sudo mv -f ./nvim-linux-x86_64/share/nvim /usr/local/share
+
+# Set ownership to original user if available
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/bin/nvim
+  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/lib/nvim
+  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/share/nvim
+fi
 
 echo ""
 echo "neovim is now installed~"
