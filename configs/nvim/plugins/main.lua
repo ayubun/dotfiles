@@ -162,7 +162,7 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 		opts = function(_, opts)
 			-- add tsx and treesitter
-			vim.list_extend(opts.ensure_installed, {
+		  require("lazyvim.util").list_extend(opts.ensure_installed, {
 				"tsx",
 				"typescript",
         "python",
@@ -175,6 +175,9 @@ return {
         "ninja",
         -- "vim",
 			})
+      opts.highlight = { enable = true }
+      opts.indent = { enable = true }
+      opts.folds = { enable = true }
 		end,
 	},
 
