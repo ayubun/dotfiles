@@ -31,6 +31,7 @@ packages=(
   # 'lsd' # https://github.com/lsd-rs/lsd
   # ^ this doesnt work pre-ubuntu 23.. see programs/ubuntu/lsd.sh
   'python3-pip'
+  'pipx'
 )
 apt_repositories=(
   'ppa:o2sh/onefetch'

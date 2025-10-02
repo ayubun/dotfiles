@@ -1,4 +1,6 @@
-require("lspconfig").rust_analyzer.setup({
+local lspconfig = require("lspconfig")
+
+lspconfig.rust_analyzer.setup({
     settings = {
         ["rust-analyzer"] = {
             completion = {
@@ -6,9 +8,31 @@ require("lspconfig").rust_analyzer.setup({
                     enable = true,
                 },
             },
-            -- Other rust-analyzer settings...
+            checkOnSave = {
+                command = "clippy",
+            },
         },
     },
-    -- Other LSP configuration options...
+})
+
+lspconfig.basedpyright.setup({
+  settings = {
+    basedpyright = {
+      analysis = {
+        ignorePatterns = { "*.pyi" },
+        diagnosticSeverityOverrides = {
+          reportCallIssue = "warning",
+          reportUnreachable = "warning",
+          reportUnusedImport = "none",
+          reportUnusedCoroutine = "warning",
+        },
+        -- diagnosticMode = "workspace",
+        diagnosticMode = "openFilesOnly",
+        typeCheckingMode = "basic",
+        reportCallIssue = "none",
+        disableOrganizeImports = true,
+      },
+    },
+  },
 })
 

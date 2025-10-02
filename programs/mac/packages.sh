@@ -39,6 +39,7 @@ packages=(
   'wireguard-tools'
   'lsd' # https://github.com/lsd-rs/lsd
   'python'
+  'pipx'
   'tlrc' # https://github.com/tldr-pages/tlrc
 )
 

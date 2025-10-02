@@ -250,28 +250,21 @@ return {
 		},
 	},
 
-	-- {
-	-- 	"easymotion/vim-easymotion",
-	-- 	keys = {
-	-- 	  { "<leader><leader>", "<Plug>(easymotion-prefix)", desc = "Easymotion" },
-	-- 	},
-	-- }
-  --
-  
-  {
-    "okuuva/auto-save.nvim",
-    version = "^1.0.0", -- recommended to use a specific version
-    event = { "InsertLeave", "TextChanged" }, -- lazy load on these events
-    opts = {
-      -- Your desired configuration options for auto-save.nvim
-      -- For example:
-      trigger_events = {
-        immediate_save = { "BufLeave", "FocusLost", "QuitPre", "VimSuspend" },
-        defer_save = { "InsertLeave", "TextChanged" },
-      },
-      debounce_delay = 1000, -- delay in milliseconds before saving after a change
-    },
-  },
+  -- manual saving is prolly better -lena
+  -- {
+  --   "okuuva/auto-save.nvim",
+  --   version = "^1.0.0", -- recommended to use a specific version
+  --   event = { "InsertLeave", "TextChanged" }, -- lazy load on these events
+  --   opts = {
+  --     -- Your desired configuration options for auto-save.nvim
+  --     -- For example:
+  --     trigger_events = {
+  --       immediate_save = { "BufLeave", "FocusLost", "QuitPre", "VimSuspend" },
+  --       defer_save = { "InsertLeave", "TextChanged" },
+  --     },
+  --     debounce_delay = 1000, -- delay in milliseconds before saving after a change
+  --   },
+  -- },
 
   -- {
   --     "numirias/semshi",
@@ -283,28 +276,6 @@ return {
     opts = {
       autoformat = false,
       inlay_hints = { enabled = true },
-      servers = {
-        basedpyright = {
-          settings = {
-            basedpyright = {
-              analysis = {
-                ignorePatterns = { "*.pyi" },
-                diagnosticSeverityOverrides = {
-                  reportCallIssue = "warning",
-                  reportUnreachable = "warning",
-                  reportUnusedImport = "none",
-                  reportUnusedCoroutine = "warning",
-                },
-                -- diagnosticMode = "workspace",
-                diagnosticMode = "openFilesOnly",
-                typeCheckingMode = "basic",
-                reportCallIssue = "none",
-                disableOrganizeImports = true,
-              },
-            },
-          },
-        },
-      },
     },
   },
 
