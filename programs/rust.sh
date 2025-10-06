@@ -1,20 +1,19 @@
 #!/bin/bash
 
 
-# lets not run this on my work box .. cuz its specially configured
 if [ -f $HOME/work/.zshrc_aliases ]; then
   echo "work computer detected; ignoring rust install"
-  exit 0
-fi
-
-# Clean old rust installation, if present
-rustup self uninstall -y &>/dev/null
-# Fresh install via rustup
-curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-# Configure current shell
-source $HOME/.cargo/env &>/dev/null
-if [[ "$OSTYPE" == "darwin"* ]]; then
-    xcode-select --install &>/dev/null
+else
+  # Clean old rust installation, if present
+  rustup self uninstall -y &>/dev/null
+  # Fresh install via rustup
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+  # Configure current shell
+  source $HOME/.cargo/env &>/dev/null
+  if [[ "$OSTYPE" == "darwin"* ]]; then
+      xcode-select --install &>/dev/null
+  fi
+  echo "rust installed~"
 fi
 
 # packages
