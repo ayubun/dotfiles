@@ -162,19 +162,20 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 		opts = function(_, opts)
 			-- add tsx and treesitter
-		  vim.list_extend(opts.ensure_installed, {
-				"tsx",
-				"typescript",
-        "python",
-        "lua",
-        "json",
-        "javascript",
-        "yaml",
-        -- "rust",
-        "rst",
-        "ninja",
-        -- "vim",
-			})
+      -- this breaks when i have it added for some reason lol
+			--  vim.list_extend(opts.ensure_installed, {
+			-- 	"tsx",
+			-- 	"typescript",
+			--      "python",
+			--      "lua",
+			--      "json",
+			--      "javascript",
+			--      "yaml",
+			--      -- "rust",
+			--      "rst",
+			--      "ninja",
+			--      -- "vim",
+			-- })
       opts.highlight = { enable = true }
       opts.indent = { enable = true }
       opts.folds = { enable = true }
