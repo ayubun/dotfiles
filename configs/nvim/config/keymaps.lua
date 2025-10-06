@@ -14,7 +14,15 @@ vim.keymap.set("n", "<A-Down>", "<cmd>resize -2<cr>", { desc = "Decrease Window 
 vim.keymap.set("n", "<A-Left>", "<cmd>vertical resize -2<cr>", { desc = "Decrease Window Width" })
 vim.keymap.set("n", "<A-Right>", "<cmd>vertical resize +2<cr>", { desc = "Increase Window Width" })
 
-vim.keymap.set("n", "<C-G><C-G>", ":let @+ = expand('%:p')<CR>", { desc = "Copy full file path" })
+-- TODO: this causes a notice error:
+-- 
+-- notify.error noice.nvim ...m/0.11.4/share/nvim/runtime/lua/vim/treesitter/query.lua:373: Query error at 130:4. Invalid node type "substitute":
+--  "substitute"
+--   ^
+-- vim.keymap.set("n", "<C-G><C-G>", ":let @+ = expand('%:p')<CR>", { desc = "Copy full file path" })
+vim.keymap.set("n", "<C-G><C-G>", function()
+  vim.fn.setreg('+', vim.fn.expand('%:p'))
+end, { desc = "Copy full file path" })
 -- local M = {}
 --
 -- M.general = {

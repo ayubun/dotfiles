@@ -33,15 +33,15 @@ return {
   --     { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
   --   },
   -- },
-  {
-    "greggh/claude-code.nvim",
-    dependencies = {
-      "nvim-lua/plenary.nvim", -- Required for git operations
-    },
-    config = function()
-      require("claude-code").setup()
-    end
-  },
+  -- {
+  --   "greggh/claude-code.nvim",
+  --   dependencies = {
+  --     "nvim-lua/plenary.nvim", -- Required for git operations
+  --   },
+  --   config = function()
+  --     require("claude-code").setup()
+  --   end
+  -- },
   {
     "christoomey/vim-tmux-navigator",
     lazy = false,
@@ -162,7 +162,7 @@ return {
 		"nvim-treesitter/nvim-treesitter",
 		opts = function(_, opts)
 			-- add tsx and treesitter
-		  require("lazyvim.util").list_extend(opts.ensure_installed, {
+		  vim.list_extend(opts.ensure_installed, {
 				"tsx",
 				"typescript",
         "python",
