@@ -9,6 +9,13 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
+  -- disable smooth scrolling
+  {
+    "snacks.nvim",
+    opts = {
+      scroll = { enabled = false },
+    },
+  },
   -- {
   --   "coder/claudecode.nvim",
   --   dependencies = { "folke/snacks.nvim" },

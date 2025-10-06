@@ -10,3 +10,5 @@ vim.g.autoformat = false
 vim.opt.relativenumber = true
 vim.opt.number = true
 
+vim.opt.sms = false
+
