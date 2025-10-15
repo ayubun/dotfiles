@@ -17,3 +17,6 @@ keybind = ctrl+l=unbind
 
 # Use zsh to run the script to avoid shell compatibility issues
 # command=zsh -l -c "$HOME/dotfiles/configs/ghostty/ghostty-tmux.sh"
+
+theme = TokyoNight Moon
+
