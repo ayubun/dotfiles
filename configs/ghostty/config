@@ -19,5 +19,10 @@ keybind = ctrl+l=unbind
 # command=zsh -l -c "$HOME/dotfiles/configs/ghostty/ghostty-tmux.sh"
 
 # theme = Overnight Slumber
-theme = Lovelace
+# theme = Lovelace
+# theme = Catppuccin Mocha
+# theme = GitHub Dark Colorblind
+# theme = Hardcore
+# theme = Hybrid
+theme = Rose Pine
 

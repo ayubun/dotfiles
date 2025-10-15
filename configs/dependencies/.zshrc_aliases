@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # dynamic aliasing (safe fallbacks)
-
+unalias cat
+alias truecat=$(which cat)
 which bat &> /dev/null
 if [ $? -eq 0 ]; then
   alias cat="bat"
@@ -14,6 +15,8 @@ else
   fi
 fi
 
+unalias ls
+alias truels=$(which ls)
 which lsd &> /dev/null
 if [ $? -eq 0 ]; then
   alias ls="lsd"
