@@ -1,10 +1,16 @@
 return {
-  -- { "yazeed1s/oh-lucy.nvim" },
-  { "folke/tokyonight.nvim" },
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "tokyonight",
-    },
-  }
+	-- { "yazeed1s/oh-lucy.nvim" },
+	{
+		"folke/tokyonight.nvim",
+		lazy = true,
+		opts = {
+			style = "night",
+		},
+	},
+	{
+		"LazyVim/LazyVim",
+		opts = {
+			colorscheme = "tokyonight",
+		},
+	},
 }
