@@ -36,6 +36,11 @@ lspconfig.rust_analyzer.setup({
 })
 
 lspconfig.basedpyright.setup({
+  root_dir = function(fname)
+    -- Look for uv.lock or .git in parent directories to find the workspace root
+    local util = require("lspconfig.util")
+    return util.root_pattern("uv.lock", ".git")(fname)
+  end,
   settings = {
     basedpyright = {
       analysis = {
@@ -46,21 +51,22 @@ lspconfig.basedpyright.setup({
           reportUnusedImport = "none",
           reportUnusedCoroutine = "warning",
         },
-        -- diagnosticMode = "workspace",
         diagnosticMode = "openFilesOnly",
         typeCheckingMode = "basic",
         reportCallIssue = "none",
         disableOrganizeImports = true,
-      },
-    },
-    python = {
-      pythonPath = ".venv/bin/python",
-      venvPath = ".",
-      analysis = {
         autoSearchPaths = true,
         useLibraryCodeForTypes = true,
       },
     },
+    -- python = {
+    --   pythonPath = ".venv/bin/python",
+    --   venvPath = ".",
+    --   analysis = {
+    --     autoSearchPaths = true,
+    --     useLibraryCodeForTypes = true,
+    --   },
+    -- },
   },
 })
 
