@@ -290,15 +290,15 @@ return {
     },
   },
 
-  {
-    "nvim-lualine/lualine.nvim",
-    opts = function(_, opts)
-      local filename = {
-        "filename",
-        path = 1, -- 1 shows the full path
-      }
-      opts.sections.lualine_c[1] = filename
-    end,
-  },
+  -- {
+  --   "nvim-lualine/lualine.nvim",
+  --   opts = function(_, opts)
+  --     local filename = {
+  --       "filename",
+  --       path = 1, -- 1 shows the full path
+  --     }
+  --     opts.sections.lualine_c[1] = filename
+  --   end,
+  -- },
 
 }
