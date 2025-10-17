@@ -53,6 +53,14 @@ lspconfig.basedpyright.setup({
         disableOrganizeImports = true,
       },
     },
+    python = {
+      pythonPath = ".venv/bin/python",
+      venvPath = ".",
+      analysis = {
+        autoSearchPaths = true,
+        useLibraryCodeForTypes = true,
+      },
+    },
   },
 })
 
