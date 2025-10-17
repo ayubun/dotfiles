@@ -31,7 +31,9 @@ keybind = ctrl+l=unbind
 # theme = Kitty Default
 # theme = Moonfly
 # theme = Neutron
-theme = Ultra Dark
+# theme = Ultra Dark
 # theme = Vague
 # theme = Kurokula
+# theme = Dracula+
+theme = iTerm2 Smoooooth
 

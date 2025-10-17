@@ -9,13 +9,6 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
-  -- disable smooth scrolling
-  {
-    "snacks.nvim",
-    opts = {
-      scroll = { enabled = false },
-    },
-  },
   -- {
   --   "coder/claudecode.nvim",
   --   dependencies = { "folke/snacks.nvim" },
@@ -98,71 +91,6 @@ return {
 		end,
 	},
 
-	-- change some telescope options and a keymap to browse plugin files
-	{
-		"nvim-telescope/telescope.nvim",
-		keys = {
-		-- add a keymap to browse plugin files
-		-- stylua: ignore
-		{
-			"<leader>fp",
-			function() require("telescope.builtin").find_files({ cwd = require("lazy.core.config").options.root }) end,
-			desc = "Find Plugin File",
-		},
-		},
-		-- change some options
-		opts = {
-			defaults = {
-        path_display = { "smart" },
-				layout_strategy = "horizontal",
-				layout_config = { prompt_position = "top" },
-				sorting_strategy = "ascending",
-				winblend = 0,
-			},
-		},
-	},
-
-	-- add pyright to lspconfig
-	-- {
-	-- 	"neovim/nvim-lspconfig",
-	-- 	---@class PluginLspOpts
-	-- 	opts = {
-	-- 		---@type lspconfig.options
-	-- 		servers = {
-	-- 			-- pyright will be automatically installed with mason and loaded with lspconfig
-	-- 			pyright = {},
-	-- 			ruff = {
-	-- 				cmd_env = { RUFF_TRACE = "messages" },
-	-- 				init_options = {
-	-- 					settings = {
-	-- 						logLevel = "error",
-	-- 					},
-	-- 				},
-	-- 				keys = {
-	-- 					{
-	-- 						"<leader>co",
-	-- 						LazyVim.lsp.action["source.organizeImports"],
-	-- 						desc = "Organize Imports",
-	-- 					},
-	-- 				},
-	-- 			},
-	-- 			ruff_lsp = {
-	-- 				keys = {
-	-- 					{
-	-- 						"<leader>co",
-	-- 						LazyVim.lsp.action["source.organizeImports"],
-	-- 						desc = "Organize Imports",
-	-- 					},
-	-- 				},
-	-- 			},
-	-- 		},
-	-- 		setup = {},
-	-- 	},
-	-- },
-
-	-- for typescript, LazyVim also includes extra specs to properly setup lspconfig,
-	-- treesitter, mason and typescript.nvim. So instead of the above, you can use:
-
 	-- since `vim.tbl_deep_extend`, can only merge tables and not lists, the code above
 	-- would overwrite `ensure_installed` with the new value.
 	-- If you'd rather extend the default config, use the code below instead:
@@ -190,28 +118,6 @@ return {
 		end,
 	},
 
-	-- use mini.starter instead of alpha
-	-- { import = "lazyvim.plugins.extras.ui.mini-starter" },
-
-	-- EasyMotion for quick navigation (like VSCode vim)
-	-- {
-	-- 	"easymotion/vim-easymotion",
-	-- 	keys = {
-	-- 		{ "<leader><leader>s", "<Plug>(easymotion-s)", desc = "Search" },
-	-- 		{ "<leader><leader>f", "<Plug>(easymotion-f)", desc = "Find forward" },
-	-- 		{ "<leader><leader>F", "<Plug>(easymotion-F)", desc = "Find backward" },
-	-- 		{ "<leader><leader>w", "<Plug>(easymotion-w)", desc = "Word forward" },
-	-- 		{ "<leader><leader>b", "<Plug>(easymotion-b)", desc = "Word backward" },
-	-- 		{ "<leader><leader>j", "<Plug>(easymotion-j)", desc = "Line down" },
-	-- 		{ "<leader><leader>k", "<Plug>(easymotion-k)", desc = "Line up" },
-	-- 	},
-	-- 	config = function()
-	-- 		-- Configure EasyMotion like VSCode vim
-	-- 		vim.g.EasyMotion_smartcase = 1
-	-- 		vim.g.EasyMotion_startofline = 0 -- keep cursor column when JK motion
-	-- 	end,
-	-- },
-
 	{
 		"folke/which-key.nvim",
 		opts = function(_, opts)
@@ -225,26 +131,7 @@ return {
 		end,
 	},
 
-	-- Show dotfiles in Telescope
-	{
-		"nvim-telescope/telescope.nvim",
-		opts = {
-			defaults = {
-				file_ignore_patterns = {
-					-- Remove patterns that hide dotfiles, keep only what you actually want to ignore
-					"%.git/",
-					"node_modules/",
-					"%.cache/",
-				},
-				hidden = true, -- Show hidden files
-			},
-			pickers = {
-				find_files = {
-					hidden = true, -- Show hidden files in find_files
-				},
-			},
-		},
-	},
+
 
 	-- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
 
@@ -278,11 +165,7 @@ return {
   --   },
   -- },
 
-  -- {
-  --     "numirias/semshi",
-  --     build = ":UpdateRemotePlugins",
-  -- },
-  
+
   {
     "neovim/nvim-lspconfig",
     opts = {
@@ -290,16 +173,5 @@ return {
       inlay_hints = { enabled = true },
     },
   },
-
-  -- {
-  --   "nvim-lualine/lualine.nvim",
-  --   opts = function(_, opts)
-  --     local filename = {
-  --       "filename",
-  --       path = 1, -- 1 shows the full path
-  --     }
-  --     opts.sections.lualine_c[1] = filename
-  --   end,
-  -- },
 
 }
