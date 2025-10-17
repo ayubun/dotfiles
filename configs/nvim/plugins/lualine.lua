@@ -1,37 +1,27 @@
+local icons = LazyVim.config.icons
+
 return {
-  "nvim-lualine/lualine.nvim",
-  event = "VeryLazy",
-  enabled = true,
-  opts = function(_, opts)
-  --   table.remove(opts.sections.lualine_c, 1)
-  --   table.remove(opts.sections.lualine_c, #opts.sections.lualine_c)
-  --   table.insert(opts.sections.lualine_c, {
-  --     "filename",
-  --     path = 3,
-  --   })
-  --   -- local filename = {
-  --   --   "filename",
-  --   --   path = 1,
-  --   -- }
-  --   -- opts.sections.lualine_c[1] = filename
-    opts.sections.lualine_c[4] = { LazyVim.lualine.pretty_path({
-      length = 12,
-    }) }
-  end,
-  -- opts = {
-  --   sections = {
-  --     lualine_a = { "mode" },
-  --     lualine_b = { "branch", "diff", "diagnostics" },
-  --     lualine_c = {
-  --       {
-  --         "filename",
-  --         path = 3, -- 1 for filename only, 2 for relative path, 3 for full path
-  --         file_status = true,
-  --         shorting_target = 60,
-  --         max_length = 100,
-  --       },
-  --     },
-  --     -- ... other sections ...
-  --   },
-  -- },
+	"nvim-lualine/lualine.nvim",
+	event = "VeryLazy",
+	enabled = true,
+	opts = {
+	  sections = {
+      -- this code is a copy of the lazyvim setup, with the simple change of overwriting pretty_path length from defaulting to 3 -> 12
+      -- https://github.com/LazyVim/LazyVim/blob/048056e9523268d6086d537e578e84e27175051d/lua/lazyvim/plugins/ui.lua#L97-L110
+	    lualine_c = {
+        LazyVim.lualine.root_dir(),
+        {
+          "diagnostics",
+          symbols = {
+            error = icons.diagnostics.Error,
+            warn = icons.diagnostics.Warn,
+            info = icons.diagnostics.Info,
+            hint = icons.diagnostics.Hint,
+          },
+        },
+        { "filetype", icon_only = true, separator = "", padding = { left = 1, right = 0 } },
+        { LazyVim.lualine.pretty_path({ length = 12 }) },
+	    },
+	  },
+	},
 }
