@@ -22,7 +22,16 @@ keybind = ctrl+l=unbind
 # theme = Lovelace
 # theme = Catppuccin Mocha
 # theme = GitHub Dark Colorblind
+# theme = GitHub Dark High Contrast
+# theme = GitHub Dark
 # theme = Hardcore
 # theme = Hybrid
-theme = Rose Pine
+# theme = Rose Pine
+# theme = Aura
+# theme = Kitty Default
+# theme = Moonfly
+# theme = Neutron
+theme = Ultra Dark
+# theme = Vague
+# theme = Kurokula
 
