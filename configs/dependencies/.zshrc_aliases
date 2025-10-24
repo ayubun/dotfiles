@@ -35,5 +35,7 @@ alias l="ll"
 alias lt="ls --tree"
 alias vim="nvim"
 # alias tldr="tldr -t ocean"
-alias love=". $HOME/dotfiles/configs/dependencies/tmux-love.sh"
+alias love=". $HOME/dotfiles/configs/dependencies/tmux-session.sh love"
+alias cute=". $HOME/dotfiles/configs/dependencies/tmux-session.sh cute"
+alias chuu=". $HOME/dotfiles/configs/dependencies/tmux-session.sh chuu"
 
