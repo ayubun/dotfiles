@@ -71,12 +71,13 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 plugins=(
+  # starship
   git
   rust
   yarn
   bun
   pip
-  uv
+  # uv
   tldr
 )
 
@@ -231,3 +232,6 @@ fi
 
 # Added by Windsurf
 export PATH="/Users/ayu/.codeium/windsurf/bin:$PATH"
+
+# eval "$(starship init zsh)"
+
