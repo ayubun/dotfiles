@@ -35,6 +35,6 @@ keybind = ctrl+l=unbind
 # theme = Vague
 # theme = Kurokula
 # theme = Dracula+
-# theme = iTerm2 Smoooooth
-theme = Gruvbox Dark Hard
+theme = iTerm2 Smoooooth
+# theme = Gruvbox Dark Hard
 
