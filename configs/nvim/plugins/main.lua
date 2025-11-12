@@ -112,7 +112,19 @@ return {
 			--      "ninja",
 			--      -- "vim",
 			-- })
-      opts.highlight = { enable = true }
+      opts.highlight = {
+        enable = true,
+        -- Disable highlighting for large files to prevent CPU spikes
+        disable = function(lang, buf)
+          local max_filesize = 100 * 1024 -- 100 KB
+          local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+          if ok and stats and stats.size > max_filesize then
+            return true
+          end
+        end,
+        -- Use a smaller chunk size for incremental parsing
+        additional_vim_regex_highlighting = false,
+      }
       opts.indent = { enable = true }
       opts.folds = { enable = true }
 		end,
