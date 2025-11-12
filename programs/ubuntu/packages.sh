@@ -32,6 +32,7 @@ packages=(
   # ^ this doesnt work pre-ubuntu 23.. see programs/ubuntu/lsd.sh
   'python3-pip'
   'pipx'
+  'ncdu'
 )
 apt_repositories=(
   'ppa:o2sh/onefetch'

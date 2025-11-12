@@ -41,6 +41,7 @@ packages=(
   'python'
   'pipx'
   'tlrc' # https://github.com/tldr-pages/tlrc
+  'ncdu'
 )
 
 # Set environment variables for non-interactive brew operations
