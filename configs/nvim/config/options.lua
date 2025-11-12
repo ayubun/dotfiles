@@ -15,5 +15,5 @@ vim.opt.number = true
 
 vim.opt.sms = false
 
-
+vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
