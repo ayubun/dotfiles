@@ -8,6 +8,10 @@ vim.g.lazyvim_python_ruff = "ruff"
 
 vim.g.lazyvim_picker = "snacks"
 
+-- Handle swap files automatically - prevents E325 ATTENTION errors
+vim.opt.swapfile = true  -- Keep swap files for crash recovery
+vim.opt.updatecount = 100  -- Update swap file after 100 keystrokes
+vim.opt.shortmess:append("A")  -- Don't give ATTENTION message when existing swap file found
 
 vim.g.autoformat = false
 vim.opt.relativenumber = false
