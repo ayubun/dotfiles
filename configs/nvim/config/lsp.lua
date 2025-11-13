@@ -1,5 +1,15 @@
 local lspconfig = require("lspconfig")
 
+-- Fix vtsls root_dir bug where vim.fs.root returns table instead of string
+lspconfig.vtsls.setup({
+  root_dir = function(fname)
+    local util = require("lspconfig.util")
+    return util.root_pattern("package.json", "tsconfig.json", "jsconfig.json", ".git")(fname)
+  end,
+})
+
+
+
 lspconfig.rust_analyzer.setup({
     settings = {
         ["rust-analyzer"] = {
