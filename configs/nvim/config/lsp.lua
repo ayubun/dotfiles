@@ -21,26 +21,26 @@ lspconfig.rust_analyzer.setup({
             checkOnSave = {
                 command = "clippy",
             },
-            -- check = {
-            --   overrideCommand = {
-            --     "cargo-subspace",
-            --     "clippy",
-            --     "$saved_file",
-            --   },
-            -- },
-            -- workspace = {
-            --   discoverConfig = {
-            --     command = {
-            --       "cargo-subspace",
-            --       "discover",
-            --       "{arg}",
-            --     },
-            --     progressLabel = "cargo-subspace",
-            --     filesToWatch = {
-            --       "Cargo.toml",
-            --     },
-            --   },
-            -- },
+            check = {
+              overrideCommand = {
+                "cargo-subspace",
+                "clippy",
+                "$saved_file",
+              },
+            },
+            workspace = {
+              discoverConfig = {
+                command = {
+                  "cargo-subspace",
+                  "discover",
+                  "{arg}",
+                },
+                progressLabel = "cargo-subspace",
+                filesToWatch = {
+                  "Cargo.toml",
+                },
+              },
+            },
         },
     },
 })
