@@ -11,38 +11,48 @@ lspconfig.vtsls.setup({
 
 
 lspconfig.rust_analyzer.setup({
-    settings = {
-        ["rust-analyzer"] = {
-            completion = {
-                autoimport = {
-                    enable = true,
-                },
-            },
-            checkOnSave = {
-                command = "clippy",
-            },
-            check = {
-              overrideCommand = {
-                "cargo-subspace",
-                "clippy",
-                "$saved_file",
-              },
-            },
-            workspace = {
-              discoverConfig = {
-                command = {
-                  "cargo-subspace",
-                  "discover",
-                  "{arg}",
-                },
-                progressLabel = "cargo-subspace",
-                filesToWatch = {
-                  "Cargo.toml",
-                },
-              },
-            },
+  settings = {
+    ["rust-analyzer"] = {
+      cargo = {
+        allFeatures = false,  -- Don't analyze all features
+        buildScripts = {
+          enable = false,  -- Disable build script analysis
         },
-    },
+      },
+      checkOnSave = {
+        command = "clippy",
+        extraArgs = { "--no-deps" },  -- Don't check dependencies
+      },
+      procMacro = {
+        enable = false,  -- Disable proc macro expansion
+      },
+      completion = {
+          autoimport = {
+              enable = true,
+          },
+      },
+      -- check = {
+      --   overrideCommand = {
+      --     "cargo-subspace",
+      --     "clippy",
+      --     "$saved_file",
+      --   },
+      -- },
+      -- workspace = {
+      --   discoverConfig = {
+      --     command = {
+      --       "cargo-subspace",
+      --       "discover",
+      --       "{arg}",
+      --     },
+      --     progressLabel = "cargo-subspace",
+      --     filesToWatch = {
+      --       "Cargo.toml",
+      --     },
+      --   },
+      -- },
+    }
+  },
 })
 
 lspconfig.basedpyright.setup({

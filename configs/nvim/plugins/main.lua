@@ -42,6 +42,16 @@ return {
   --     require("claude-code").setup()
   --   end
   -- },
+  -- https://github.com/linrongbin16/gitlinker.nvim
+  {
+    "linrongbin16/gitlinker.nvim",
+    cmd = "GitLink",
+    opts = {},
+    keys = {
+      { "<leader>gy", "<cmd>GitLink<cr>", mode = { "n", "v" }, desc = "Yank git link" },
+      { "<leader>gY", "<cmd>GitLink!<cr>", mode = { "n", "v" }, desc = "Open git link" },
+    },
+  },
   {
     "christoomey/vim-tmux-navigator",
     lazy = false,
