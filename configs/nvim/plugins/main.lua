@@ -133,10 +133,48 @@ return {
 				"shellcheck",
 				"shfmt",
 				"flake8",
-				-- "rust-analyzer",
 			},
 		},
 	},
+  {
+    "mason-org/mason-lspconfig.nvim",
+    opts = {
+      ensure_installed = { 
+        "lua_ls", 
+        "stylua",
+        "shellcheck",
+        "shfmt",
+        "flake8",
+      },
+      automatic_enable = {
+        exclude = {
+          "rust_analyzer",
+        }
+      },
+      -- handlers = {
+      --     -- ... handlers for other LSPs ...
+      --     rust_analyzer = function() end, -- This prevents mason-lspconfig from setting up rust_analyzer
+      -- },
+    },
+    dependencies = {
+        { "mason-org/mason.nvim", opts = {} },
+        "neovim/nvim-lspconfig",
+    },
+  },
+  {
+    "neovim/nvim-lspconfig",
+    opts = {
+      autoformat = false,
+      inlay_hints = { enabled = true },
+      -- Prevent LazyVim from auto-setting up rust_analyzer (we use rustaceanvim instead)
+      servers = {
+        rust_analyzer = {
+          -- Set to false to prevent automatic setup by LazyVim
+          enabled = false,
+        },
+      },
+    },
+  },
 
   -- manual saving is prolly better -lena
   -- {
@@ -153,15 +191,6 @@ return {
   --     debounce_delay = 1000, -- delay in milliseconds before saving after a change
   --   },
   -- },
-
-
-  {
-    "neovim/nvim-lspconfig",
-    opts = {
-      autoformat = false,
-      inlay_hints = { enabled = true },
-    },
-  },
 
   -- {
   --   "yetone/avante.nvim",
