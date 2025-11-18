@@ -22,7 +22,7 @@ vim.opt.sms = false
 vim.opt.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
 
 -- Optimize scrolling performance - prevents scroll event queueing
-vim.opt.lazyredraw = true  -- Don't redraw while executing macros/commands
+-- vim.opt.lazyredraw = true  -- Don't redraw while executing macros/commands
 vim.opt.ttyfast = true     -- Assume fast terminal connection
 vim.opt.updatetime = 250   -- Faster screen updates (default 4000ms)
 vim.opt.timeoutlen = 750   -- Faster key sequence timeout
