@@ -128,24 +128,24 @@ return {
 	{
 		"mason-org/mason.nvim",
 		opts = {
-			ensure_installed = {
-				"stylua",
-				"shellcheck",
-				"shfmt",
-				"flake8",
-			},
+			-- ensure_installed = {
+			-- 	"stylua",
+			-- 	"shellcheck",
+			-- 	"shfmt",
+			-- 	"flake8",
+			-- },
 		},
 	},
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = { 
-        "lua_ls", 
-        "stylua",
-        "shellcheck",
-        "shfmt",
-        "flake8",
-      },
+      -- ensure_installed = { 
+      --   "lua_ls", 
+      --   "stylua",
+      --   "shellcheck",
+      --   "shfmt",
+      --   "flake8",
+      -- },
       automatic_enable = {
         exclude = {
           "rust_analyzer",
