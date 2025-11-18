@@ -107,19 +107,19 @@ return {
 		end,
 	},
 
-	{
-		"folke/which-key.nvim",
-		opts = function(_, opts)
-			opts.spec = opts.spec or {}
-			table.insert(opts.spec, {
-				"<leader><leader>", 
-				group = "+EasyMotion",
-				icon = "🏃"
-			})
-			return opts
-		end,
-	},
-
+	-- {
+	-- 	"folke/which-key.nvim",
+	-- 	opts = function(_, opts)
+	-- 		opts.spec = opts.spec or {}
+	-- 		table.insert(opts.spec, {
+	-- 			"<leader><leader>", 
+	-- 			group = "+EasyMotion",
+	-- 			icon = "🏃"
+	-- 		})
+	-- 		return opts
+	-- 	end,
+	-- },
+	--
 
 
 	-- add jsonls and schemastore packages, and setup treesitter for json, json5 and jsonc
@@ -149,12 +149,12 @@ return {
       automatic_enable = {
         exclude = {
           "rust_analyzer",
+          "rust-analyzer",
         }
       },
-      -- handlers = {
-      --     -- ... handlers for other LSPs ...
-      --     rust_analyzer = function() end, -- This prevents mason-lspconfig from setting up rust_analyzer
-      -- },
+      handlers = {
+          rust_analyzer = function() end, -- This prevents mason-lspconfig from setting up rust_analyzer
+      },
     },
     dependencies = {
         { "mason-org/mason.nvim", opts = {} },
