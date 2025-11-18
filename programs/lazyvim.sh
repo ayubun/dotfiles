@@ -27,9 +27,13 @@ rm -rf ~/.config/nvim/.git
 
 # Clean pre-installed configs & symlink dotfiles
 rm -rf ~/.config/nvim/lua
+rm -rf ~/.config/nvim/after/ftplugin
+rm -rf ~/.config/nvim/ftplugin
 mkdir -p ~/.config/nvim/lua
+mkdir -p ~/.config/nvim/after/ftplugin
 ln -s ~/dotfiles/configs/nvim/config ~/.config/nvim/lua/config
 ln -s ~/dotfiles/configs/nvim/plugins ~/.config/nvim/lua/plugins
+ln -s ~/dotfiles/configs/nvim/after/ftplugin ~/.config/nvim/after/ftplugin
 
 # Fix ownership so the original user can write to nvim config files
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
