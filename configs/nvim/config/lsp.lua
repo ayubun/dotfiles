@@ -18,18 +18,39 @@ lspconfig.rust_analyzer.setup({
         buildScripts = {
           enable = false,  -- Disable build script analysis
         },
+        loadOutDirsFromCheck = false,  -- Don't load OUT_DIR values from cargo check
       },
       checkOnSave = {
+        enable = true,
         command = "clippy",
         extraArgs = { "--no-deps" },  -- Don't check dependencies
       },
       procMacro = {
         enable = false,  -- Disable proc macro expansion
       },
+      diagnostics = {
+        enable = true,
+        disabled = {},
+        experimental = {
+          enable = false,  -- Disable experimental diagnostics
+        },
+        refreshSupport = false,  -- Don't auto-refresh diagnostics
+      },
+      lens = {
+        enable = false,  -- Disable code lens (saves CPU)
+      },
+      hover = {
+        actions = {
+          enable = false,
+        },
+      },
       completion = {
           autoimport = {
               enable = true,
           },
+      },
+      inlayHints = {
+        enable = true,
       },
       -- check = {
       --   overrideCommand = {
@@ -51,7 +72,7 @@ lspconfig.rust_analyzer.setup({
       --     },
       --   },
       -- },
-    }
+    },
   },
 })
 
