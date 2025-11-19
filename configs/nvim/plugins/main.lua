@@ -80,27 +80,27 @@ return {
           default_settings = {
             ["rust-analyzer"] = {
               checkOnSave = true,
-              check = {
-                invocationStrategy = "once",
-                overrideCommand = {
-                  "cargo-subspace",
-                  "clippy",
-                  "$saved_file",
-                },
-              },
-              workspace = {
-                discoverConfig = {
-                  command = {
-                    "cargo-subspace",
-                    "discover",
-                    "{arg}",
-                  },
-                  progressLabel = "cargo-subspace",
-                  filesToWatch = {
-                    "Cargo.toml",
-                  },
-                },
-              },
+              -- check = {
+              --   invocationStrategy = "once",
+              --   overrideCommand = {
+              --     "cargo-subspace",
+              --     "clippy",
+              --     "$saved_file",
+              --   },
+              -- },
+              -- workspace = {
+              --   discoverConfig = {
+              --     command = {
+              --       "cargo-subspace",
+              --       "discover",
+              --       "{arg}",
+              --     },
+              --     progressLabel = "cargo-subspace",
+              --     filesToWatch = {
+              --       "Cargo.toml",
+              --     },
+              --   },
+              -- },
               numThreads = 16,
             },
           },
