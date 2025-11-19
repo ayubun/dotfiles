@@ -41,6 +41,47 @@ lspconfig.vtsls.setup({
 --   },
 -- })
 
+vim.g.rustaceanvim = {
+  -- Plugin configuration
+  tools = {
+  },
+  -- LSP configuration
+  server = {
+    on_attach = function(client, bufnr)
+      -- you can also put keymaps in here
+    end,
+    default_settings = {
+      -- rust-analyzer language server configuration
+      ['rust-analyzer'] = {
+--       check = {
+--         invocationStrategy = "once",
+--         overrideCommand = {
+--           "cargo-subspace",
+--           "clippy",
+--           "$saved_file",
+--         },
+--       },
+--       workspace = {
+--         discoverConfig = {
+--           command = {
+--             "cargo-subspace",
+--             "discover",
+--             "{arg}",
+--           },
+--           progressLabel = "cargo-subspace",
+--           filesToWatch = {
+--             "Cargo.toml",
+--           },
+--         },
+--       },
+      },
+    },
+  },
+  -- DAP configuration
+  dap = {
+  },
+}
+
 lspconfig.basedpyright.setup({
   root_dir = function(fname)
     -- Look for uv.lock or .git in parent directories to find the workspace root

@@ -9,6 +9,26 @@
 -- * disable/enabled LazyVim plugins
 -- * override the configuration of LazyVim plugins
 return {
+  {
+    'mrcjkb/rustaceanvim',
+    version = '^6',
+    ft = { "rust" },
+    init = function()
+      -- Auto-install rust-analyzer component if missing
+      vim.defer_fn(function()
+        local handle = io.popen("rustup component list --installed 2>&1 | grep -q rust-analyzer")
+        local result = handle:read("*a")
+        handle:close()
+
+        -- If rust-analyzer not installed, install it
+        if result == "" then
+          -- vim.notify("Installing rust-analyzer via rustup...", vim.log.levels.INFO)
+          vim.fn.system("rustup component add rust-analyzer")
+          -- vim.notify("rust-analyzer installed!", vim.log.levels.INFO)
+        end
+      end, 100)
+    end,
+  },
   -- https://github.com/linrongbin16/gitlinker.nvim
   {
     "linrongbin16/gitlinker.nvim",
@@ -139,21 +159,14 @@ return {
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      -- ensure_installed = { 
-      --   "lua_ls", 
-      --   "stylua",
-      --   "shellcheck",
-      --   "shfmt",
-      --   "flake8",
-      -- },
-      automatic_enable = {
-        exclude = {
-          "rust_analyzer",
-          "rust-analyzer",
-        }
-      },
+      -- Explicitly disable rust_analyzer setup - rustaceanvim handles it
       handlers = {
-          rust_analyzer = function() end, -- This prevents mason-lspconfig from setting up rust_analyzer
+        -- MUST provide default handler when using handlers table
+        function(server_name)
+          require("lspconfig")[server_name].setup({})
+        end,
+        -- Override rust_analyzer to do nothing
+        rust_analyzer = function() end,
       },
     },
     dependencies = {
