@@ -20,13 +20,70 @@ return {
         local result = handle:read("*a")
         handle:close()
 
-        -- If rust-analyzer not installed, install it
         if result == "" then
-          -- vim.notify("Installing rust-analyzer via rustup...", vim.log.levels.INFO)
           vim.fn.system("rustup component add rust-analyzer")
-          -- vim.notify("rust-analyzer installed!", vim.log.levels.INFO)
         end
       end, 100)
+
+      -- Configure rustaceanvim BEFORE it loads
+      vim.g.rustaceanvim = {
+        server = {
+          default_settings = {
+            ['rust-analyzer'] = {
+              checkOnSave = {
+                command = "clippy",
+                extraArgs = { "--no-deps" },  -- Don't check dependencies
+              },
+              check = {
+                command = "check",
+                extraArgs = { "--profile", "rust-analyzer" },
+                workspace = false,
+              },
+              cachePriming = {
+                enable = false,
+              },
+              procMacro = {
+                enable = true,
+                ignored = {
+                  ["async-trait"] = { "async_trait" },
+                  ["napi-derive"] = { "napi" },
+                  ["async-recursion"] = { "async_recursion" },
+                },
+              },
+              -- linkedProjects = { '/home/discord/dev/Cargo.toml' },
+              workspace = {
+                symbol = {
+                  search = {
+                    kind = "only_types",
+                    scope = "workspace",
+                  },
+                },
+              },
+              -- check = {
+              --   invocationStrategy = "once",
+              --   overrideCommand = {
+              --     "cargo-subspace",
+              --     "clippy",
+              --     "$saved_file",
+              --   },
+              -- },
+              -- workspace = {
+              --   discoverConfig = {
+              --     command = {
+              --       "cargo-subspace",
+              --       "discover",
+              --       "{arg}",
+              --     },
+              --     progressLabel = "cargo-subspace",
+              --     filesToWatch = {
+              --       "Cargo.toml",
+              --     },
+              --   },
+              -- },
+            },
+          },
+        },
+      }
     end,
   },
   -- https://github.com/linrongbin16/gitlinker.nvim

@@ -41,50 +41,50 @@ lspconfig.vtsls.setup({
 --   },
 -- })
 
-vim.g.rustaceanvim = {
-  -- Plugin configuration
-  tools = {
-  },
-  -- LSP configuration
-  server = {
-    on_attach = function(client, bufnr)
-      -- you can also put keymaps in here
-    end,
-    default_settings = {
-      -- rust-analyzer language server configuration
-      ['rust-analyzer'] = {
-        -- check = {
-        --   command = "check",
-        --   extraArgs = { "--profile", "rust-analyzer" },
-        --   workspace = false,
-        -- },
-        -- cachePriming = {
-        --   enable = false,
-        -- },
-        -- procMacro = {
-        --   enable = true,
-        --   ignored = {
-        --     ["async-trait"] = { "async_trait" },
-        --     ["napi-derive"] = { "napi" },
-        --     ["async-recursion"] = { "async_recursion" },
-        --   },
-        -- },
-        -- -- linkedProjects = { '/home/discord/dev/Cargo.toml' },
-        -- workspace = {
-        --   symbol = {
-        --     search = {
-        --       kind = "only_types",
-        --       scope = "workspace",
-        --     },
-        --   },
-        -- },
-      },
-    },
-  },
-  -- DAP configuration
-  dap = {
-  },
-}
+-- vim.g.rustaceanvim = {
+--   -- Plugin configuration
+--   tools = {
+--   },
+--   -- LSP configuration
+--   server = {
+--     on_attach = function(client, bufnr)
+--       -- you can also put keymaps in here
+--     end,
+--     default_settings = {
+--       -- rust-analyzer language server configuration
+--       ['rust-analyzer'] = {
+--         check = {
+--           command = "check",
+--           extraArgs = { "--profile", "rust-analyzer" },
+--           workspace = false,
+--         },
+--         cachePriming = {
+--           enable = false,
+--         },
+--         procMacro = {
+--           enable = true,
+--           ignored = {
+--             ["async-trait"] = { "async_trait" },
+--             ["napi-derive"] = { "napi" },
+--             ["async-recursion"] = { "async_recursion" },
+--           },
+--         },
+--         -- linkedProjects = { '/home/discord/dev/Cargo.toml' },
+--         workspace = {
+--           symbol = {
+--             search = {
+--               kind = "only_types",
+--               scope = "workspace",
+--             },
+--           },
+--         },
+--       },
+--     },
+--   },
+--   -- DAP configuration
+--   dap = {
+--   },
+-- }
 
 lspconfig.basedpyright.setup({
   root_dir = function(fname)
