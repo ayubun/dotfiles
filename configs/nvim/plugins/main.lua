@@ -28,39 +28,41 @@ return {
       -- Configure rustaceanvim BEFORE it loads
       vim.g.rustaceanvim = {
         server = {
-          -- Custom root_dir to find workspace root in deeply nested projects
-          root_dir = function(fname)
-            local util = require('lspconfig.util')
-            -- For nested workspaces, Cargo.lock at root is source of truth
-            return util.root_pattern('Cargo.lock')(fname)
-              or util.root_pattern('Cargo.toml')(fname)
-              or util.root_pattern('rust-project.json')(fname)
-              or util.find_git_ancestor(fname)
-          end,
           default_settings = {
             ['rust-analyzer'] = {
-              -- CRITICAL: Index the entire workspace properly
               cargo = {
-                allFeatures = true,  -- Enable all features for full indexing
+                allFeatures = true,
                 loadOutDirsFromCheck = true,
+                runBuildScripts = true,  -- Actually run build scripts
                 buildScripts = {
                   enable = true,
                 },
               },
-              files = {
-                excludeDirs = { ".git", "target", "node_modules" },
+              -- Enable cache priming for initial indexing of ALL dependencies
+              cachePriming = {
+                enable = true,
+                numThreads = 0,
               },
               checkOnSave = {
+                enable = true,
                 command = "clippy",
-                -- extraArgs = { "--no-deps" },  -- Don't check dependencies
               },
               check = {
                 command = "check",
-                extraArgs = { "--profile", "rust-analyzer" },
-                -- workspace = false,
+                allTargets = true,
               },
-              cachePriming = {
-                enable = false,
+              -- CRITICAL: Explicitly enable dependency indexing
+              imports = {
+                granularity = {
+                  group = "module",
+                },
+                prefix = "self",
+              },
+              diagnostics = {
+                enable = true,
+                experimental = {
+                  enable = true,
+                },
               },
               procMacro = {
                 enable = true,
