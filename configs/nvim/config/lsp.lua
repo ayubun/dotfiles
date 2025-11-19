@@ -53,27 +53,31 @@ vim.g.rustaceanvim = {
     default_settings = {
       -- rust-analyzer language server configuration
       ['rust-analyzer'] = {
---       check = {
---         invocationStrategy = "once",
---         overrideCommand = {
---           "cargo-subspace",
---           "clippy",
---           "$saved_file",
---         },
---       },
---       workspace = {
---         discoverConfig = {
---           command = {
---             "cargo-subspace",
---             "discover",
---             "{arg}",
---           },
---           progressLabel = "cargo-subspace",
---           filesToWatch = {
---             "Cargo.toml",
---           },
---         },
---       },
+        check = {
+          command = "check",
+          extraArgs = { "--profile", "rust-analyzer" },
+          workspace = false,
+        },
+        cachePriming = {
+          enable = false,
+        },
+        procMacro = {
+          enable = true,
+          ignored = {
+            ["async-trait"] = { "async_trait" },
+            ["napi-derive"] = { "napi" },
+            ["async-recursion"] = { "async_recursion" },
+          },
+        },
+        -- linkedProjects = { '/home/discord/dev/Cargo.toml' },
+        workspace = {
+          symbol = {
+            search = {
+              kind = "only_types",
+              scope = "workspace",
+            },
+          },
+        },
       },
     },
   },

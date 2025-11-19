@@ -148,12 +148,17 @@ return {
 	{
 		"mason-org/mason.nvim",
 		opts = {
-			-- ensure_installed = {
-			-- 	"stylua",
-			-- 	"shellcheck",
-			-- 	"shfmt",
-			-- 	"flake8",
-			-- },
+      -- ensure_installed = {
+      --   -- "rust-analyzer", -- rust
+      --   "lua-language-server", -- lua
+      --   "terraform-ls", -- terraform
+      --   "taplo", -- toml
+      --   "json-lsp", -- json
+      --   "ruff",
+      --   "pyright",
+      --   "mypy",
+      --   "vtsls",
+      -- },
 		},
 	},
   {

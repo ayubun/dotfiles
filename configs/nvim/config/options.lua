@@ -37,3 +37,25 @@ vim.opt.synmaxcol = 200    -- Don't highlight long lines (prevents freeze on min
 vim.opt.redrawtime = 1500  -- Max time for syntax highlighting per command
 -- vim.opt.regexpengine = 1   -- Use old regex engine (faster for some patterns)
 
+--my hero: https://github.com/ethowitz/neovim/blob/main/init.lua
+-- Searching
+vim.opt.ignorecase = true -- Ignore case in searches
+vim.opt.smartcase = true  -- Override ignorecase if search pattern contains a capital letter
+
+-- Toggle between absolute and hybrid line numbers
+vim.cmd([[
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave,WinEnter * if &nu && mode() != "i" | set rnu   | endif
+  autocmd BufLeave,FocusLost,InsertEnter,WinLeave   * if &nu                  | set nornu | endif
+augroup END
+]])
+
+-- Reload open files when they change on disk
+vim.opt.autoread = true
+vim.cmd([[autocmd FocusGained,BufEnter,CursorHold,CursorHoldI * if mode() != 'c' | checktime | endif ]])
+vim.cmd([[autocmd FileChangedShellPost *
+        \ echohl WarningMsg | echo "File changed on disk. Buffer reloaded." | echohl None ]])
+
+vim.keymap.set("t", "<Esc><Esc>", "<C-\\><C-n>", { desc = "Exit terminal mode" })
+
