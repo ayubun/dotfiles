@@ -1,110 +1,111 @@
--- since this is just an example spec, don't actually load anything here and return an empty spec
--- stylua: ignore
--- if true then return {} end
+local function setup_keybindings(bufnr)
+  require("utils").keys({
+    {
+      "<leader>rd",
+      function()
+        vim.cmd.RustLsp("openDocs")
+      end,
+      desc = "Open docs",
+    },
 
--- every spec file under the "plugins" directory will be loaded automatically by lazy.nvim
---
--- In your plugin files, you can:
--- * add extra plugins
--- * disable/enabled LazyVim plugins
--- * override the configuration of LazyVim plugins
+    {
+      "<leader>re",
+      function()
+        vim.cmd.RustLsp("expandMacro")
+      end,
+      desc = "Expand macro",
+    },
+    {
+      "<leader>rr",
+      function()
+        vim.cmd.RustLsp("relatedDiagnostics")
+      end,
+      desc = "Related diagnostics",
+    },
+    {
+      "<leader>rp",
+      function()
+        vim.cmd.RustLsp("rebuildProcMacros")
+      end,
+      desc = "Rebuild proc macros",
+    },
+    {
+      "<leader>rx",
+      function()
+        vim.cmd.RustLsp({ "explainError", "current" })
+      end,
+      desc = "Explain error",
+    },
+    {
+      "<space>e",
+      function()
+        vim.cmd.RustLsp({ "renderDiagnostic", "current" })
+      end,
+      desc = "Open LSP diagnostic float",
+    },
+    {
+      "K",
+      function()
+        vim.cmd.RustLsp({ "hover", "actions" })
+      end,
+      desc = "Show information about symbol at cursor",
+    },
+  }, { silent = true, buffer = bufnr })
+end
+
 return {
   {
     'mrcjkb/rustaceanvim',
     version = '^6',
     ft = { "rust" },
-    init = function()
-      -- Auto-install rust-analyzer component if missing
-      vim.defer_fn(function()
-        local handle = io.popen("rustup component list --installed 2>&1 | grep -q rust-analyzer")
-        local result = handle:read("*a")
-        handle:close()
-
-        if result == "" then
-          vim.fn.system("rustup component add rust-analyzer")
-        end
-      end, 100)
-
-      -- Configure rustaceanvim BEFORE it loads
+    -- init = function()
+    --   -- Auto-install rust-analyzer component if missing
+    --   vim.defer_fn(function()
+    --     local handle = io.popen("rustup component list --installed 2>&1 | grep -q rust-analyzer")
+    --     local result = handle:read("*a")
+    --     handle:close()
+    --
+    --     if result == "" then
+    --       vim.fn.system("rustup component add rust-analyzer")
+    --     end
+    --   end, 100)
+    -- end,
+    config = function()
       vim.g.rustaceanvim = {
+        tools = {},
         server = {
+          on_attach = function(client, bufnr)
+            setup_keybindings()
+          end,
           default_settings = {
-            ['rust-analyzer'] = {
-              cargo = {
-                allFeatures = true,
-                loadOutDirsFromCheck = true,
-                runBuildScripts = true,  -- Actually run build scripts
-                buildScripts = {
-                  enable = true,
-                },
-              },
-              -- Enable cache priming for initial indexing of ALL dependencies
-              cachePriming = {
-                enable = true,
-                numThreads = 0,
-              },
-              checkOnSave = {
-                enable = true,
-                command = "clippy",
-              },
+            ["rust-analyzer"] = {
+              checkOnSave = true,
               check = {
-                command = "check",
-                allTargets = true,
-              },
-              -- CRITICAL: Explicitly enable dependency indexing
-              imports = {
-                granularity = {
-                  group = "module",
-                },
-                prefix = "self",
-              },
-              diagnostics = {
-                enable = true,
-                experimental = {
-                  enable = true,
+                invocationStrategy = "once",
+                overrideCommand = {
+                  "cargo-subspace",
+                  "clippy",
+                  "$saved_file",
                 },
               },
-              procMacro = {
-                enable = true,
-                ignored = {
-                  ["async-trait"] = { "async_trait" },
-                  ["napi-derive"] = { "napi" },
-                  ["async-recursion"] = { "async_recursion" },
-                },
-              },
-              -- linkedProjects = { '/home/discord/dev/Cargo.toml' },
               workspace = {
-                symbol = {
-                  search = {
-                    kind = "only_types",
-                    scope = "workspace",
+                discoverConfig = {
+                  command = {
+                    "cargo-subspace",
+                    "discover",
+                    "{arg}",
+                  },
+                  progressLabel = "cargo-subspace",
+                  filesToWatch = {
+                    "Cargo.toml",
                   },
                 },
               },
-              -- check = {
-              --   invocationStrategy = "once",
-              --   overrideCommand = {
-              --     "cargo-subspace",
-              --     "clippy",
-              --     "$saved_file",
-              --   },
-              -- },
-              -- workspace = {
-              --   discoverConfig = {
-              --     command = {
-              --       "cargo-subspace",
-              --       "discover",
-              --       "{arg}",
-              --     },
-              --     progressLabel = "cargo-subspace",
-              --     filesToWatch = {
-              --       "Cargo.toml",
-              --     },
-              --   },
-              -- },
+              numThreads = 16,
             },
           },
         },
+        dap = {},
       }
     end,
   },
