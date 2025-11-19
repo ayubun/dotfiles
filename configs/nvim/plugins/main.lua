@@ -28,8 +28,28 @@ return {
       -- Configure rustaceanvim BEFORE it loads
       vim.g.rustaceanvim = {
         server = {
+          -- Custom root_dir to find workspace root in deeply nested projects
+          root_dir = function(fname)
+            local util = require('lspconfig.util')
+            -- For nested workspaces, Cargo.lock at root is source of truth
+            return util.root_pattern('Cargo.lock')(fname)
+              or util.root_pattern('Cargo.toml')(fname)
+              or util.root_pattern('rust-project.json')(fname)
+              or util.find_git_ancestor(fname)
+          end,
           default_settings = {
             ['rust-analyzer'] = {
+              -- CRITICAL: Index the entire workspace properly
+              cargo = {
+                allFeatures = true,  -- Enable all features for full indexing
+                loadOutDirsFromCheck = true,
+                buildScripts = {
+                  enable = true,
+                },
+              },
+              files = {
+                excludeDirs = { ".git", "target", "node_modules" },
+              },
               checkOnSave = {
                 command = "clippy",
                 -- extraArgs = { "--no-deps" },  -- Don't check dependencies
