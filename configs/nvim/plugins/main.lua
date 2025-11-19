@@ -1,39 +1,7 @@
-local function setup_keybindings(bufnr)
-  local opts = { silent = true, buffer = bufnr }
-
-  vim.keymap.set("n", "<leader>rd", function()
-    vim.cmd.RustLsp("openDocs")
-  end, vim.tbl_extend("force", opts, { desc = "Open docs" }))
-
-  vim.keymap.set("n", "<leader>re", function()
-    vim.cmd.RustLsp("expandMacro")
-  end, vim.tbl_extend("force", opts, { desc = "Expand macro" }))
-
-  vim.keymap.set("n", "<leader>rr", function()
-    vim.cmd.RustLsp("relatedDiagnostics")
-  end, vim.tbl_extend("force", opts, { desc = "Related diagnostics" }))
-
-  vim.keymap.set("n", "<leader>rp", function()
-    vim.cmd.RustLsp("rebuildProcMacros")
-  end, vim.tbl_extend("force", opts, { desc = "Rebuild proc macros" }))
-
-  vim.keymap.set("n", "<leader>rx", function()
-    vim.cmd.RustLsp({ "explainError", "current" })
-  end, vim.tbl_extend("force", opts, { desc = "Explain error" }))
-
-  vim.keymap.set("n", "<space>e", function()
-    vim.cmd.RustLsp({ "renderDiagnostic", "current" })
-  end, vim.tbl_extend("force", opts, { desc = "Open LSP diagnostic float" }))
-
-  vim.keymap.set("n", "K", function()
-    vim.cmd.RustLsp({ "hover", "actions" })
-  end, vim.tbl_extend("force", opts, { desc = "Show information about symbol at cursor" }))
-end
-
 return {
   {
     'mrcjkb/rustaceanvim',
-    version = '^6',
+    version = '^5',
     ft = { "rust" },
     -- init = function()
     --   -- Auto-install rust-analyzer component if missing
@@ -57,6 +25,10 @@ return {
           default_settings = {
             ["rust-analyzer"] = {
               checkOnSave = true,
+              check = {
+                command = "clippy",
+                extraArgs = {},
+              },
               -- check = {
               --   invocationStrategy = "once",
               --   overrideCommand = {
