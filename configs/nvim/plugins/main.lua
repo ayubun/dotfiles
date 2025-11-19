@@ -3,7 +3,6 @@ return {
     'mrcjkb/rustaceanvim',
     version = '^5',
     ft = { "rust" },
-    lazy = true,
     -- init = function()
     --   -- Auto-install rust-analyzer component if missing
     --   vim.defer_fn(function()
@@ -26,10 +25,6 @@ return {
           default_settings = {
             ["rust-analyzer"] = {
               checkOnSave = true,
-              check = {
-                command = "clippy",
-                extraArgs = {},
-              },
               -- check = {
               --   invocationStrategy = "once",
               --   overrideCommand = {
@@ -214,7 +209,7 @@ return {
     opts = {
       autoformat = false,
       inlay_hints = { enabled = true },
-      -- Prevent LazyVim from auto-setting up rust_analyzer (we use rustaceanvim instead)
+      -- -- Prevent LazyVim from auto-setting up rust_analyzer (we use rustaceanvim instead)
       -- servers = {
       --   rust_analyzer = {
       --     -- Set to false to prevent automatic setup by LazyVim
