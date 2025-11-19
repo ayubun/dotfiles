@@ -32,12 +32,12 @@ return {
             ['rust-analyzer'] = {
               checkOnSave = {
                 command = "clippy",
-                extraArgs = { "--no-deps" },  -- Don't check dependencies
+                -- extraArgs = { "--no-deps" },  -- Don't check dependencies
               },
               check = {
                 command = "check",
                 extraArgs = { "--profile", "rust-analyzer" },
-                workspace = false,
+                -- workspace = false,
               },
               cachePriming = {
                 enable = false,
