@@ -33,19 +33,19 @@ return {
                   "$saved_file",
                 },
               },
-              -- workspace = {
-              --   discoverConfig = {
-              --     command = {
-              --       "cargo-subspace",
-              --       "discover",
-              --       "{arg}",
-              --     },
-              --     progressLabel = "cargo-subspace",
-              --     filesToWatch = {
-              --       "Cargo.toml",
-              --     },
-              --   },
-              -- },
+              workspace = {
+                discoverConfig = {
+                  command = {
+                    "cargo-subspace",
+                    "discover",
+                    "{arg}",
+                  },
+                  progressLabel = "cargo-subspace",
+                  filesToWatch = {
+                    "Cargo.toml",
+                  },
+                },
+              },
               numThreads = 16,
             },
           },
