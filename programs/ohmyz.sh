@@ -5,6 +5,11 @@ sudo apt-get install zsh -y &>/dev/null
 # Make it default
 sudo chsh -s $(which zsh) &>/dev/null
 
+# if the original user isn't current user, lets update the shell for them too
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    sudo chsh -s $(which zsh) $ORIGINAL_USER &>/dev/null
+fi
+
 # # If we already have zsh just continue
 # if ! command -v zsh &>/dev/null; then
 #     if sudo -n true 2>/dev/null; then           # password-less sudo available

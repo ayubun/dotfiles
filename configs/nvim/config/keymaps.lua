@@ -33,3 +33,5 @@ end, { desc = "Copy full file path" })
 --     ["<C-k>"] = { "<cmd> TmuxNavigateUp<CR>", "window up" },
 --   }
 -- }
+
+
