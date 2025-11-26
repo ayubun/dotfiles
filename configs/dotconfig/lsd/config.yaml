@@ -28,7 +28,7 @@ color:
   # When "classic" is set, this is set to "no-color".
   # Possible values: default, custom
   # When "custom" is set, lsd will look in the config directory for `colors.yaml`.
-  theme: custom
+  theme: default
 
 # == Date ==
 # This specifies the date format for the date column. The freeform format
@@ -89,7 +89,7 @@ recursion:
 # == Size ==
 # Specifies the format of the size column.
 # Possible values: default, short, bytes
-size: short
+size: default
 
 # == Permission ==
 # Specify the format of the permission column
