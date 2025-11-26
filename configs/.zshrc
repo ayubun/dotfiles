@@ -121,6 +121,10 @@ export TERM=xterm-256color
 export VISUAL=vim
 export EDITOR=vim
 
+# Custom LS_COLORS using Dracula theme colors for consistent appearance across Mac/Linux
+# Dracula palette: cyan=159, blue=183, magenta=212, green=120, orange=215, red=210
+export LS_COLORS="di=1;38;5;141:ln=38;5;159:so=38;5;212:pi=38;5;215:ex=1;38;5;120:bd=38;5;183;48;5;237:cd=38;5;183;48;5;237:su=38;5;231;48;5;210:sg=38;5;231;48;5;159:tw=38;5;231;48;5;120:ow=38;5;231;48;5;215:*.tar=38;5;210:*.tgz=38;5;210:*.zip=38;5;210:*.gz=38;5;210:*.bz2=38;5;210:*.7z=38;5;210:*.rar=38;5;210:*.jpg=38;5;212:*.jpeg=38;5;212:*.png=38;5;212:*.gif=38;5;212:*.bmp=38;5;212:*.svg=38;5;212:*.mp4=38;5;141:*.mkv=38;5;141:*.avi=38;5;141:*.mov=38;5;141:*.mp3=38;5;141:*.flac=38;5;141:*.wav=38;5;141"
+
 # modify zsh to not bind to ctrl + h,j,k,l (i want them for vim/tmux)
 bindkey -r "^H" &>/dev/null
 bindkey -r "^J" &>/dev/null
@@ -129,7 +133,8 @@ bindkey -r "^L" &>/dev/null
 
 # Exit virtualenv if present (this is just because I cant find where its activating.......)
 deactivate &>/dev/null
-DOTFILES_FOLDER=$HOME/dotfiles
+export DOTFILES_FOLDER=$HOME/dotfiles
+export XDG_CONFIG_HOME=$HOME/.config
 
 # Load any dependencies in the dependencies directory
 # NOTE(ayubun): erm, this breaks because i repurposed the depedencies folder to include scripts that shouldn't be run without commands,

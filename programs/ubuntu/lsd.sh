@@ -11,7 +11,7 @@ fi
 cd "$TMP_DIR"
 
 # https://github.com/lsd-rs/lsd/releases
-VERSION=1.1.5
+VERSION=1.2.0
 curl -L "https://github.com/lsd-rs/lsd/releases/download/v${VERSION}/lsd-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz
 sudo mv -f "lsd-v${VERSION}-x86_64-unknown-linux-gnu/lsd" /usr/bin/
 

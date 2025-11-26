@@ -1,0 +1,70 @@
+# user: 230
+# group: 187
+# permission:
+#   read: 34      # dark green (was: dark_green)
+#   write: 178    # dark yellow/orange (was: dark_yellow)
+#   exec: 160     # dark red (was: dark_red)
+#   exec-sticky: 5
+#   no-access: 245
+#   octal: 6
+#   acl: 30       # dark cyan (was: dark_cyan)
+#   context: 37   # light cyan (was: cyan)
+# date:
+#   hour-old: 40
+#   day-old: 42
+#   older: 36
+# size:
+#   none: 245
+#   small: 229
+#   medium: 216
+#   large: 172
+# inode:
+#   valid: 13
+#   invalid: 245
+# links:
+#   valid: 13
+#   invalid: 245
+# tree-edge: 245
+# git-status:
+#   default: 245
+#   unmodified: 245
+#   ignored: 245
+#   new-in-index: 34      # dark green (was: dark_green)
+#   new-in-workdir: 34    # dark green (was: dark_green)
+#   typechange: 178       # dark yellow/orange (was: dark_yellow)
+#   deleted: 160          # dark red (was: dark_red)
+#   renamed: 34           # dark green (was: dark_green)
+#   modified: 178         # dark yellow/orange (was: dark_yellow)
+#   conflicted: 160       # dark red (was: dark_red)
+
+# https://github.com/dracula/lsd/blob/main/colors.yaml
+#  Dracula
+#  ┬  ┌─┐┌┬┐
+#  │  └─┐ ││
+#  ┴─┘└─┘─┴┘
+# urrick hunt
+
+user: 159                           # cyan
+group: 231                          # foreground
+permission:
+  read: 183                         # blue
+  write: 212                        # magenta
+  exec: 159                         # cyan
+  exec-sticky: 159                  # cyan
+  no-access: 210                    # red
+date:
+  hour-old: 146                     # comment 20% lighter
+  day-old: 103                      # comment
+  older: 60                         # current line
+size:
+  none: 60                          # current line
+  small: 120                        # green
+  medium: 215                       # orange
+  large: 210                        # red
+inode:
+  valid: 231                        # foreground
+  invalid: 210                      # red
+links:
+  valid: 159                        # cyan
+  invalid: 210                      # red
+tree-edge: 183                      # blue
