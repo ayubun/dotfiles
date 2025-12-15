@@ -29,6 +29,9 @@
   # Zsh >= 5.1 is required.
   autoload -Uz is-at-least && is-at-least 5.1 || return
 
+  # my own things i guess
+  typeset -g POWERLEVEL9K_INSTANT_PROMPT_COMMAND_LINES=0
+
   # The list of segments shown on the left. Fill it with the most important segments.
   typeset -g POWERLEVEL9K_LEFT_PROMPT_ELEMENTS=(
     # os_icon               # os identifier

@@ -109,6 +109,9 @@ source $ZSH/oh-my-zsh.sh
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
 
+
+# Put prompt at the bottom of the terminal
+printf '\n%.0s' {1..100}
 # To customize prompt, run p10k configure or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
