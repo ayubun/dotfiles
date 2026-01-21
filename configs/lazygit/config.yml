@@ -6,6 +6,9 @@ customCommands:
     command: git diff -z --name-only {{.SelectedLocalCommit.ParentRefName}} {{.SelectedLocalCommit.Sha}} | xargs -0 lvim --
     output: terminal
 
+
 os:
-  editCommand: 'nvr -cc split --remote-silent {{filename}}'
+  # oops, this was never actually broken
+  # editCommand: 'nvr -cc split --remote-silent {{filename}}'
+  openCommand: 'nvr -cc split --remote-silent {{filename}}'
 
