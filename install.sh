@@ -414,8 +414,6 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 rm -rf $DOTFILES_FOLDER/tmp || true
 
-source ~/.zshrc
-
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}"
@@ -426,4 +424,6 @@ fi
 echo ""
 echo "${RESET}${YELLOW_TEXT}  Be sure to install the necessary fonts for Powerlevel10k:"
 echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/master/font.md${RESET}"
+echo ""
+echo "${RESET}${YELLOW_TEXT}    To change the current shell to zsh, run `exec zsh -l`"
 echo "${RESET}"
