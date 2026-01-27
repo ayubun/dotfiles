@@ -414,6 +414,8 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 rm -rf $DOTFILES_FOLDER/tmp || true
 
+source ~/.zshrc
+
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}"
