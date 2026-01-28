@@ -4,19 +4,23 @@
 # Note: Job control can cause SIGTTOU issues with background processes writing to terminal
 # set -m
 
+BYPASS=false
 EXTRAS=false
 VERBOSE=false
 
-if [ -f $HOME/work/.zshrc_aliases ]; then
-  exit 0
-fi
-
-while getopts 'ev' flag; do
+while getopts 'bev' flag; do
   case "${flag}" in
+  b) BYPASS=true ;;
   e) EXTRAS=true ;;
   v) VERBOSE=true ;;
   esac
 done
+
+if ! $BYPASS; then
+  if [ -f $HOME/work/.zshrc_aliases ]; then
+    exit 0
+  fi
+fi
 
 SELF="${BASH_SOURCE[0]}"
 [[ $SELF == */* ]] || SELF="./$SELF"
