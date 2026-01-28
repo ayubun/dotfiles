@@ -7,6 +7,10 @@
 EXTRAS=false
 VERBOSE=false
 
+if [ -f $HOME/work/.zshrc_aliases ]; then
+  exit 0
+fi
+
 while getopts 'ev' flag; do
   case "${flag}" in
   e) EXTRAS=true ;;
