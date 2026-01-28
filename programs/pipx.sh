@@ -6,7 +6,6 @@ run_pipx() {
         # Run as the original user with their home directory
         sudo -u "$ORIGINAL_USER" -H pipx "$@"
     else
-        echo "⚠️ WARNING: Running pipx as root"
         pipx "$@"
     fi
 }
@@ -20,6 +19,7 @@ if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
         sudo chown -R "$ORIGINAL_USER:$(id -gn $ORIGINAL_USER)" "$ORIGINAL_HOME/.local/pipx" &>/dev/null
     fi
 else
+    echo "⚠️ WARNING: Running pipx as root"
     if [[ -d ~/.local/pipx ]]; then
         sudo chown -R $(id -u):$(id -g) ~/.local/pipx &>/dev/null
     fi
