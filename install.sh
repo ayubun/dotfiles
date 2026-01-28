@@ -16,11 +16,11 @@ while getopts 'bev' flag; do
   esac
 done
 
-if ! $BYPASS; then
-  if [ -f $HOME/work/.zshrc_aliases ]; then
-    exit 0
-  fi
-fi
+# if ! $BYPASS; then
+#   if [ -f $HOME/work/.zshrc_aliases ]; then
+#     exit 0
+#   fi
+# fi
 
 SELF="${BASH_SOURCE[0]}"
 [[ $SELF == */* ]] || SELF="./$SELF"
@@ -422,8 +422,6 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 rm -rf $DOTFILES_FOLDER/tmp || true
 
-source ~/.zshrc
-
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}"
@@ -437,3 +435,9 @@ echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/mast
 echo ""
 echo "${RESET}${YELLOW_TEXT}      To change the current shell to zsh, run 'exec zsh -l'"
 echo "${RESET}"
+
+if [ -f $HOME/work/.zshrc_aliases ]; then
+  source ~/work/init-chuu.sh
+  source ~/work/init-love.sh
+fi
+
