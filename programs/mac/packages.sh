@@ -6,7 +6,7 @@
 
 packages=(
   # casks
-  '--cask docker'
+  '--cask docker --force'
   '--cask signal'
   '--cask telegram'
   '--cask arc'
@@ -50,7 +50,7 @@ export HOMEBREW_NO_AUTO_UPDATE=1
 export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # For some reason, the brew install for docker fails unless we ensure this doesn't exist prior
-rm -rf /Applications/Docker.app
+# rm -rf /Applications/Docker.app
 
 # Run brew commands as original user on macOS (brew refuses to run as root)
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
@@ -102,3 +102,4 @@ fi
 # https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#user-config
 rm -f ~/Library/Application\ Support/lazygit/config.yml
 ln -s ~/dotfiles/configs/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml
+
