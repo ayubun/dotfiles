@@ -4,6 +4,8 @@
 # Note: Job control can cause SIGTTOU issues with background processes writing to terminal
 # set -m
 
+ARGS=("$@")
+
 BYPASS=false
 EXTRAS=false
 VERBOSE=false
