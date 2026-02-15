@@ -11,13 +11,13 @@ fi
 
 cd "$TMP_DIR"
 
-rm -rf ./nvim-linux-x86_64.tar.gz
+ARCH=$(get_arch)
+rm -rf ./nvim-linux-${ARCH}.tar.gz
 
-sudo curl -L https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.tar.gz | sudo tar -xz
-# mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
-sudo mv -f ./nvim-linux-x86_64/bin/nvim /usr/local/bin
-sudo mv -f ./nvim-linux-x86_64/lib/nvim /usr/local/lib
-sudo mv -f ./nvim-linux-x86_64/share/nvim /usr/local/share
+sudo curl -L "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCH}.tar.gz" | sudo tar -xz
+sudo mv -f ./nvim-linux-${ARCH}/bin/nvim /usr/local/bin
+sudo mv -f ./nvim-linux-${ARCH}/lib/nvim /usr/local/lib
+sudo mv -f ./nvim-linux-${ARCH}/share/nvim /usr/local/share
 
 # Set ownership to original user if available
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then

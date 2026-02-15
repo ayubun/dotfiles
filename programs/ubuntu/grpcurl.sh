@@ -14,8 +14,9 @@ cd "$TMP_DIR"
 
 # https://github.com/fullstorydev/grpcurl
 VERSION=1.8.7
+ARCH=$(get_arch)
 mkdir grpcurl  # Temp dir for this binary
-curl -L "https://github.com/fullstorydev/grpcurl/releases/download/v${VERSION}/grpcurl_${VERSION}_linux_x86_64.tar.gz" | tar xz -C grpcurl
+curl -L "https://github.com/fullstorydev/grpcurl/releases/download/v${VERSION}/grpcurl_${VERSION}_linux_${ARCH}.tar.gz" | tar xz -C grpcurl
 sudo mv -f grpcurl/grpcurl /usr/bin/
 sudo rm -rf grpcurl  # Remove temp dir
 

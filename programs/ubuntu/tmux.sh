@@ -16,9 +16,11 @@ fi
 cd "$TMP_DIR"
 # sudo rm -rf ./tmux &/dev/null
 
+TMUX_VERSION="3.5a"
 git clone https://github.com/tmux/tmux.git
 cd tmux
-git checkout tmux-3.5a
+git fetch --tags
+git checkout "$TMUX_VERSION"
 sh autogen.sh
 ./configure && make
 

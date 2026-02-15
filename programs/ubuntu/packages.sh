@@ -1,10 +1,10 @@
 #!/bin/bash
 
-BOLD=$(tput bold)
-UNDERLINE=$(tput smul)
-YELLOW_TEXT=$(tput setaf 3)
-BLUE_TEXT=$(tput setaf 4)
-RESET=$(tput sgr0)
+BOLD=$(safe_tput bold || true)
+UNDERLINE=$(safe_tput smul || true)
+YELLOW_TEXT=$(safe_tput setaf 3 || true)
+BLUE_TEXT=$(safe_tput setaf 4 || true)
+RESET=$(safe_tput sgr0 || true)
 
 packages=(
   'build-essential'
@@ -12,7 +12,7 @@ packages=(
   'unzip'
   'manpages-dev'
   'dnsutils'
-  'neofetch' # TODO: switch off neofetch
+  # neofetch installed separately below (deprecated upstream, may be unavailable on Ubuntu 24.10+)
   'onefetch'
   'net-tools'
   'htop'
@@ -80,6 +80,10 @@ for ((i = 0; i < total_packages; i += batch_size)); do
   safer-apt-fast install "${batch[@]}"
   echo "${RESET}${YELLOW_TEXT}[${BOLD}Install Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Done${RESET}"
 done
+
+# neofetch is deprecated upstream and may not be in repos on Ubuntu 24.10+
+# Install separately so a missing package doesn't break the batch
+safer-apt-fast install neofetch 2>/dev/null || true
 
 safer-apt-fast autoremove
 

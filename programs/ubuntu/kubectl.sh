@@ -12,7 +12,8 @@ fi
 
 cd "$TMP_DIR"
 
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+ARCH=$(get_arch deb)
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/${ARCH}/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
 
 cd "$CURRENT_DIR"

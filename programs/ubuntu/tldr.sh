@@ -12,10 +12,10 @@ cd "$TMP_DIR"
 
 # https://github.com/tldr-pages/tlrc/releases
 VERSION=1.11.1
+ARCH=$(get_arch)
 mkdir -p tldr/
 cd tldr/
-# curl -L "https://github.com/tldr-pages/tlrc/releases/download/v${VERSION}/tlrc-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" | tar xz
-curl -L "https://github.com/tldr-pages/tlrc/releases/download/v${VERSION}/tlrc-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" | tar xz
+curl -L "https://github.com/tldr-pages/tlrc/releases/download/v${VERSION}/tlrc-v${VERSION}-${ARCH}-unknown-linux-musl.tar.gz" | tar xz
 sudo mv -f ./tldr /usr/bin/
 cd ../../
 

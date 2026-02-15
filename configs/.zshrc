@@ -121,8 +121,8 @@ printf '\n%.0s' {1..100}
 # specifying term to fix ghostty incompatibilities
 export TERM=xterm-256color
 
-export VISUAL=vim
-export EDITOR=vim
+export VISUAL=nvim
+export EDITOR=nvim
 # https://github.com/sharkdp/vivid?tab=readme-ov-file#theme-preview
 # to preview all themes:
 # for theme in $(vivid themes); do

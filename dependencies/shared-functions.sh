@@ -53,9 +53,9 @@ safer-apt() {
 safer-apt-fast() {
     # If we're capturing logs (CAPTURE_OUTPUT is set), don't redirect to /dev/null
     if [[ -n "$CAPTURE_OUTPUT" ]]; then
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || unlock-apt
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || unlock-apt
     else
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -yV 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
     fi
 }
 
@@ -68,6 +68,33 @@ safe_tput() {
     fi
 }
 
+# Detect system architecture and output the appropriate string for download URLs.
+# Usage: get_arch [format]
+#   format: "uname" (default) → x86_64/aarch64
+#           "deb"             → amd64/arm64
+#           "go"              → amd64/arm64
+get_arch() {
+    local format="${1:-uname}"
+    local machine
+    machine=$(uname -m)
+    case "$format" in
+        deb|go)
+            case "$machine" in
+                x86_64)  echo "amd64" ;;
+                aarch64|arm64) echo "arm64" ;;
+                *) echo "$machine" ;;
+            esac
+            ;;
+        *)
+            case "$machine" in
+                aarch64) echo "aarch64" ;;
+                arm64)   echo "aarch64" ;;
+                *)       echo "$machine" ;;
+            esac
+            ;;
+    esac
+}
+
 # Export all functions for use in child scripts
 export -f run_script_parallel
 export -f unlock-apt
@@ -75,6 +102,7 @@ export -f fix-apt
 export -f safer-apt
 export -f safer-apt-fast
 export -f safe_tput
+export -f get_arch
 
 # Set up environment variables if not already set
 if [[ -z "$DOTFILES_FOLDER" ]]; then

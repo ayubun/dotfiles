@@ -27,6 +27,6 @@ fi
 
 # https://github.com/mhinz/neovim-remote
 run_pipx install neovim-remote
-run_pipx install pynvim --upgrade
+run_pipx upgrade pynvim 2>/dev/null || run_pipx install pynvim
 run_pipx install basedpyright
 
