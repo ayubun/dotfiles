@@ -197,9 +197,11 @@ if [ -f $HOME/work/.zshrc_aliases ]; then
 fi
 
 # Bins
-add_to_path "$HOME/discord/.local/bin"
+if [ -f $HOME/work/.zshrc_aliases ]; then
+  add_to_path "$HOME/discord/.local/bin"
+  add_discord_bin_to_usr_local_bin "coder2" "coder"
+fi
 add_to_path "$HOME/.local/bin"
-add_discord_bin_to_usr_local_bin "coder2" "coder"
 
 # asdf
 . "$HOME/.asdf/asdf.sh" &>/dev/null
