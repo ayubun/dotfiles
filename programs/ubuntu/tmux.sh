@@ -20,7 +20,7 @@ TMUX_VERSION="3.5a"
 git clone https://github.com/tmux/tmux.git
 cd tmux
 git fetch --tags
-git checkout "$TMUX_VERSION"
+git checkout "tmux-$TMUX_VERSION"
 sh autogen.sh
 ./configure && make
 
