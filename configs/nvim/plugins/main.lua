@@ -54,6 +54,13 @@ return {
       }
     end,
   },
+  -- https://github.com/avifenesh/claucode.nvim
+  {
+    "avifenesh/claucode.nvim",
+    config = function()
+      require("claucode").setup()
+    end,
+  },
   -- https://github.com/linrongbin16/gitlinker.nvim
   {
     "linrongbin16/gitlinker.nvim",
