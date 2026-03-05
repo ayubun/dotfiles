@@ -455,8 +455,15 @@ echo ""
 echo "${RESET}${YELLOW_TEXT}      To change the current shell to zsh, run 'exec zsh -l'"
 echo "${RESET}"
 
-if [ -f $HOME/work/.zshrc_aliases ]; then
-  source ~/work/init-chuu.sh
-  source ~/work/init-love.sh
+# run startup scripts if needed
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if [ -f $HOME/work/startup.sh ]; then
+    STARTUP_INDICATOR_FILE="/tmp/startup"
+    if ! [ -f "$STARTUP_INDICATOR_FILE" ]; then
+      ~/work/startup.sh
+      touch $STARTUP_INDICATOR_FILE
+      echo "startup.sh complete ! :D"
+    fi
+  fi
 fi
 
