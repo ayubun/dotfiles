@@ -312,7 +312,24 @@ if ! [[ "$OSTYPE" == "darwin"* ]]; then
       # Add updater to crontab
       (sudo crontab -l 2>/dev/null; echo "*/5 * * * * ${SCRIPT_PATH}") | sudo crontab -
   fi
+  if [ -f $HOME/work/.zshrc_aliases ]; then
+    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring ~/work auto-updater${RESET}"
+    RELATIVE_SCRIPT_PATH=updaters/work.sh
+    SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
 
+    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        # Run as original user using sudo -u
+        sudo -u "$ORIGINAL_USER" -H bash -c "crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null"
+        sudo -u "$ORIGINAL_USER" -H bash -c "(crontab -l 2>/dev/null; echo \"*/5 * * * * ${SCRIPT_PATH}\") | crontab -"
+        # maybe could replace with this oneline?: (crontab -l ; echo "0 * * * * your_command") | sort - | uniq - | crontab -
+    else
+        echo "${RESET}${RED_TEXT}${BOLD}⚠️WARNING: Because install.sh was run as a root user (no original user), the auto-updater cron will be added to the root crontab${RESET}"
+        # Remove any existing entry in the crontab
+        sudo crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | sudo crontab - &>/dev/null
+        # Add updater to crontab
+        (sudo crontab -l 2>/dev/null; echo "*/5 * * * * ${SCRIPT_PATH}") | sudo crontab -
+    fi
+  fi
 fi
 
 echo ""
