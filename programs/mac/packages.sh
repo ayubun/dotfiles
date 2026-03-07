@@ -42,6 +42,7 @@ packages=(
   'pipx'
   'tlrc' # https://github.com/tldr-pages/tlrc
   'ncdu'
+  'dive' # https://github.com/wagoodman/dive
 )
 
 # Set environment variables for non-interactive brew operations
