@@ -4,7 +4,7 @@
 add_to_path() {
   # Check if the path is not already in the PATH variable
   if ! echo "$PATH" | grep -E -q "(^|:)$1($|:)"; then
-    PATH="$PATH:$1"
+    export PATH="$1:$PATH"
   fi
 }
 
