@@ -13,6 +13,9 @@ else
   export WORK=false
 fi
 
+# Core aliases - for use in scripts
+alias ai-agent="opencode"
+
 # Load any pre-configured functions
 if [ -f "$DOTFILES_FOLDER/configs/dependencies/functions.sh" ]; then
   source "$DOTFILES_FOLDER/configs/dependencies/functions.sh"
