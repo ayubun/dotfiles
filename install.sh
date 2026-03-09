@@ -441,6 +441,18 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 rm -rf $DOTFILES_FOLDER/tmp || true
 
+# run startup script if needed
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if [ -f $HOME/work/startup.sh ]; then
+    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        # run as original user using sudo -u
+        sudo -u "$ORIGINAL_USER" -H bash -c "~/work/startup.sh"
+    else
+      ~/work/startup.sh
+    fi
+  fi
+fi
+
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}"
@@ -454,16 +466,4 @@ echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/mast
 echo ""
 echo "${RESET}${YELLOW_TEXT}      To change the current shell to zsh, run 'exec zsh -l'"
 echo "${RESET}"
-
-# run startup scripts if needed
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  if [ -f $HOME/work/startup.sh ]; then
-    STARTUP_INDICATOR_FILE="/tmp/startup"
-    if ! [ -f "$STARTUP_INDICATOR_FILE" ]; then
-      ~/work/startup.sh
-      touch $STARTUP_INDICATOR_FILE
-      echo "startup.sh complete ! :D"
-    fi
-  fi
-fi
 
