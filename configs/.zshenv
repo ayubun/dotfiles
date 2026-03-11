@@ -27,6 +27,10 @@ fi
 add_to_path "$HOME/.opencode/bin"
 # local bin
 add_to_path "$HOME/.local/bin"
+if $WORK; then
+  # discord bin
+  add_to_path "$HOME/discord/.local/bin"
+fi
 # bun
 export BUN_INSTALL="$HOME/.bun"
 add_to_path "$BUN_INSTALL/bin"
