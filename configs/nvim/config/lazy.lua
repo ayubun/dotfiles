@@ -23,7 +23,7 @@ require("lazy").setup({
 		{ import = "lazyvim.plugins.extras.lang.typescript" },
 		{ import = "lazyvim.plugins.extras.lang.json" },
 		{ import = "lazyvim.plugins.extras.lang.python" },
-    { import = "lazyvim.plugins.extras.lang.elixir" },
+    -- { import = "lazyvim.plugins.extras.lang.elixir" },
     -- using https://github.com/mrcjkb/rustaceanvim
     -- { import = "lazyvim.plugins.extras.lang.rust" },
 

@@ -8,6 +8,20 @@ lspconfig.vtsls.setup({
   end,
 })
 
+vim.lsp.config('lexical', {
+    filetypes = { 'elixir', 'eelixir', 'heex', 'surface' },
+    root_dir = function(fname, on_dir)
+      local discord_root = vim.fs.root(fname, ".discord_repo_root")
+      if discord_root then
+        on_dir(discord_root .. "/.elixir_ls_root")
+        return
+      else
+        on_dir(vim.fs.root(fname, {"mix.exs", ".git"}) or vim.loop.cwd())
+      end
+
+    end,
+    cmd = { "lexical" }
+})
 
 
 -- lspconfig.rust_analyzer.setup({
