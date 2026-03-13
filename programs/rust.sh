@@ -1,15 +1,31 @@
 #!/bin/bash
 
+# Source cargo env for the current shell
+source "$HOME/.cargo/env" &>/dev/null
 
-if [ -f $HOME/work/.zshrc_aliases ]; then
+# Helper to run commands as the original (non-root) user
+run_as_user() {
+    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        sudo -u "$ORIGINAL_USER" -H bash -c "source \$HOME/.cargo/env &>/dev/null && $1"
+    else
+        eval "$1"
+    fi
+}
+
+# fix ownership of cargo/rustup directories upfront in case a previous run left them root-owned
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.rustup" 2>/dev/null || true
+fi
+
+if [ -f "$HOME/work/.zshrc_aliases" ]; then
   echo "work computer detected; ignoring rust install"
 else
   # Clean old rust installation, if present
-  rustup self uninstall -y &>/dev/null
+  run_as_user "rustup self uninstall -y &>/dev/null"
   # Fresh install via rustup
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
-  # Configure current shell
-  source $HOME/.cargo/env &>/dev/null
+  run_as_user "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+  source "$HOME/.cargo/env" &>/dev/null
   if [[ "$OSTYPE" == "darwin"* ]]; then
       xcode-select --install &>/dev/null
   fi
@@ -17,14 +33,14 @@ else
 fi
 
 # clean up old standalone rust-analyzer location
-rm -f ~/.local/bin/rust-analyzer
+rm -f "$HOME/.local/bin/rust-analyzer"
 
 # set default toolchain to latest nightly
-rustup default nightly
-rustup update nightly
+run_as_user "rustup default nightly"
+run_as_user "rustup update nightly"
 
 # packages
-rustup component add rust-src
+run_as_user "rustup component add rust-src"
 
 # install latest standalone rust-analyzer (avoids bugs in toolchain-pinned versions)
 if [[ "$OSTYPE" == "darwin"* ]]; then
@@ -32,10 +48,15 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   RA_TARGET="x86_64-unknown-linux-gnu"
 fi
-curl -L "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-${RA_TARGET}.gz" | gunzip -c - > ~/.cargo/bin/rust-analyzer
-chmod +x ~/.cargo/bin/rust-analyzer
+curl -L "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-${RA_TARGET}.gz" | gunzip -c - > "$HOME/.cargo/bin/rust-analyzer"
+chmod +x "$HOME/.cargo/bin/rust-analyzer"
+
+# fix ownership again after downloads/installs that ran as root (e.g. rust-analyzer curl)
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.rustup" 2>/dev/null || true
+fi
 
 # https://github.com/ethowitz/cargo-subspace
 # helps keep large cargo projects lazy-loading with rust-analyzer
-cargo install --locked cargo-subspace --force
-
+run_as_user "cargo install --locked cargo-subspace --force"
