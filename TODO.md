@@ -1,0 +1,1 @@
+- fix first-time installation of homebrew (it seeks sudo pw without wanting full sudo, which means just downgrading user doesn't do enough when run non-interactively)

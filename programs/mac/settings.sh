@@ -1,5 +1,12 @@
 #!/bin/bash
 
+STAMP="$HOME/dotfiles/settings-installed"
+
+if [[ -f "$STAMP" ]]; then
+  echo "Already installed. Remove $STAMP to re-run."
+  exit 0
+fi
+
 # Close any open System Preferences panes, to prevent them from overriding
 # settings we’re about to change
 osascript -e 'tell application "System Preferences" to quit'
@@ -949,3 +956,6 @@ for app in "Activity Monitor" \
 	killall "${app}" &> /dev/null
 done
 echo "Done. Note that some of these changes require a logout/restart to take effect."
+
+touch $STAMP
+
