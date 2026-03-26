@@ -35,8 +35,9 @@ fi
 sudo nvram SystemAudioVolume=" "
 
 # Disable transparency in the menu bar and elsewhere
-# NOTE: requires sudo on modern macOS (SIP-protected domain)
-sudo defaults write /Library/Preferences/com.apple.universalaccess reduceTransparency -bool true
+# NOTE: com.apple.universalaccess is TCC-protected on modern macOS; requires
+# Full Disk Access for your terminal app, or set via System Settings > Accessibility
+#sudo defaults write /Library/Preferences/com.apple.universalaccess reduceTransparency -bool true
 
 # Set highlight color to purple
 defaults write NSGlobalDomain AppleHighlightColor -string "0.968627 0.831373 1.000000"
@@ -157,11 +158,12 @@ defaults write com.apple.BluetoothAudioAgent "Apple Bitpool Min (editable)" -int
 defaults write NSGlobalDomain AppleKeyboardUIMode -int 3
 
 # Use scroll gesture with the Ctrl (^) modifier key to zoom
-# NOTE: requires sudo on modern macOS (SIP-protected domain)
-sudo defaults write /Library/Preferences/com.apple.universalaccess closeViewScrollWheelToggle -bool true
-sudo defaults write /Library/Preferences/com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
+# NOTE: com.apple.universalaccess is TCC-protected on modern macOS; requires
+# Full Disk Access for your terminal app, or set via System Settings > Accessibility
+#sudo defaults write /Library/Preferences/com.apple.universalaccess closeViewScrollWheelToggle -bool true
+#sudo defaults write /Library/Preferences/com.apple.universalaccess HIDScrollZoomModifierMask -int 262144
 # Follow the keyboard focus while zoomed in
-sudo defaults write /Library/Preferences/com.apple.universalaccess closeViewZoomFollowsFocus -bool true
+#sudo defaults write /Library/Preferences/com.apple.universalaccess closeViewZoomFollowsFocus -bool true
 
 # Disable press-and-hold for keys in favor of key repeat
 defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
@@ -834,10 +836,9 @@ defaults write com.google.Chrome.canary PMPrintingExpandedStateForPrint2 -bool t
 # GPGMail 2                                                                   #
 ###############################################################################
 
-# Disable signing emails by default (only if GPGMail is installed)
-if [[ -e ~/Library/Preferences/org.gpgtools.gpgmail.plist ]]; then
-	defaults write ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault -bool false
-fi
+# Disable signing emails by default
+# NOTE: writing to org.gpgtools.gpgmail by path fails on modern macOS
+#defaults write ~/Library/Preferences/org.gpgtools.gpgmail SignNewEmailsByDefault -bool false
 
 ###############################################################################
 # Opera & Opera Developer                                                     #
