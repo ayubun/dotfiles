@@ -44,14 +44,25 @@ else
 fi
 
 
-auto_su() {
-  [[ $UID == 0 ]] || exec sudo -p "Dotfiles must be run as root. Please enter the password for %u to continue: " -- "$BASH" -- "$SELF" "${ARGS[@]}"
+setup_sudo() {
+  if [[ $UID == 0 ]]; then
+    # Already root (e.g. via 'sudo ./install.sh') - fix HOME for child scripts
+    export HOME="$ORIGINAL_HOME"
+  else
+    # Validate sudo access (prompts for password once)
+    sudo -v -p "Dotfiles requires sudo access. Please enter the password for %u to continue: " || exit 1
+  fi
 
-  # override home with original home
-  export HOME="$ORIGINAL_HOME"
+  # Grant passwordless sudo for the original user so that child processes
+  # (e.g. brew cask installs running via sudo -u) never stall on a password prompt
+  local target_user="${ORIGINAL_USER:-$USER}"
+  if [[ "$target_user" != "root" && ! -f /etc/sudoers.d/dotfiles-temp ]]; then
+    sudo sh -c "echo '$target_user ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/dotfiles-temp && chmod 440 /etc/sudoers.d/dotfiles-temp"
+    trap 'sudo rm -f /etc/sudoers.d/dotfiles-temp 2>/dev/null' EXIT
+  fi
 }
 
-auto_su
+setup_sudo
 
 # Safe tput function that falls back to empty strings if tput fails
 safe_tput() {
@@ -128,11 +139,16 @@ else
   exit 1
 fi
 
-# clean up temp files from prev runs
-rm -rf $DOTFILES_FOLDER/tmp || true
-mkdir $DOTFILES_FOLDER/tmp || true
-rm -rf $DOTFILES_FOLDER/logs || true
-mkdir $DOTFILES_FOLDER/logs || true
+# clean up temp files from prev runs (use sudo to handle root-owned leftovers)
+sudo rm -rf "$DOTFILES_FOLDER/tmp" 2>/dev/null || true
+sudo rm -rf "$DOTFILES_FOLDER/logs" 2>/dev/null || true
+mkdir "$DOTFILES_FOLDER/tmp"
+mkdir "$DOTFILES_FOLDER/logs"
+
+# Fix ownership when running as root so future non-root runs can clean up
+if [[ $UID -eq 0 && -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+  chown "$ORIGINAL_USER" "$DOTFILES_FOLDER/tmp" "$DOTFILES_FOLDER/logs"
+fi
 
 # Initialize failure tracking
 FAILURE_LOG="$DOTFILES_FOLDER/tmp/failed_scripts.log"
@@ -156,6 +172,10 @@ run_script() {
 
   # Create log directory structure
   mkdir -p "$log_dir"
+  # Fix ownership when running as root so future non-root runs can clean up
+  if [[ $UID -eq 0 && -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    chown "$ORIGINAL_USER" "$log_dir"
+  fi
 
   echo "${RESET}${CYAN_TEXT}[${BOLD}Running${RESET}${CYAN_TEXT}]${RESET} ${BLUE_TEXT}${UNDERLINE}${script_name}${RESET} ${YELLOW_TEXT}(${script_dir})${RESET}"
 
@@ -440,7 +460,7 @@ echo ""
 
 # Clean up temporary files
 rm -f "$FAILURE_LOG" 2>/dev/null || true
-rm -rf $DOTFILES_FOLDER/tmp || true
+sudo rm -rf "$DOTFILES_FOLDER/tmp" 2>/dev/null || true
 
 # run startup script if needed
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then

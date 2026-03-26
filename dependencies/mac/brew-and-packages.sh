@@ -56,6 +56,12 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_AUTO_UPDATE=1
     if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        # Pre-create /opt/homebrew with correct ownership so the installer
+        # can skip its own sudo mkdir/chown steps (speeds up installation)
+        if [[ ! -d /opt/homebrew ]]; then
+            sudo mkdir -p /opt/homebrew
+            sudo chown "$ORIGINAL_USER":admin /opt/homebrew
+        fi
         # Run as original user using sudo -u
         sudo -u "$ORIGINAL_USER" -H bash -c "NONINTERACTIVE=1 CI=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
     else
@@ -76,20 +82,6 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         sudo -u "$ORIGINAL_USER" bash -c 'echo '\''eval "$(/opt/homebrew/bin/brew shellenv)"'\'' >> '"$ORIGINAL_HOME"'/.zprofile'
         eval "$(/opt/homebrew/bin/brew shellenv)"
     fi
-fi
-
-# We need gnu parallel to run our dotfiles faster (async)
-# https://superuser.com/questions/1659206/run-background-async-cmd-with-sync-output
-export HOMEBREW_NO_ANALYTICS=1
-export HOMEBREW_NO_AUTO_UPDATE=1
-export HOMEBREW_NO_INSTALL_CLEANUP=1
-
-if [[ "$OSTYPE" == "darwin"* ]] && [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-    # Run brew as original user on macOS
-    sudo -u "$ORIGINAL_USER" -H bash -c 'eval "$(/opt/homebrew/bin/brew shellenv)" && brew install --force-bottle parallel'
-else
-    # Run normally on Linux (where brew can run as root)
-    brew install --force-bottle parallel
 fi
 
 cd "$CURRENT_DIR"

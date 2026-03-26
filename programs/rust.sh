@@ -32,6 +32,12 @@ else
   echo "rust installed~"
 fi
 
+# Everything below requires a working rust/cargo installation
+if ! command -v rustup &>/dev/null && ! [[ -f "$HOME/.cargo/bin/rustup" ]]; then
+  echo "rustup not found, skipping rust toolchain setup"
+  exit 0
+fi
+
 # clean up old standalone rust-analyzer location
 rm -f "$HOME/.local/bin/rust-analyzer"
 
@@ -48,6 +54,7 @@ if [[ "$OSTYPE" == "darwin"* ]]; then
 else
   RA_TARGET="x86_64-unknown-linux-gnu"
 fi
+mkdir -p "$HOME/.cargo/bin"
 curl -L "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-${RA_TARGET}.gz" | gunzip -c - > "$HOME/.cargo/bin/rust-analyzer"
 chmod +x "$HOME/.cargo/bin/rust-analyzer"
 
