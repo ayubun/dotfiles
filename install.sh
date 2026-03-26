@@ -462,18 +462,6 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 sudo rm -rf "$DOTFILES_FOLDER/tmp" 2>/dev/null || true
 
-# run startup script if needed (detached, so install.sh doesn't block on
-# long-running services like clyde)
-if [[ "$OSTYPE" == "linux-gnu"* ]]; then
-  if [ -f $HOME/work/startup.sh ]; then
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        sudo -u "$ORIGINAL_USER" -H bash -c "nohup ~/work/startup.sh </dev/null &>/dev/null &"
-    else
-      nohup ~/work/startup.sh </dev/null &>/dev/null &
-    fi
-  fi
-fi
-
 echo ""
 echo ""
 echo "${RESET}${GREEN_TEXT}${BOLD}            Installation is complete! (* ^ ω ^)${RESET}"
@@ -487,4 +475,21 @@ echo "${RESET}${YELLOW_TEXT}  https://github.com/romkatv/powerlevel10k/blob/mast
 echo ""
 echo "${RESET}${YELLOW_TEXT}      To change the current shell to zsh, run 'exec zsh -l'"
 echo "${RESET}"
+
+# run startup script if needed
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  if [ -f $HOME/work/startup.sh ]; then
+    echo "${RESET}${YELLOW_TEXT}[${BOLD}Work Startup${RESET}${YELLOW_TEXT}]${BLUE_TEXT} Running ~/work/startup.sh${RESET}"
+    echo ""
+    STARTUP_START=$(date +%s)
+    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        sudo -u "$ORIGINAL_USER" -H bash ~/work/startup.sh
+    else
+      ~/work/startup.sh
+    fi
+    STARTUP_ELAPSED=$(( $(date +%s) - STARTUP_START ))
+    echo "${RESET}${YELLOW_TEXT}[${BOLD}Work Startup${RESET}${YELLOW_TEXT}]${GREEN_TEXT} Startup complete~ (${STARTUP_ELAPSED}s)${RESET}"
+    echo ""
+  fi
+fi
 
