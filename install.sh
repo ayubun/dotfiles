@@ -346,6 +346,7 @@ find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -
 if [[ "$OSTYPE" == "darwin"* ]]; then
   echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ghostty${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default Ghostty config${RESET}"
   rm -rf ${HOME}/.config/ghostty/config
+  mkdir -p ${HOME}/.config/ghostty
   ln -s $DOTFILES_FOLDER/configs/ghostty/config ${HOME}/.config/ghostty/config
 fi
 
