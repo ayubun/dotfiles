@@ -39,8 +39,17 @@ sudo nvram SystemAudioVolume=" "
 # Full Disk Access for your terminal app, or set via System Settings > Accessibility
 #sudo defaults write /Library/Preferences/com.apple.universalaccess reduceTransparency -bool true
 
-# Set highlight color to purple
+# Set appearance to Dark
+defaults write NSGlobalDomain AppleInterfaceStyle -string "Dark"
+
+# Set theme color to Purple
+defaults write NSGlobalDomain AppleAccentColor -int 5
+
+# Set text highlight color to purple
 defaults write NSGlobalDomain AppleHighlightColor -string "0.968627 0.831373 1.000000"
+
+# Set Liquid Glass to Tinted
+defaults write NSGlobalDomain NSGlassDiffusionSetting -int 1
 
 # Set sidebar icon size to medium
 defaults write NSGlobalDomain NSTableViewDefaultSizeMode -int 2
@@ -172,6 +181,32 @@ defaults write NSGlobalDomain ApplePressAndHoldEnabled -bool false
 defaults write NSGlobalDomain KeyRepeat -int 3
 # 15 is the fastest the ui can select. 10 is a bit too fast imo lol . . 12 prolly gewd
 defaults write NSGlobalDomain InitialKeyRepeat -int 12
+
+# Disable "Select the previous input source" shortcut (Ctrl+Space)
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 60 '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>262144</integer></array><key>type</key><string>standard</string></dict></dict>'
+
+# Disable "Select next source in Input menu" shortcut (Ctrl+Option+Space)
+defaults write com.apple.symbolichotkeys AppleSymbolicHotKeys -dict-add 61 '<dict><key>enabled</key><false/><key>value</key><dict><key>parameters</key><array><integer>32</integer><integer>49</integer><integer>786432</integer></array><key>type</key><string>standard</string></dict></dict>'
+
+# Configure input sources: Canadian English and Japanese - Romaji
+defaults write com.apple.HIToolbox AppleEnabledInputSources -array \
+  '<dict><key>Bundle ID</key><string>com.apple.CharacterPaletteIM</string><key>InputSourceKind</key><string>Non Keyboard Input Method</string></dict>' \
+  '<dict><key>Bundle ID</key><string>com.apple.inputmethod.Kotoeri.RomajiTyping</string><key>Input Mode</key><string>com.apple.inputmethod.Japanese</string><key>InputSourceKind</key><string>Input Mode</string></dict>' \
+  '<dict><key>Bundle ID</key><string>com.apple.inputmethod.Kotoeri.RomajiTyping</string><key>InputSourceKind</key><string>Keyboard Input Method</string></dict>' \
+  '<dict><key>InputSourceKind</key><string>Keyboard Layout</string><key>KeyboardLayout ID</key><integer>29</integer><key>KeyboardLayout Name</key><string>Canadian</string></dict>' \
+  '<dict><key>Bundle ID</key><string>com.apple.50onPaletteIM</string><key>InputSourceKind</key><string>Non Keyboard Input Method</string></dict>'
+defaults write com.apple.HIToolbox AppleCurrentKeyboardLayoutInputSourceID -string "com.apple.keylayout.Canadian"
+defaults write com.apple.HIToolbox AppleSelectedInputSources -array \
+  '<dict><key>InputSourceKind</key><string>Keyboard Layout</string><key>KeyboardLayout ID</key><integer>29</integer><key>KeyboardLayout Name</key><string>Canadian</string></dict>'
+
+# Japanese - Romaji: Set Shift key action to Katakana
+defaults write com.apple.inputmethod.Kotoeri JIMPrefShiftKeyActionKey -int 0
+
+# Use Caps Lock key to switch between input sources
+defaults write NSGlobalDomain TISRomanSwitchState -bool true
+
+# Show Input menu in menu bar
+defaults write com.apple.TextInputMenu visible -bool true
 
 # Set language and text formats
 # Note: if you’re in the US, replace `EUR` with `USD`, `Centimeters` with
@@ -477,88 +512,11 @@ find "${HOME}/Library/Application Support/Dock" -name "*-*.db" -maxdepth 1 -dele
 # defaults write com.apple.dock wvous-bl-modifier -int 0
 
 ###############################################################################
-# Safari & WebKit                                                             #
+# WebKit                                                                      #
 ###############################################################################
 
-# NOTE: Since macOS Sonoma, Safari is sandboxed and `defaults write com.apple.Safari`
-# is blocked from outside the sandbox. These settings must be configured through
-# Safari > Settings manually. Leaving them commented for reference.
-
-# # Privacy: don't send search queries to Apple
-# defaults write com.apple.Safari UniversalSearchEnabled -bool false
-# defaults write com.apple.Safari SuppressSearchSuggestions -bool true
-
-# # Show the full URL in the address bar (note: this still hides the scheme)
-# defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool true
-
-# # Set Safari's home page to `about:blank` for faster loading
-# defaults write com.apple.Safari HomePage -string "about:blank"
-
-# # Prevent Safari from opening 'safe' files automatically after downloading
-# defaults write com.apple.Safari AutoOpenSafeDownloads -bool false
-
-# # Allow hitting the Backspace key to go to the previous page in history
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2BackspaceKeyNavigationEnabled -bool true
-
-# # Hide Safari's bookmarks bar by default
-# defaults write com.apple.Safari ShowFavoritesBar -bool false
-
-# # Hide Safari's sidebar in Top Sites
-# defaults write com.apple.Safari ShowSidebarInTopSites -bool false
-
-# # Disable Safari's thumbnail cache for History and Top Sites
-# defaults write com.apple.Safari DebugSnapshotsUpdatePolicy -int 2
-
-# # Enable Safari's debug menu
-# defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-
-# # Make Safari's search banners default to Contains instead of Starts With
-# defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
-
-# # Remove useless icons from Safari's bookmarks bar
-# defaults write com.apple.Safari ProxiesInBookmarksBar "()"
-
-# # Enable the Develop menu and the Web Inspector in Safari
-# defaults write com.apple.Safari IncludeDevelopMenu -bool true
-# defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool true
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-
 # Add a context menu item for showing the Web Inspector in web views
-# (this one writes to NSGlobalDomain, not Safari, so it still works)
 defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
-
-# # Enable continuous spellchecking
-# defaults write com.apple.Safari WebContinuousSpellCheckingEnabled -bool true
-# # Disable auto-correct
-# defaults write com.apple.Safari WebAutomaticSpellingCorrectionEnabled -bool false
-
-# # Disable AutoFill
-# defaults write com.apple.Safari AutoFillFromAddressBook -bool false
-# defaults write com.apple.Safari AutoFillPasswords -bool false
-# defaults write com.apple.Safari AutoFillCreditCardData -bool false
-# defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
-
-# # Warn about fraudulent websites
-# defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
-
-# # Disable plug-ins
-# defaults write com.apple.Safari WebKitPluginsEnabled -bool false
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2PluginsEnabled -bool false
-
-# # Disable Java
-# defaults write com.apple.Safari WebKitJavaEnabled -bool false
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabled -bool false
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaEnabledForLocalFiles -bool false
-
-# # Block pop-up windows
-# defaults write com.apple.Safari WebKitJavaScriptCanOpenWindowsAutomatically -bool false
-# defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2JavaScriptCanOpenWindowsAutomatically -bool false
-
-# # Enable "Do Not Track"
-# defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
-
-# # Update extensions automatically
-# defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool true
 
 ###############################################################################
 # Mail                                                                        #
