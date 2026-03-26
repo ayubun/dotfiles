@@ -436,11 +436,11 @@ echo ""
 
 # Show failed scripts
 if [[ -s "$FAILURE_LOG" ]]; then
-  echo "${RESET}${RED_TEXT}${BOLD}⚠️  WARNING: The following scripts failed to install:${RESET}"
+  echo "${RESET}${RED_TEXT}${BOLD}⚠️ WARNING: The following scripts failed to install:${RESET}"
   echo ""
   while IFS= read -r failed_script; do
     script_name=$(basename "$failed_script")
-    echo "${RESET}${RED_TEXT}${BOLD}    ✗ ${script_name}${RESET} ${RED_TEXT}(${failed_script})${RESET}"
+    echo "${RESET}${RED_TEXT}${BOLD}   ✗ ${script_name}${RESET} ${RED_TEXT}(${failed_script})${RESET}"
   done <"$FAILURE_LOG"
   echo ""
   echo "${RESET}${YELLOW_TEXT}You may want to check these scripts manually and re-run them if needed.${RESET}"
@@ -462,14 +462,14 @@ echo ""
 rm -f "$FAILURE_LOG" 2>/dev/null || true
 sudo rm -rf "$DOTFILES_FOLDER/tmp" 2>/dev/null || true
 
-# run startup script if needed
+# run startup script if needed (detached, so install.sh doesn't block on
+# long-running services like clyde)
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   if [ -f $HOME/work/startup.sh ]; then
     if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        # run as original user using sudo -u
-        sudo -u "$ORIGINAL_USER" -H bash -c "~/work/startup.sh"
+        sudo -u "$ORIGINAL_USER" -H bash -c "nohup ~/work/startup.sh </dev/null &>/dev/null &"
     else
-      ~/work/startup.sh
+      nohup ~/work/startup.sh </dev/null &>/dev/null &
     fi
   fi
 fi
