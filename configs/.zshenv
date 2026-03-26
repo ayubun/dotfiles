@@ -54,7 +54,7 @@ export EDITOR="nvim"
 export TERM=xterm-256color
 
 # Rust/Cargo
-. "$HOME/.cargo/env"
+[ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
 
 if [ -f $HOME/work/.zshenv ]; then
   source ~/work/.zshenv

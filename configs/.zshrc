@@ -77,7 +77,6 @@ plugins=(
   git
   rust
   yarn
-  bun
   pip
   # uv
   tldr
