@@ -75,9 +75,9 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 plugins=(
   # starship
   git
-  rust
   yarn
   pip
+  bun
   # uv
   tldr
 )
