@@ -12,9 +12,11 @@ casks=(
   cursor
   discord
   discord@canary
+  discord@ptb
   raycast
   spotify
   batfi
+  steam
 )
 
 formulae=(
