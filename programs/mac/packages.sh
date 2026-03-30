@@ -7,7 +7,6 @@ casks=(
   docker
   signal
   telegram
-  arc
   ghostty
   cursor
   discord
