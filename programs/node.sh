@@ -2,6 +2,12 @@
 
 CURRENT_DIR=$(pwd)
 
+# fix ownership of nvm/npm directories upfront in case they ended up root-owned
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.nvm" 2>/dev/null || true
+    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.npm" 2>/dev/null || true
+fi
+
 # lets not run this on my work box .. cuz its specially configured
 # however, i still want my default-packages
 # so i will run through them and manually install, expecting a pre-existing node version

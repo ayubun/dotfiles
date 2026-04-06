@@ -6,6 +6,14 @@
 # ln -s ~/dotfiles/configs/lvim/config.lua ~/.config/lvim/config.lua
 ##############################
 
+# fix ownership of nvim directories upfront in case they ended up root-owned
+# (e.g. devbox provisioning, accidental sudo nvim, etc.)
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+    for dir in ~/.config/nvim ~/.local/share/nvim ~/.local/state/nvim ~/.cache/nvim; do
+        [[ -d "$dir" ]] && sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$dir" 2>/dev/null || true
+    done
+fi
+
 # required
 rm -rf ~/.config/nvim.bak
 mv ~/.config/nvim{,.bak}
@@ -35,8 +43,5 @@ ln -s ~/dotfiles/configs/nvim/config ~/.config/nvim/lua/config
 ln -s ~/dotfiles/configs/nvim/plugins ~/.config/nvim/lua/plugins
 ln -s ~/dotfiles/configs/nvim/after/ftplugin ~/.config/nvim/after/ftplugin
 
-# Fix ownership so the original user can write to nvim config files
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-    chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER" 2>/dev/null || echo staff)" ~/.config/nvim 2>/dev/null || true
-fi
+
 
