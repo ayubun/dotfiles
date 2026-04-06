@@ -110,14 +110,12 @@ return {
 		opts = { use_diagnostic_signs = true },
 	},
 
-	-- override nvim-cmp and add cmp-emoji
+	-- configure blink.cmp (LazyVim's default completion engine)
 	{
-		"hrsh7th/nvim-cmp",
-		dependencies = { "hrsh7th/cmp-emoji" },
-		---@param opts cmp.ConfigSchema
-		opts = function(_, opts)
-			table.insert(opts.sources, { name = "emoji" })
-		end,
+		"saghen/blink.cmp",
+		opts = {
+			fuzzy = { implementation = "lua" },
+		},
 	},
 
 	-- since `vim.tbl_deep_extend`, can only merge tables and not lists, the code above
