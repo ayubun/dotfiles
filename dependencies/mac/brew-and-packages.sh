@@ -51,24 +51,21 @@ cd "$TMP_DIR"
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Homebrew refuses to run as root, so we need to run as the original user
-    # Use NONINTERACTIVE mode and run as original user
     export HOMEBREW_NO_ANALYTICS=1
     export HOMEBREW_NO_AUTO_UPDATE=1
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        # Pre-create /opt/homebrew with correct ownership so the installer
-        # can skip its own sudo mkdir/chown steps (speeds up installation)
-        if [[ ! -d /opt/homebrew ]]; then
-            sudo mkdir -p /opt/homebrew
-            sudo chown "$ORIGINAL_USER":admin /opt/homebrew
-        fi
-        # Run as original user using sudo -u
-        sudo -u "$ORIGINAL_USER" -H bash -c "NONINTERACTIVE=1 CI=1 /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)\""
-    else
-        echo "Error: Cannot install Homebrew - original user information not available"
-        exit 1
+    # Pre-create /opt/homebrew with correct ownership so the installer
+    # can skip its own sudo mkdir/chown steps (speeds up installation)
+    if [[ ! -d /opt/homebrew ]]; then
+        sudo mkdir -p /opt/homebrew
+        sudo chown "$(whoami)":admin /opt/homebrew
     fi
+    # Homebrew refuses to run as root -- this script already runs as the user
+    NONINTERACTIVE=1 CI=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
+
+export HOMEBREW_NO_ANALYTICS=1
+export HOMEBREW_NO_AUTO_UPDATE=1
+export HOMEBREW_NO_INSTALL_CLEANUP=1
 
 # Run post-install scripts
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -76,12 +73,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> $HOME/.zprofile
     eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
-    # Post-brew installation script for Mac OS - run as original user
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        # Add to original user's .zprofile and evaluate for this session
-        sudo -u "$ORIGINAL_USER" bash -c 'echo '\''eval "$(/opt/homebrew/bin/brew shellenv)"'\'' >> '"$ORIGINAL_HOME"'/.zprofile'
-        eval "$(/opt/homebrew/bin/brew shellenv)"
+    # Post-brew installation script for Mac OS
+    if ! grep -q 'eval "$(/opt/homebrew/bin/brew shellenv)"' "$HOME/.zprofile" 2>/dev/null; then
+        echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' >> "$HOME/.zprofile"
     fi
+    eval "$(/opt/homebrew/bin/brew shellenv)"
+    brew update || true
+    brew upgrade || true
 fi
 
 cd "$CURRENT_DIR"

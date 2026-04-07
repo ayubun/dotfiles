@@ -2,13 +2,8 @@
 
 # Install Zsh if missing (Ubuntu)
 sudo apt-get install zsh -y &>/dev/null
-# Make it default
-sudo chsh -s $(which zsh) &>/dev/null
-
-# if the original user isn't current user, lets update the shell for them too
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-    sudo chsh -s $(which zsh) $ORIGINAL_USER &>/dev/null
-fi
+# Make it the default shell for the current user
+sudo chsh -s "$(which zsh)" "$USER" &>/dev/null
 
 # # If we already have zsh just continue
 # if ! command -v zsh &>/dev/null; then
@@ -39,12 +34,11 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         -delete
 fi
 # Remove any old installation, if present
-sudo rm -r $HOME/.oh-my-zsh
+sudo rm -rf $HOME/.oh-my-zsh
 # Install Oh My Zsh
 export RUNZSH=no
 export KEEP_ZSHRC=yes
 sh -c "$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --keep-zshrc --unattended
-sudo chsh -s $(which zsh) "${ORIGINAL_USER:-$USER}" &>/dev/null
 # Install Powerlevel10k theme (https://github.com/romkatv/powerlevel10k)
 mkdir -p ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k
 git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}/themes/powerlevel10k

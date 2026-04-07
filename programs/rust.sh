@@ -3,15 +3,6 @@
 # Source cargo env for the current shell
 source "$HOME/.cargo/env" &>/dev/null
 
-# Helper to run commands as the original (non-root) user
-run_as_user() {
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        sudo -u "$ORIGINAL_USER" -H bash -c "source \$HOME/.cargo/env &>/dev/null && $1"
-    else
-        eval "$1"
-    fi
-}
-
 # fix ownership of cargo/rustup directories upfront in case a previous run left them root-owned
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
     sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
@@ -53,9 +44,9 @@ fi
 # --- Non-work computer: full rust install ---
 
 # Clean old rust installation, if present
-run_as_user "rustup self uninstall -y &>/dev/null"
+rustup self uninstall -y &>/dev/null
 # Fresh install via rustup
-run_as_user "curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y"
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 source "$HOME/.cargo/env" &>/dev/null
 if [[ "$OSTYPE" == "darwin"* ]]; then
     xcode-select --install &>/dev/null
@@ -69,15 +60,15 @@ if ! command -v rustup &>/dev/null && ! [[ -f "$HOME/.cargo/bin/rustup" ]]; then
 fi
 
 # set default toolchain to latest nightly
-run_as_user "rustup default nightly"
-run_as_user "rustup update nightly"
+rustup default nightly
+rustup update nightly
 
 # packages
-run_as_user "rustup component add rust-src"
+rustup component add rust-src
 
 install_rust_analyzer
 
-# fix ownership again after downloads/installs that ran as root (e.g. rust-analyzer curl)
+# fix ownership after downloads/installs
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
     sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
     sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.rustup" 2>/dev/null || true
@@ -85,8 +76,8 @@ fi
 
 # tree-sitter CLI -- needed by nvim-treesitter to compile parsers from source.
 # Building from source avoids GLIBC mismatch issues with pre-built binaries.
-run_as_user "cargo install --locked tree-sitter-cli"
+cargo install --locked tree-sitter-cli
 
 # https://github.com/ethowitz/cargo-subspace
 # helps keep large cargo projects lazy-loading with rust-analyzer
-run_as_user "cargo install --locked cargo-subspace --force"
+cargo install --locked cargo-subspace --force

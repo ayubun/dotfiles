@@ -14,17 +14,14 @@ cd "$TMP_DIR"
 ARCH=$(get_arch)
 rm -rf ./nvim-linux-${ARCH}.tar.gz
 
-sudo curl -L "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCH}.tar.gz" | sudo tar -xz
+curl -L "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCH}.tar.gz" | tar -xz
 sudo mv -f ./nvim-linux-${ARCH}/bin/nvim /usr/local/bin
 sudo mv -f ./nvim-linux-${ARCH}/lib/nvim /usr/local/lib
 sudo mv -f ./nvim-linux-${ARCH}/share/nvim /usr/local/share
 
-# Set ownership to original user if available
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/bin/nvim
-  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/lib/nvim
-  sudo chown -R "$ORIGINAL_USER:$ORIGINAL_USER" /usr/local/share/nvim
-fi
+# Ensure all users can read and execute
+sudo chmod 755 /usr/local/bin/nvim
+sudo chmod -R a+rX /usr/local/lib/nvim /usr/local/share/nvim
 
 echo ""
 echo "neovim is now installed~"
@@ -35,4 +32,3 @@ cd ..
 if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
   rm -rf "$TMP_DIR"
 fi
-

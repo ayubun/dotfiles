@@ -1,32 +1,13 @@
 #!/bin/bash
 
-# Function to run pipx commands as the original user if available
-run_pipx() {
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        # Run as the original user with their home directory
-        sudo -u "$ORIGINAL_USER" -H pipx "$@"
-    else
-        pipx "$@"
-    fi
-}
-
-# fix ownership of pipx directory
-# this can be created by root on accident (probably due to my own bad code lol)
-# if that happens, all future pipx attempts fail, so we have to fix it first
+# fix ownership of pipx directory -- may be root-owned from a prior run
 if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-    ORIGINAL_HOME=$(eval echo ~$ORIGINAL_USER)
-    if [[ -d "$ORIGINAL_HOME/.local/pipx" ]]; then
-        sudo chown -R "$ORIGINAL_USER:$(id -gn $ORIGINAL_USER)" "$ORIGINAL_HOME/.local/pipx" &>/dev/null
-    fi
-else
-    echo "⚠️ WARNING: Running pipx as root"
-    if [[ -d ~/.local/pipx ]]; then
-        sudo chown -R $(id -u):$(id -g) ~/.local/pipx &>/dev/null
+    if [[ -d "$HOME/.local/pipx" ]]; then
+        sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.local/pipx" &>/dev/null
     fi
 fi
 
 # https://github.com/mhinz/neovim-remote
-run_pipx install neovim-remote
-run_pipx upgrade pynvim 2>/dev/null || run_pipx install pynvim
-run_pipx install basedpyright
-
+pipx install neovim-remote
+pipx upgrade pynvim 2>/dev/null || pipx install pynvim
+pipx install basedpyright

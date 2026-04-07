@@ -279,7 +279,7 @@ defaults write com.apple.screensaver askForPasswordDelay -int 0
 
 # Don't save screenshots to the Desktop
 mkdir -p "${HOME}/Screenshots"
-chown "${SUDO_USER:-$(whoami)}" "${HOME}/Screenshots"
+sudo chown "$(whoami)" "${HOME}/Screenshots" 2>/dev/null || true
 defaults write com.apple.screencapture location -string "${HOME}/Screenshots"
 
 # Save screenshots in PNG format (other options: BMP, GIF, JPG, PDF, TIFF)
