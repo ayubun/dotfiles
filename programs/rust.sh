@@ -23,10 +23,10 @@ install_rust_analyzer() {
     chmod +x "$HOME/.cargo/bin/rust-analyzer"
 }
 
-if [ -f "$HOME/work/.zshrc_aliases" ]; then
-    echo "work computer detected; skipping rust install & toolchain management"
-    # Work computer manages its own rust toolchain via Nix.
-    # Skip rustup management, but use the system cargo for tool installs.
+if [ -f "$HOME/work/.zshrc_aliases" ] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
+    echo "work devbox detected; skipping rust install & toolchain management"
+    # Linux devbox manages its own rust toolchain via Nix.
+    # Skip rustup management, but use the Nix-provided cargo for tool installs.
     install_rust_analyzer
 
     if command -v cargo &>/dev/null; then
