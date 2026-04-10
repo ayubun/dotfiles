@@ -54,6 +54,7 @@ return {
       }
     end,
   },
+  { "direnv/direnv.vim" },
   -- https://github.com/avifenesh/claucode.nvim
   {
     "avifenesh/claucode.nvim",
