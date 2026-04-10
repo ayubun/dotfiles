@@ -87,6 +87,8 @@ safer-apt-fast install neofetch 2>/dev/null || true
 
 safer-apt-fast autoremove
 
+sudo ln -s /usr/bin/fdfind /usr/bin/fd
+
 # Unlock apt lock (only if we acquired it)
 if [[ -d "$HOME/dotfiles/tmp" ]]; then
   rm -f $HOME/dotfiles/tmp/apt.lock
