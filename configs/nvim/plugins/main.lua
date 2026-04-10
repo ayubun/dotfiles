@@ -54,6 +54,7 @@ return {
       }
     end,
   },
+  -- this syncs neovim's env with the one that the user has
   { "direnv/direnv.vim" },
   -- https://github.com/avifenesh/claucode.nvim
   {
