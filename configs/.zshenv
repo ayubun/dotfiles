@@ -15,6 +15,9 @@ fi
 
 # Core aliases - for use in scripts
 alias ai-agent="opencode"
+# Use native Claude Code install -- the Discord disget wrapper is broken (os error 48)
+# and overwrites ~/.local/bin/claude with a bad symlink on every invocation
+# alias claude="$HOME/.local/bin/claude"
 
 # Load any pre-configured functions
 if [ -f "$DOTFILES_FOLDER/configs/dependencies/functions.sh" ]; then

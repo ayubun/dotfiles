@@ -1,0 +1,10 @@
+{
+  "model": "opus[1m]",
+  "statusLine": {
+    "type": "command",
+    "command": "bash ${HOME}/dotfiles/configs/claude/statusline-command.sh"
+  },
+  "enabledPlugins": {
+    "plugin-recommender@discord-ai-context-marketplace": true
+  }
+}
