@@ -13,6 +13,13 @@ fi
 # This avoids bugs in toolchain-pinned versions.
 install_rust_analyzer() {
     rm -f "$HOME/.local/bin/rust-analyzer"
+    # Remove existing rust-analyzer from cargo/bin BEFORE writing the new one.
+    # On Linux, rustup uses hardlinks — all proxies (rustup, cargo, rustc,
+    # rust-analyzer, etc.) share the same inode.  Writing through the
+    # hardlink with `>` would overwrite that shared inode and corrupt
+    # every proxy.  Removing first breaks the hardlink so the new
+    # standalone binary gets its own inode.
+    rm -f "$HOME/.cargo/bin/rust-analyzer"
     if [[ "$OSTYPE" == "darwin"* ]]; then
         RA_TARGET="aarch64-apple-darwin"
     else
