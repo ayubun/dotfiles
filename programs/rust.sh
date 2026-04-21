@@ -30,25 +30,52 @@ install_rust_analyzer() {
     chmod +x "$HOME/.cargo/bin/rust-analyzer"
 }
 
+# Install cargo extensions that are shared across all environments.
+install_cargo_extensions() {
+    if command -v cargo &>/dev/null; then
+        echo "cargo found at $(command -v cargo)"
+        # tree-sitter CLI -- needed by nvim-treesitter to compile parsers from source.
+        # Building from source avoids GLIBC mismatch issues with pre-built binaries.
+        cargo install --locked tree-sitter-cli || true
+        # https://github.com/ethowitz/cargo-subspace
+        # helps keep large cargo projects lazy-loading with rust-analyzer
+        cargo install --locked cargo-subspace --force || true
+    else
+        echo "WARNING: cargo not found in PATH, skipping cargo extensions"
+    fi
+}
+
+# Fix ownership of cargo/rustup dirs after installs (root runs can leave them root-owned)
+fix_cargo_ownership() {
+    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+        sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
+        sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.rustup" 2>/dev/null || true
+    fi
+}
+
 if [ -f "$HOME/work/.zshrc_aliases" ] && [[ "$OSTYPE" == "linux-gnu"* ]]; then
-    echo "work devbox detected; skipping rust install & toolchain management"
+    echo "** work devbox detected **"
     # Linux devbox manages its own rust toolchain via Nix.
     # Skip rustup management, but use the Nix-provided cargo for tool installs.
     install_rust_analyzer
 
-    if command -v cargo &>/dev/null; then
-        cargo install --locked tree-sitter-cli 2>/dev/null || true
-        cargo install --locked cargo-subspace --force 2>/dev/null || true
-    fi
+    # Ensure Nix-provided tools are in PATH (non-interactive shells don't
+    # source shell profiles, so cargo from Nix may not be reachable).
+    for nix_profile in "$HOME/.nix-profile/etc/profile.d/nix.sh" \
+                       "/nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh" \
+                       "/etc/profile.d/nix.sh"; do
+        [[ -f "$nix_profile" ]] && source "$nix_profile" 2>/dev/null
+    done
 
-    # fix ownership after downloads
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
-    fi
+    install_cargo_extensions
+    fix_cargo_ownership
+    echo "** work devbox setup complete **"
     exit 0
 fi
 
 # --- Non-work computer: full rust install ---
+
+echo "** non-work machine detected **"
 
 # Clean old rust installation, if present
 rustup self uninstall -y &>/dev/null
@@ -74,17 +101,8 @@ rustup update nightly
 rustup component add rust-src
 
 install_rust_analyzer
+install_cargo_extensions
+fix_cargo_ownership
 
-# fix ownership after downloads/installs
-if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.cargo" 2>/dev/null || true
-    sudo chown -R "$ORIGINAL_USER:$(id -gn "$ORIGINAL_USER")" "$HOME/.rustup" 2>/dev/null || true
-fi
+echo "** non-work setup complete **"
 
-# tree-sitter CLI -- needed by nvim-treesitter to compile parsers from source.
-# Building from source avoids GLIBC mismatch issues with pre-built binaries.
-cargo install --locked tree-sitter-cli
-
-# https://github.com/ethowitz/cargo-subspace
-# helps keep large cargo projects lazy-loading with rust-analyzer
-cargo install --locked cargo-subspace --force
