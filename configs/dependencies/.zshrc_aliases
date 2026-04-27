@@ -99,3 +99,5 @@ alias chuuuuuuuuu="chuu"
 alias chuuuuuuuuuu="chuu"
 alias chuuuuuuuuuuu="chuu"
 
+alias usako="ssh usako"
+alias usako-forward="cd ~/discord && clyde coder forward"
