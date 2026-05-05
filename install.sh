@@ -125,6 +125,11 @@ if [[ "$DOTFILES_FOLDER" != "$HOME/dotfiles" ]]; then
   exit 0
 fi
 
+# The bootstrap clone above uses HTTPS (no auth needed for public read), but pushes/pulls
+# should use SSH so they auth via the user's SSH key instead of an interactive password
+# prompt (which can be intercepted by tools like Coder's askpass wrapper).
+git -C "$HOME/dotfiles" remote set-url origin git@github.com:ayubun/dotfiles.git 2>/dev/null || true
+
 
 echo ""
 
