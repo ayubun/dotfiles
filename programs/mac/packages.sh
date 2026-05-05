@@ -35,7 +35,6 @@ formulae=(
   python@3.12
   jesseduffield/lazygit/lazygit
   fd
-  tmux
   wireguard-tools
   lsd # https://github.com/lsd-rs/lsd
   python
@@ -43,6 +42,7 @@ formulae=(
   tlrc # https://github.com/tldr-pages/tlrc
   ncdu
   dive # https://github.com/wagoodman/dive
+  cloudflared
 )
 
 # Formulae that must be compiled from source (no bottles available)
