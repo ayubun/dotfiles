@@ -51,12 +51,38 @@ safer-apt() {
 }
 
 safer-apt-fast() {
+    # Fall back to plain apt when apt-fast isn't installed (e.g., its PPA was unreachable
+    # during dependency install). Keeps callers transparent to the missing binary.
+    if ! command -v apt-fast >/dev/null 2>&1; then
+        safer-apt "$@"
+        return $?
+    fi
     # If we're capturing logs (CAPTURE_OUTPUT is set), don't redirect to /dev/null
     if [[ -n "$CAPTURE_OUTPUT" ]]; then
         "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || unlock-apt
     else
         "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
     fi
+}
+
+# Retry add-apt-repository on transient failures (e.g., launchpad PPA 504 / connection-refused).
+# Returns 0 on success, non-zero after exhausting retries (caller can choose to ignore).
+safer-add-apt-repository() {
+    local repo="$1"
+    local max_attempts=3
+    local attempt=1
+    local delay=5
+    while (( attempt <= max_attempts )); do
+        if sudo DEBIAN_FRONTEND=noninteractive add-apt-repository -y "$repo"; then
+            return 0
+        fi
+        echo "add-apt-repository attempt $attempt failed for $repo; retrying in ${delay}s..." >&2
+        sleep "$delay"
+        delay=$(( delay * 2 ))
+        (( attempt++ ))
+    done
+    echo "add-apt-repository failed for $repo after $max_attempts attempts; continuing without it" >&2
+    return 1
 }
 
 # Safe tput function that falls back to empty strings if tput fails
@@ -101,6 +127,7 @@ export -f unlock-apt
 export -f fix-apt
 export -f safer-apt
 export -f safer-apt-fast
+export -f safer-add-apt-repository
 export -f safe_tput
 export -f get_arch
 

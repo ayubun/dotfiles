@@ -66,7 +66,7 @@ total_packages=${#packages[@]}
 # done
 
 for repository in ${apt_repositories[@]}; do
-  sudo DEBIAN_FRONTEND=noninteractive add-apt-repository -y $repository
+  safer-add-apt-repository "$repository" || true
 done
 
 safer-apt-fast update
