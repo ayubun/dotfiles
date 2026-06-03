@@ -1,0 +1,3 @@
+[submodule "configs/opencode/sources/ed3d-plugins-hailz"]
+	path = configs/opencode/sources/ed3d-plugins-hailz
+	url = git@github.com:haileyok/ed3d-plugins-hailz.git
