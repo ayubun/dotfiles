@@ -6,5 +6,6 @@
   },
   "enabledPlugins": {
     "plugin-recommender@discord-ai-context-marketplace": true
-  }
+  },
+  "skipDangerousModePermissionPrompt": true
 }
