@@ -6,3 +6,6 @@ mkdir -p ~/.claude
 
 ln -sF ~/dotfiles/configs/claude/settings.json ~/.claude/settings.json
 
+rm -rf ~/.claude/skills
+ln -s ~/dotfiles/configs/claude/skills ~/.claude/skills
+

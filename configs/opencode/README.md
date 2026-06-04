@@ -14,7 +14,7 @@ configs/opencode/
     ed3d-plugins-hailz/                    # git submodule (read-only)
 ```
 
-`skills/` is **fully owned** by `updaters/opencode-skills.sh`. Do not hand-edit
+`skills/` is **fully owned** by `updaters/skills.sh`. Do not hand-edit
 files under any `ed3d-*` subdir; the next conversion will wipe them. Custom
 non-`ed3d-*` skill dirs placed here are preserved.
 
@@ -24,12 +24,12 @@ non-`ed3d-*` skill dirs placed here are preserved.
 # 1. Bump the submodule to the upstream commit you want
 git submodule update --remote configs/opencode/sources/ed3d-plugins-hailz
 
-# 2. Regenerate (idempotent)
-./updaters/opencode-skills.sh
+# 2. Regenerate (emits both opencode and claude code output)
+./updaters/skills.sh
 
-# 3. Review and commit submodule bump + converted skills together
-git add .gitmodules configs/opencode
-git commit -m "opencode-skills: bump ed3d-plugins-hailz"
+# 3. Review and commit
+git add configs/opencode configs/claude
+git commit
 ```
 
 Restart opencode after committing - skill registration happens once at

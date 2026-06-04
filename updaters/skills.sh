@@ -1,25 +1,24 @@
 #!/usr/bin/env bash
-# Convert Claude Code skills from the ed3d-plugins-hailz submodule into
-# opencode-compatible skill directories under configs/opencode/skills/.
+# Convert Claude Code skills from the ed3d-plugins-hailz submodule into:
+#   1. opencode format  -> configs/opencode/skills/<plugin>/<skill>/SKILL.md
+#   2. claude code copy -> configs/claude/skills/<skill>/SKILL.md  (flat, unmodified)
 #
-# Idempotent: the destination is fully owned by this script. Every plugin
-# subtree it manages is wiped and rewritten from the current submodule
-# state, so re-running after an upstream bump always produces the same
-# result as a fresh checkout.
+# Idempotent: both destinations are fully owned by this script. Every
+# managed subtree is wiped and rewritten from the current submodule state,
+# so re-running after an upstream bump always produces the same result.
 #
 # Typical workflow:
 #   1. Bump the submodule to the upstream commit you want:
 #        git submodule update --remote configs/opencode/sources/ed3d-plugins-hailz
 #      (or cd in and check out a specific ref)
 #   2. Regenerate:
-#        ./updaters/opencode-skills.sh
-#   3. Review and commit both the submodule bump and the regenerated skills:
-#        git add .gitmodules configs/opencode
+#        ./updaters/skills.sh
+#   3. Review and commit:
+#        git add configs/opencode configs/claude
 #        git commit
 #
 # Flags:
 #   --source <path>   override the source repo path (default: the submodule)
-#   --dest   <path>   override the destination dir (default: configs/opencode/skills)
 #   -h | --help       print this header
 
 set -euo pipefail
@@ -28,7 +27,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 SOURCE_DIR="${REPO_ROOT}/configs/opencode/sources/ed3d-plugins-hailz"
-DEST_DIR="${REPO_ROOT}/configs/opencode/skills"
+
+OPENCODE_DEST="${REPO_ROOT}/configs/opencode/skills"
+CLAUDE_DEST="${REPO_ROOT}/configs/claude/skills"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -36,12 +37,7 @@ while [[ $# -gt 0 ]]; do
       SOURCE_DIR="$2"
       shift 2
       ;;
-    --dest)
-      DEST_DIR="$2"
-      shift 2
-      ;;
     -h | --help)
-      # Print the leading comment block as usage.
       awk 'NR>1 && /^#/ {sub(/^# ?/,""); print; next} NR>1 {exit}' "${BASH_SOURCE[0]}"
       exit 0
       ;;
@@ -58,28 +54,21 @@ if [[ ! -d "$SOURCE_DIR/plugins" ]]; then
   exit 1
 fi
 
-mkdir -p "$DEST_DIR"
+# --- Prepare destinations ---------------------------------------------------
 
-# Idempotency: wipe every plugin tree we previously emitted. Leave anything
-# else in the directory alone (README, .gitkeep, manually-added skills).
-# All emitted plugin dirs are prefixed "ed3d-".
-find "$DEST_DIR" -mindepth 1 -maxdepth 1 -type d -name 'ed3d-*' -exec rm -rf {} +
+mkdir -p "$OPENCODE_DEST" "$CLAUDE_DEST"
 
-# Frontmatter whitelist. Anything not in this set is dropped from the
-# rewritten SKILL.md (notably the Claude-Code-only "user-invocable" key).
-# Keep this list aligned with opencode's documented skill schema:
-#   https://opencode.ai/config.json
+# Idempotency: wipe every managed tree. Non-ed3d dirs are preserved.
+find "$OPENCODE_DEST" -mindepth 1 -maxdepth 1 -type d -name 'ed3d-*' -exec rm -rf {} +
+find "$CLAUDE_DEST" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
+
+# --- opencode frontmatter filter --------------------------------------------
+
+# Whitelist for opencode SKILL.md frontmatter keys.
 ALLOWED_KEYS='^(name|description|license|compatibility|metadata)$'
 
-# awk program that:
-#   - copies markdown body verbatim
-#   - in frontmatter:
-#       * emits a canonical "name: <folder-name>" right after the opening
-#         "---" (opencode requires name to match the folder, and upstream
-#         occasionally drifts; we normalize unconditionally)
-#       * drops any source "name:" line
-#       * keeps whitelisted keys and their continuation lines
-#       * drops everything else (notably the Claude-Code "user-invocable")
+# awk program: rewrites frontmatter for opencode (canonical name, strip
+# unknown keys); copies markdown body verbatim.
 AWK_FILTER='
 BEGIN { in_fm = 0; fm_done = 0; skip = 0 }
 /^---[ \t]*$/ {
@@ -96,7 +85,6 @@ BEGIN { in_fm = 0; fm_done = 0; skip = 0 }
   }
 }
 in_fm {
-  # A new key starts at column 0 and matches "key:".
   if (match($0, /^[A-Za-z_][A-Za-z0-9_-]*[ \t]*:/)) {
     key = $0
     sub(/[ \t]*:.*/, "", key)
@@ -104,15 +92,13 @@ in_fm {
     if (key ~ allowed) { skip = 0; print } else { skip = 1 }
     next
   }
-  # Continuation line (indented or blank): inherit current skip state.
   if (!skip) print
   next
 }
 { print }
 '
 
-# Extract a one-line frontmatter scalar value. Used for validation, not for
-# rewriting (rewriting is done by the awk filter above).
+# Extract a one-line frontmatter scalar value (for validation only).
 extract_value() {
   awk -v key="$2" '
     BEGIN { in_fm = 0 }
@@ -129,6 +115,8 @@ extract_value() {
   ' "$1"
 }
 
+# --- Convert -----------------------------------------------------------------
+
 count=0
 shopt -s nullglob
 for plugin_path in "$SOURCE_DIR"/plugins/*/; do
@@ -141,8 +129,6 @@ for plugin_path in "$SOURCE_DIR"/plugins/*/; do
     fm_name="$(extract_value "${skill_path}SKILL.md" name)"
     fm_desc="$(extract_value "${skill_path}SKILL.md" description)"
 
-    # description is the only hard requirement (opencode silently drops
-    # skills without it). name is normalized to folder regardless of source.
     if [[ -z "$fm_desc" ]]; then
       echo "error: ${plugin_name}/${skill_name}/SKILL.md missing 'description'" >&2
       exit 1
@@ -151,16 +137,19 @@ for plugin_path in "$SOURCE_DIR"/plugins/*/; do
       echo "warn: ${plugin_name}/${skill_name}/SKILL.md: source name '$fm_name' != folder; using folder" >&2
     fi
 
-    out_dir="$DEST_DIR/$plugin_name/$skill_name"
-    mkdir -p "$out_dir"
+    # -- opencode: plugin-grouped, rewritten frontmatter --
+    oc_dir="$OPENCODE_DEST/$plugin_name/$skill_name"
+    mkdir -p "$oc_dir"
 
-    # Copy every auxiliary file verbatim (subdirs included).
     find "$skill_path" -mindepth 1 -maxdepth 1 ! -name 'SKILL.md' \
-      -exec cp -R {} "$out_dir/" \;
+      -exec cp -R {} "$oc_dir/" \;
 
-    # Rewrite SKILL.md with the frontmatter filter.
     awk -v allowed="$ALLOWED_KEYS" -v folder_name="$skill_name" "$AWK_FILTER" \
-      "${skill_path}SKILL.md" > "$out_dir/SKILL.md"
+      "${skill_path}SKILL.md" > "$oc_dir/SKILL.md"
+
+    # -- claude code: flat, original files verbatim --
+    cc_dir="$CLAUDE_DEST/$skill_name"
+    cp -R "$skill_path" "$cc_dir"
 
     count=$((count + 1))
   done
@@ -168,5 +157,6 @@ done
 shopt -u nullglob
 
 echo "converted $count skills"
-echo "  source: $SOURCE_DIR"
-echo "  dest:   $DEST_DIR"
+echo "  source:  $SOURCE_DIR"
+echo "  opencode: $OPENCODE_DEST"
+echo "  claude:   $CLAUDE_DEST"
