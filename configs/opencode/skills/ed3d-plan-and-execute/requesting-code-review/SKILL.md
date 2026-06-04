@@ -18,7 +18,7 @@ This prevents collisions when multiple planning/execution sessions run in parall
 ## Caller is always the top-level orchestrator
 
 This skill is always invoked from the top-level orchestrator session,
-never from inside a subagent. Subagents in Claude Code cannot dispatch
+never from inside a subagent. Subagents in opencode cannot dispatch
 their own subagents — the `Task` / `Agent` tool is reserved for the
 orchestrator. Both `executing-an-implementation-plan` (single feature)
 and `executing-parallel-issue-sweep` (multi-issue) call this skill from

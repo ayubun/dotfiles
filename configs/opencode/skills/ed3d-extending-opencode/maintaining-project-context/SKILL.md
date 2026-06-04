@@ -1,15 +1,15 @@
 ---
 name: maintaining-project-context
-description: Use when completing development phases or branches to identify and update CLAUDE.md or AGENTS.md files that may have become stale - analyzes what changed, determines affected contracts and documentation, and coordinates updates
+description: Use when completing development phases or branches to identify and update AGENTS.md or AGENTS.md files that may have become stale - analyzes what changed, determines affected contracts and documentation, and coordinates updates
 ---
 
 # Maintaining Project Context
 
-**REQUIRED SUB-SKILL:** Use ed3d-extending-claude:writing-claude-md-files for all context file creation and updates.
+**REQUIRED SUB-SKILL:** Use ed3d-extending-opencode:writing-agents-md-files for all context file creation and updates.
 
 ## Core Principle
 
-Context files (CLAUDE.md or AGENTS.md) document contracts and architectural intent. When code changes contracts, the documentation must update. Stale documentation is worse than no documentation.
+Context files (AGENTS.md or AGENTS.md) document contracts and architectural intent. When code changes contracts, the documentation must update. Stale documentation is worse than no documentation.
 
 **Trigger:** End of development phase, branch completion, or any work that changed contracts, APIs, or domain structure.
 
@@ -21,14 +21,14 @@ Before any updates, detect what format this repository uses:
 # Check for AGENTS.md at root
 ls -la AGENTS.md 2>/dev/null
 
-# Check for CLAUDE.md at root
-ls -la CLAUDE.md 2>/dev/null
+# Check for AGENTS.md at root
+ls -la AGENTS.md 2>/dev/null
 ```
 
 | Root AGENTS.md? | Format | Action |
 |-----------------|--------|--------|
-| Yes | AGENTS.md-canonical | Update AGENTS.md files, create companion CLAUDE.md |
-| No | CLAUDE.md-canonical | Update CLAUDE.md files directly |
+| Yes | AGENTS.md-canonical | Update AGENTS.md files, create companion AGENTS.md |
+| No | AGENTS.md-canonical | Update AGENTS.md files directly |
 
 **Key principle:** We use OUR format structure (Purpose, Contracts, Dependencies, Invariants, etc.) regardless of filename. AGENTS.md is just for cross-platform AI agent compatibility.
 
@@ -38,10 +38,10 @@ When the repo uses AGENTS.md:
 
 1. **Read AGENTS.md first** before making any updates
 2. **Write content to AGENTS.md** using our standard structure
-3. **Create companion CLAUDE.md** next to each AGENTS.md with exactly this content:
+3. **Create companion AGENTS.md** next to each AGENTS.md with exactly this content:
 
 ```markdown
-Read @./AGENTS.md and treat its contents as if they were in CLAUDE.md
+Read @./AGENTS.md and treat its contents as if they were in AGENTS.md
 ```
 
 ## When to Update Context Files
@@ -90,7 +90,7 @@ For each significant change, determine which context file should document it:
 
 **Hierarchy rule:** Information belongs at the lowest level where it applies. Domain-specific contracts go in domain files, not root.
 
-**For AGENTS.md-canonical repos:** When creating new domain context files, create both `AGENTS.md` (with content) and `CLAUDE.md` (companion pointer).
+**For AGENTS.md-canonical repos:** When creating new domain context files, create both `AGENTS.md` (with content) and `AGENTS.md` (companion pointer).
 
 ### Step 3: Verify Contracts Still Hold
 
@@ -118,24 +118,24 @@ grep -r "from '\.\." <domain>/
 4. Remove stale content
 5. Verify under token budget (<100 lines for domain files)
 
-**For new domains (CLAUDE.md-canonical repos):**
-1. Create `<domain>/CLAUDE.md` using template from writing-claude-md-files
+**For new domains (AGENTS.md-canonical repos):**
+1. Create `<domain>/AGENTS.md` using template from writing-agents-md-files
 2. Document purpose, contracts, dependencies, invariants
 3. Set freshness date
 
 **For new domains (AGENTS.md-canonical repos):**
-1. Create `<domain>/AGENTS.md` using template from writing-claude-md-files
+1. Create `<domain>/AGENTS.md` using template from writing-agents-md-files
 2. Document purpose, contracts, dependencies, invariants
 3. Set freshness date
-4. Create companion `<domain>/CLAUDE.md`:
+4. Create companion `<domain>/AGENTS.md`:
    ```markdown
-   Read @./AGENTS.md and treat its contents as if they were in CLAUDE.md
+   Read @./AGENTS.md and treat its contents as if they were in AGENTS.md
    ```
 
 ### Step 5: Commit Documentation Updates
 
 ```bash
-git add <affected CLAUDE.md files>
+git add <affected AGENTS.md files>
 git commit -m "docs: update project context for <branch-name>"
 ```
 
@@ -151,8 +151,8 @@ Has code changed?
         └─ Contracts/APIs/structure → Continue
             │
             ├─ New domain created?
-            │   ├─ AGENTS.md repo → Create AGENTS.md + companion CLAUDE.md
-            │   └─ CLAUDE.md repo → Create CLAUDE.md
+            │   ├─ AGENTS.md repo → Create AGENTS.md + companion AGENTS.md
+            │   └─ AGENTS.md repo → Create AGENTS.md
             │
             ├─ Existing domain changed?
             │   └─ Update domain context file (read first!)
@@ -187,14 +187,14 @@ Has code changed?
 | Skipping verification | Read the code, confirm contracts hold |
 | Skipping format detection | Always check for AGENTS.md first |
 | Writing AGENTS.md without reading | Always read existing content before updating |
-| Forgetting companion CLAUDE.md | AGENTS.md repos need both files |
+| Forgetting companion AGENTS.md | AGENTS.md repos need both files |
 
 ## Integration Points
 
 **Called by:**
-- **project-claude-librarian agent** - Uses this skill to coordinate updates
+- **project-opencode-librarian agent** - Uses this skill to coordinate updates
 - **executing-an-implementation-plan** (Step 5b) - After all tasks complete
 - **finishing-a-development-branch** (Step 4b) - Before merge/PR
 
 **Uses:**
-- **writing-claude-md-files** - For actual context file creation/updates (works for both CLAUDE.md and AGENTS.md)
+- **writing-agents-md-files** - For actual context file creation/updates (works for both AGENTS.md and AGENTS.md)

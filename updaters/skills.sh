@@ -115,6 +115,43 @@ extract_value() {
   ' "$1"
 }
 
+# --- opencode renaming helpers -----------------------------------------------
+
+# Rename map for directory / skill / plugin names.
+opencode_rename() {
+  local name="$1"
+  name="${name//extending-claude/extending-opencode}"
+  name="${name//writing-claude-md-files/writing-agents-md-files}"
+  name="${name//writing-claude-directives/writing-opencode-directives}"
+  echo "$name"
+}
+
+# Text replacements applied to all opencode output files.
+# Order matters: longer/more specific patterns first to avoid partial matches.
+opencode_text_replace() {
+  sed \
+    -e 's/CLAUDE\.md/AGENTS.md/g' \
+    -e 's/Claude Code/opencode/g' \
+    -e 's/claude code/opencode/g' \
+    -e 's/claude-code/opencode/g' \
+    -e 's/extending-claude/extending-opencode/g' \
+    -e 's/writing-claude-md-files/writing-agents-md-files/g' \
+    -e 's/writing-claude-directives/writing-opencode-directives/g' \
+    -e 's/project-claude-librarian/project-opencode-librarian/g' \
+    -e 's/CLAUDE_MD_TESTING/AGENTS_MD_TESTING/g' \
+    -e 's|~/\.claude/skills/|~/.config/opencode/skills/|g'
+}
+
+# Rename files whose names contain claude-specific terms.
+opencode_rename_files() {
+  local dir="$1"
+  find "$dir" -depth -type f -name '*CLAUDE*' | while read -r f; do
+    local base; base="$(basename "$f")"
+    local newbase; newbase="${base//CLAUDE_MD/AGENTS_MD}"
+    [[ "$base" != "$newbase" ]] && mv "$f" "$(dirname "$f")/$newbase"
+  done
+}
+
 # --- Convert -----------------------------------------------------------------
 
 count=0
@@ -138,14 +175,26 @@ for plugin_path in "$SOURCE_DIR"/plugins/*/; do
     fi
 
     # -- opencode: plugin-grouped, rewritten frontmatter --
-    oc_dir="$OPENCODE_DEST/$plugin_name/$skill_name"
+    # Apply dir name renames (plugin + skill level).
+    oc_plugin="$(opencode_rename "$plugin_name")"
+    oc_skill="$(opencode_rename "$skill_name")"
+    oc_dir="$OPENCODE_DEST/$oc_plugin/$oc_skill"
     mkdir -p "$oc_dir"
 
     find "$skill_path" -mindepth 1 -maxdepth 1 ! -name 'SKILL.md' \
       -exec cp -R {} "$oc_dir/" \;
 
-    awk -v allowed="$ALLOWED_KEYS" -v folder_name="$skill_name" "$AWK_FILTER" \
-      "${skill_path}SKILL.md" > "$oc_dir/SKILL.md"
+    # Rewrite SKILL.md: frontmatter filter + text replacements.
+    # folder_name uses the renamed skill name so name: matches the dir.
+    awk -v allowed="$ALLOWED_KEYS" -v folder_name="$oc_skill" "$AWK_FILTER" \
+      "${skill_path}SKILL.md" | opencode_text_replace > "$oc_dir/SKILL.md"
+
+    # Post-process auxiliary text files with the same replacements.
+    find "$oc_dir" -type f ! -name 'SKILL.md' \( -name '*.md' -o -name '*.txt' \) \
+      -exec "$SCRIPT_DIR/_opencode-text-replace.sh" {} +
+
+    # Rename auxiliary files (e.g. CLAUDE_MD_TESTING.md -> AGENTS_MD_TESTING.md).
+    opencode_rename_files "$oc_dir"
 
     # -- claude code: flat, original files verbatim --
     cc_dir="$CLAUDE_DEST/$skill_name"

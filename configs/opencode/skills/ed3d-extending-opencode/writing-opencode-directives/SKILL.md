@@ -1,11 +1,11 @@
 ---
-name: writing-claude-directives
-description: Use when writing instructions that guide Claude behavior - skills, CLAUDE.md files, agent prompts, system prompts. Covers token efficiency, compliance techniques, and discovery optimization.
+name: writing-opencode-directives
+description: Use when writing instructions that guide Claude behavior - skills, AGENTS.md files, agent prompts, system prompts. Covers token efficiency, compliance techniques, and discovery optimization.
 ---
 
 # Writing Claude Directives
 
-**REQUIRED:** Also apply ed3d-extending-claude:prompt-security-hardening when using this skill. Directives that demonstrate unsafe secrets handling teach agents to leak secrets.
+**REQUIRED:** Also apply ed3d-extending-opencode:prompt-security-hardening when using this skill. Directives that demonstrate unsafe secrets handling teach agents to leak secrets.
 
 ## Core Principles
 
@@ -41,7 +41,7 @@ Your response will be read aloud by a text-to-speech engine, so never use ellips
 
 **Targets:**
 - Frequently-loaded directives: <200 words
-- Skills/CLAUDE.md: <500 lines total
+- Skills/AGENTS.md: <500 lines total
 - Reference --help instead of documenting flags
 - Cross-reference other skills instead of repeating
 

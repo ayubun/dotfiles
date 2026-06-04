@@ -1,13 +1,13 @@
 ---
 name: creating-a-plugin
-description: Use when creating a new Claude Code plugin or setting up plugin structure - provides complete file organization, manifest format, and component definitions for commands, agents, skills, hooks, and MCP servers
+description: Use when creating a new opencode plugin or setting up plugin structure - provides complete file organization, manifest format, and component definitions for commands, agents, skills, hooks, and MCP servers
 ---
 
 # Creating a Plugin
 
 ## Overview
 
-A **Claude Code plugin** packages reusable components (commands, agents, skills, hooks, MCP servers) for distribution. Create a plugin when you have components that work across multiple projects.
+A **opencode plugin** packages reusable components (commands, agents, skills, hooks, MCP servers) for distribution. Create a plugin when you have components that work across multiple projects.
 
 **Don't create a plugin for:**
 - Project-specific configurations (use `.claude/` in project root)
@@ -348,7 +348,7 @@ Core principle in 1-2 sentences.
 - `Stop` - When Claude finishes responding
 - `SessionStart` - Session initialization
 - `SessionEnd` - Session cleanup
-- `Notification` - On Claude Code notifications
+- `Notification` - On opencode notifications
 - `SubagentStop` - When subagent completes
 - `PreCompact` - Before context compaction
 
@@ -403,7 +403,7 @@ For local development, create a marketplace to organize your plugins:
 
 ```json
 {
-  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "$schema": "https://anthropic.com/opencode/marketplace.schema.json",
   "name": "my-dev-marketplace",
   "version": "1.0.0",
   "owner": {
@@ -573,10 +573,10 @@ dev-marketplace/
 
 **For public distribution:**
 
-Refer to official Claude Code documentation for publishing to public marketplaces.
+Refer to official opencode documentation for publishing to public marketplaces.
 
 ## Reference Links
 
-- Official plugin docs: https://docs.claude.com/en/docs/claude-code/plugins
-- Plugin reference: https://docs.claude.com/en/docs/claude-code/plugins-reference
-- MCP servers: https://docs.claude.com/en/docs/claude-code/mcp-servers
+- Official plugin docs: https://docs.claude.com/en/docs/opencode/plugins
+- Plugin reference: https://docs.claude.com/en/docs/opencode/plugins-reference
+- MCP servers: https://docs.claude.com/en/docs/opencode/mcp-servers

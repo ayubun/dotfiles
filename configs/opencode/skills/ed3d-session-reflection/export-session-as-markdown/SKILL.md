@@ -1,11 +1,11 @@
 ---
 name: export-session-as-markdown
-description: Use when the user wants to export a Claude Code session transcript as a readable Markdown file — converts the current session (or a specified transcript path) into GitHub-flavored Markdown with metadata header, collapsible tool results, and thinking blocks
+description: Use when the user wants to export a opencode session transcript as a readable Markdown file — converts the current session (or a specified transcript path) into GitHub-flavored Markdown with metadata header, collapsible tool results, and thinking blocks
 ---
 
 # Export Session as Markdown
 
-Export a Claude Code session transcript to a human-readable GitHub-flavored Markdown file.
+Export a opencode session transcript to a human-readable GitHub-flavored Markdown file.
 
 ## Prerequisites
 

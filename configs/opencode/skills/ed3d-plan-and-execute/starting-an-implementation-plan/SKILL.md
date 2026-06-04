@@ -270,7 +270,7 @@ The execute-implementation-plan command will implement the plan task-by-task wit
 
 **Use the real paths from Step 1, not placeholders.** The example above shows the format — substitute your actual verified paths.
 
-**Why absolute paths:** After /clear, Claude Code returns to the original session directory (often the repo root, not the worktree). Absolute paths ensure execution happens in the correct directory regardless of where /clear returns.
+**Why absolute paths:** After /clear, opencode returns to the original session directory (often the repo root, not the worktree). Absolute paths ensure execution happens in the correct directory regardless of where /clear returns.
 
 **Why /clear instead of continuing:**
 - Execution needs fresh context to work effectively

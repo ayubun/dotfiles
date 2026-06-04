@@ -75,7 +75,7 @@ Dispatch one subagent codebase-investigator to understand testing behavior for t
 - **DO NOT prescribe new requirements around testing. Follow how the codebase does it.**
    - For example: do NOT stipulate TDD unless you understand the scope of the problem to be a predominantly functional one OR you receive direction from a human otherwise and do not assume that mocking databases or other external dependencies is acceptable. 
 - If you find problems that are difficult to test in isolation with mocks, you should surface questions to the human operator as to how they want to proceed.
-- Instruct the subagent to seek out CLAUDE.md or AGENTS.md files that include details on testing behavior, logic, and methodology, and include file references for you to provide in your plan for the executor to pass to its subagents.
+- Instruct the subagent to seek out AGENTS.md or AGENTS.md files that include details on testing behavior, logic, and methodology, and include file references for you to provide in your plan for the executor to pass to its subagents.
 
 Dispatch a second subagent codebase-investigator (simultaneously) with:
 - "The design assumes these files exist: [list with expected paths/structure from design]"

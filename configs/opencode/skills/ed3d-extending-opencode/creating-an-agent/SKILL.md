@@ -1,11 +1,11 @@
 ---
 name: creating-an-agent
-description: Use when creating specialized subagents for Claude Code plugins or the Task tool - covers description writing for auto-delegation, tool selection, prompt structure, and testing agents
+description: Use when creating specialized subagents for opencode plugins or the Task tool - covers description writing for auto-delegation, tool selection, prompt structure, and testing agents
 ---
 
 # Creating an Agent
 
-**REQUIRED BACKGROUND:** Read ed3d-extending-claude:writing-claude-directives for foundational guidance on token efficiency, compliance techniques, and directive structure. This skill focuses on agent-specific patterns.
+**REQUIRED BACKGROUND:** Read ed3d-extending-opencode:writing-opencode-directives for foundational guidance on token efficiency, compliance techniques, and directive structure. This skill focuses on agent-specific patterns.
 
 ## What is an Agent?
 

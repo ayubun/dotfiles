@@ -21,7 +21,7 @@ Gather accurate, current, well-sourced information from the internet to inform p
 **Don't use for:**
 - Information already in codebase (use codebase search)
 - General knowledge within Claude's training (just answer directly)
-- Project-specific conventions (check CLAUDE.md)
+- Project-specific conventions (check AGENTS.md)
 
 ## Core Research Workflow
 

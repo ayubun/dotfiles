@@ -128,7 +128,7 @@ This scratchpad ensures isolation when multiple execution sessions run in parall
 
 ### 2. Create Phase-Level Task List
 
-Use TaskCreate to create **three task entries per phase** (or TodoWrite in older Claude Code versions). Include the title from the header:
+Use TaskCreate to create **three task entries per phase** (or TodoWrite in older opencode versions). Include the title from the header:
 
 ```
 - [ ] Phase 1a: Read /absolute/path/to/phase_01.md — Document Infrastructure Implementation Plan
@@ -332,23 +332,23 @@ Proceed to the next phase's "Read" step. Repeat 3a-3c for each phase.
 
 ### 4. Update Project Context
 
-After all phases complete, invoke the `ed3d-extending-claude:project-claude-librarian` subagent (when available) to review changes and update CLAUDE.md files if needed.
+After all phases complete, invoke the `ed3d-extending-opencode:project-opencode-librarian` subagent (when available) to review changes and update AGENTS.md files if needed.
 
 ```
 <invoke name="Task">
-<parameter name="subagent_type">ed3d-extending-claude:project-claude-librarian</parameter>
+<parameter name="subagent_type">ed3d-extending-opencode:project-opencode-librarian</parameter>
 <parameter name="description">Updating project context after implementation</parameter>
 <parameter name="prompt">
-  Review what changed during this implementation and update CLAUDE.md files if contracts or structure changed.
+  Review what changed during this implementation and update AGENTS.md files if contracts or structure changed.
 
   Base commit: <commit SHA at start of first phase>
   Current HEAD: <current commit>
   Working directory: <directory>
 
-  Follow the ed3d-extending-claude:maintaining-project-context skill to:
+  Follow the ed3d-extending-opencode:maintaining-project-context skill to:
   1. Diff against base to see what changed
   2. Identify contract/API/structure changes
-  3. Update affected CLAUDE.md files
+  3. Update affected AGENTS.md files
   4. Commit documentation updates
 
   Report back with what was updated (or that no updates were needed).
@@ -358,7 +358,7 @@ After all phases complete, invoke the `ed3d-extending-claude:project-claude-libr
 
 **If librarian reports updates:** Review the changes, then proceed to final review.
 **If librarian reports no updates needed:** Proceed to final review.
-**If librarian subagent is unavailable:** skip this entire step. Say aloud that you're skipping it because the `ed3d-extending-claude` plugin is not available.
+**If librarian subagent is unavailable:** skip this entire step. Say aloud that you're skipping it because the `ed3d-extending-opencode` plugin is not available.
 
 ### 5. Final Review Sequence
 
@@ -546,8 +546,8 @@ You: I'm using the `executing-an-implementation-plan` skill.
 
 --- Finalize ---
 
-[Invoke project-claude-librarian subagent]
-→ Updated CLAUDE.md.
+[Invoke project-opencode-librarian subagent]
+→ Updated AGENTS.md.
 
 [Use requesting-code-review skill for final review]
 → All requirements met.

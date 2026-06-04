@@ -1,15 +1,15 @@
 ---
 name: review-session
-description: Use when the user wants to review a Claude Code session for quality — analyzes the current session (or a specified transcript path) for prompting effectiveness, agent performance, and environment gaps, producing actionable recommendations
+description: Use when the user wants to review a opencode session for quality — analyzes the current session (or a specified transcript path) for prompting effectiveness, agent performance, and environment gaps, producing actionable recommendations
 ---
 
 # Review Session
 
-Review a single Claude Code session transcript for quality and produce actionable findings.
+Review a single opencode session transcript for quality and produce actionable findings.
 
 ## Prerequisites
 
-- The `ed3d-extending-claude` plugin must be installed.
+- The `ed3d-extending-opencode` plugin must be installed.
 - The `ed3d-session-reflection` plugin must be installed (provides the `conversation-reviewer` agent and `reduce-transcript.py` script).
 - The current session's transcript path must be available (injected by the SessionStart hook). If it is not available, ask the user for the transcript path.
 
@@ -58,7 +58,7 @@ Dispatch the `conversation-reviewer` agent with:
 <parameter name="description">Review session transcript</parameter>
 <parameter name="model">opus</parameter>
 <parameter name="prompt">
-Review the reduced Claude Code session transcript.
+Review the reduced opencode session transcript.
 
 Transcript path: /tmp/session-review/reduced.txt
 Write your findings to: /tmp/session-review/findings.md

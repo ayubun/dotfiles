@@ -25,7 +25,7 @@ Transform rough ideas into fully-formed designs through structured questioning a
 
 **REQUIRED: Create task tracker at start**
 
-Use TaskCreate to create todos for each phase (or TodoWrite in older Claude Code versions):
+Use TaskCreate to create todos for each phase (or TodoWrite in older opencode versions):
 
 - Phase 1: Understanding (purpose, constraints, criteria gathered)
 - Phase 2: Exploration (2-3 approaches proposed and evaluated)

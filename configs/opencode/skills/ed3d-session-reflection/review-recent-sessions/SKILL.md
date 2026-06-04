@@ -1,6 +1,6 @@
 ---
 name: review-recent-sessions
-description: Use when the user wants to review their recent Claude Code sessions for patterns — analyzes the last N sessions (default 5) in the current project, dispatching parallel reviewers per session, then synthesizing cross-session findings
+description: Use when the user wants to review their recent opencode sessions for patterns — analyzes the last N sessions (default 5) in the current project, dispatching parallel reviewers per session, then synthesizing cross-session findings
 ---
 
 # Review Recent Sessions
@@ -9,7 +9,7 @@ Review multiple recent sessions from the current project directory to identify c
 
 ## Prerequisites
 
-- The `ed3d-extending-claude` plugin must be installed.
+- The `ed3d-extending-opencode` plugin must be installed.
 - The `ed3d-session-reflection` plugin must be installed (provides the `conversation-reviewer` agent and `reduce-transcript.py` script).
 - The current session's transcript path must be available (to determine the project directory).
 
@@ -68,7 +68,7 @@ For each reduced transcript, dispatch a `conversation-reviewer` agent **in the b
 <parameter name="model">opus</parameter>
 <parameter name="run_in_background">true</parameter>
 <parameter name="prompt">
-Review the reduced Claude Code session transcript.
+Review the reduced opencode session transcript.
 
 Transcript path: /tmp/session-review-batch/reduced-N.txt
 Write your findings to: /tmp/session-review-batch/findings-N.md
@@ -87,7 +87,7 @@ Once all reviewers complete, dispatch a general-purpose Sonnet agent to synthesi
 <parameter name="subagent_type">ed3d-basic-agents:sonnet-general-purpose</parameter>
 <parameter name="description">Synthesize session reviews</parameter>
 <parameter name="prompt">
-You are synthesizing findings from multiple Claude Code session reviews into a cross-session analysis.
+You are synthesizing findings from multiple opencode session reviews into a cross-session analysis.
 
 Read all findings files in /tmp/session-review-batch/findings-*.md
 
@@ -98,7 +98,7 @@ Produce a synthesis that identifies:
 2. **Progression** — is the user getting better or worse at prompting over time? Is the agent handling certain tasks better or worse?
 
 3. **Highest-impact recommendations** — across all sessions, which recommendations would have the biggest effect? Prioritize:
-   - CLAUDE.md changes (things the user keeps correcting)
+   - AGENTS.md changes (things the user keeps correcting)
    - Hooks (behaviors that should be enforced automatically)
    - Skills/workflows (multi-step processes that keep being done manually)
 

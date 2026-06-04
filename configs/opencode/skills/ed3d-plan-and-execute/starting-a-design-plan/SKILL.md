@@ -28,7 +28,7 @@ Orchestrate the complete design workflow from initial idea to implementation-rea
 
 **REQUIRED: Create task tracker at start**
 
-Use TaskCreate to create todos for each phase (or TodoWrite in older Claude Code versions):
+Use TaskCreate to create todos for each phase (or TodoWrite in older opencode versions):
 
 - Phase 1: Context Gathering (initial information collected)
 - (conditional) Read project design guidance (if `.ed3d/design-plan-guidance.md` exists)
@@ -306,7 +306,7 @@ Ready to create the implementation plan? This requires fresh context to work eff
 ```
 /ed3d-plan-and-execute:start-implementation-plan @docs/design-plans/[full-filename].md .
 ```
-(the `.` at the end is necessary or else Claude Code will eat the command and do the wrong thing.)
+(the `.` at the end is necessary or else opencode will eat the command and do the wrong thing.)
 
 (2) Clear your context:
 ```

@@ -1,6 +1,6 @@
 ---
 name: prompt-security-hardening
-description: Use when writing skills, CLAUDE.md files, agent prompts, or any directives that involve shell commands, environment variables, API credentials, file creation, or git operations - prevents secrets leakage into LLM context, unsafe shell patterns, and credential exposure
+description: Use when writing skills, AGENTS.md files, agent prompts, or any directives that involve shell commands, environment variables, API credentials, file creation, or git operations - prevents secrets leakage into LLM context, unsafe shell patterns, and credential exposure
 ---
 
 # Prompt Security Hardening
@@ -55,7 +55,7 @@ grep -n 'ANTHROPIC_API_KEY' ~/.zshrc
 
 ## 2. Never Hardcode Secrets in Generated Code or Directives
 
-When writing skills, agents, or CLAUDE.md files that include code examples, use environment variable references. When generating code for users, always reference environment variables or secret managers.
+When writing skills, agents, or AGENTS.md files that include code examples, use environment variable references. When generating code for users, always reference environment variables or secret managers.
 
 ```python
 # SAFE
@@ -221,7 +221,7 @@ stat .env                            # file metadata
 
 ## Applying This Skill to Directives
 
-When writing skills, CLAUDE.md files, or agent prompts:
+When writing skills, AGENTS.md files, or agent prompts:
 
 1. **Code examples** in directives must use environment variable references, not placeholder secrets
 2. **Shell examples** that check configuration must use existence checks, not value reads

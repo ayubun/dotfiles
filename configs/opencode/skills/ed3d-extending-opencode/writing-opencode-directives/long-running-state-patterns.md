@@ -10,7 +10,7 @@ Long-running agents work in discrete sessions. Each new session starts without m
 
 ### Automatic Tools
 
-**Auto-Compact**: Triggers at ~95% context capacity. Claude Code summarizes history, preserving architectural decisions and unresolved bugs. Manually trigger with `/compact` at logical breakpoints.
+**Auto-Compact**: Triggers at ~95% context capacity. opencode summarizes history, preserving architectural decisions and unresolved bugs. Manually trigger with `/compact` at logical breakpoints.
 
 **Token Budget Awareness**: Claude 4.5+ receives updates on remaining context after tool calls. Enables better task persistence and strategy adjustment.
 
@@ -95,7 +95,7 @@ Explicit feature lists prevent premature completion and duplicate work.
 
 1. `pwd` - establish location
 2. `git log --oneline -20` - review recent work
-3. Read progress file and CLAUDE.md
+3. Read progress file and AGENTS.md
 4. `source init.sh` - start services
 5. Run tests to verify baseline
 6. Choose single feature from pending list
@@ -104,7 +104,7 @@ Explicit feature lists prevent premature completion and duplicate work.
 
 **Manual Compact** (Recommended): At logical breakpoints, `/compact` then `/clear`. Start fresh on next feature.
 
-**Memory Tool Preservation**: Before context limits, save state to memory files. Update CLAUDE.md and progress file.
+**Memory Tool Preservation**: Before context limits, save state to memory files. Update AGENTS.md and progress file.
 
 ## Subagent Orchestration
 
@@ -168,7 +168,7 @@ git checkout -b claude-session/$(date +%s)
 git stash save "claude-checkpoint: $(date)"
 ```
 
-### Claude Code Checkpoints
+### opencode Checkpoints
 
 - Esc+Esc or `/rewind` opens checkpoint menu
 - Can restore conversation, code, or both
@@ -197,7 +197,7 @@ These patterns consistently cause session failures:
 ## References
 
 - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
-- [Claude Code Best practices](https://www.anthropic.com/engineering/claude-code-best-practices)
+- [opencode Best practices](https://www.anthropic.com/engineering/opencode-best-practices)
 - [Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [claude-flow](https://github.com/ruvnet/claude-flow) - Multi-agent orchestration
 - [continuous-claude](https://github.com/AnandChowdhary/continuous-claude) - CI/CD loop pattern

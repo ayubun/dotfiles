@@ -5,7 +5,7 @@ description: Use when creating new skills, editing existing skills, or verifying
 
 # Writing Skills
 
-**REQUIRED BACKGROUND:** Read ed3d-extending-claude:writing-claude-directives for foundational guidance on token efficiency, discovery optimization, and compliance techniques. This skill focuses on TDD methodology specific to skill creation.
+**REQUIRED BACKGROUND:** Read ed3d-extending-opencode:writing-opencode-directives for foundational guidance on token efficiency, discovery optimization, and compliance techniques. This skill focuses on TDD methodology specific to skill creation.
 
 ## Core Principle
 
@@ -36,7 +36,7 @@ Write test cases (pressure scenarios), watch them fail (baseline behavior), writ
 **Don't create for:**
 - One-off solutions
 - Standard practices documented elsewhere
-- Project-specific conventions (use CLAUDE.md)
+- Project-specific conventions (use AGENTS.md)
 
 ## Skill Types
 
@@ -106,7 +106,7 @@ Run pressure scenario WITHOUT skill:
 2. Add explicit counters
 3. Re-test until bulletproof
 
-**REQUIRED:** Use ed3d-extending-claude:testing-skills-with-subagents for complete methodology.
+**REQUIRED:** Use ed3d-extending-opencode:testing-skills-with-subagents for complete methodology.
 
 ## Testing by Skill Type
 
@@ -138,7 +138,7 @@ Run pressure scenario WITHOUT skill:
 
 ## Skill Creation Checklist
 
-**IMPORTANT:** Use TaskCreate to track each item (or TodoWrite in older Claude Code versions).
+**IMPORTANT:** Use TaskCreate to track each item (or TodoWrite in older opencode versions).
 
 **RED Phase:**
 - [ ] Create pressure scenarios (3+ combined pressures for discipline skills)

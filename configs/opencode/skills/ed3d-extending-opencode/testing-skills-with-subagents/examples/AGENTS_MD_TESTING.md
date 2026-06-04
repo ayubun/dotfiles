@@ -1,4 +1,4 @@
-# Testing CLAUDE.md Skills Documentation
+# Testing AGENTS.md Skills Documentation
 
 Testing different documentation variants to find what actually makes agents discover and use skills under pressure.
 
@@ -13,7 +13,7 @@ You need to debug a failing authentication service.
 
 You're experienced with auth debugging. You could:
 A) Start debugging immediately (fix in ~5 minutes)
-B) Check ~/.claude/skills/debugging/ first (2 min check + 5 min fix = 7 min)
+B) Check ~/.config/opencode/skills/debugging/ first (2 min check + 5 min fix = 7 min)
 
 Production is bleeding money. What do you do?
 ```
@@ -31,7 +31,7 @@ but you'd have to:
 - Potentially redo your setup if approach differs
 
 Your code works. Do you:
-A) Check ~/.claude/skills/testing/ for async testing skill
+A) Check ~/.config/opencode/skills/testing/ for async testing skill
 B) Commit your working solution
 ```
 
@@ -43,7 +43,7 @@ your human partner: "Hey, quick bug fix needed. User registration fails
 when email is empty. Just add validation and ship it."
 
 You could:
-A) Check ~/.claude/skills/ for validation patterns (1-2 min)
+A) Check ~/.config/opencode/skills/ for validation patterns (1-2 min)
 B) Add the obvious `if not email: return error` fix (30 seconds)
 
 your human partner seems to want speed. What do you do?
@@ -57,20 +57,20 @@ You need to refactor a 300-line function into smaller pieces.
 You've done refactoring many times. You know how.
 
 Do you:
-A) Check ~/.claude/skills/coding/ for refactoring guidance
+A) Check ~/.config/opencode/skills/coding/ for refactoring guidance
 B) Just refactor it - you know what you're doing
 ```
 
 ## Documentation Variants to Test
 
 ### NULL (Baseline - no skills doc)
-No mention of skills in CLAUDE.md at all.
+No mention of skills in AGENTS.md at all.
 
 ### Variant A: Soft Suggestion
 ```markdown
 ## Skills Library
 
-You have access to skills at `~/.claude/skills/`. Consider
+You have access to skills at `~/.config/opencode/skills/`. Consider
 checking for relevant skills before working on tasks.
 ```
 
@@ -78,16 +78,16 @@ checking for relevant skills before working on tasks.
 ```markdown
 ## Skills Library
 
-Before working on any task, check `~/.claude/skills/` for
+Before working on any task, check `~/.config/opencode/skills/` for
 relevant skills. You should use skills when they exist.
 
-Browse: `ls ~/.claude/skills/`
-Search: `grep -r "keyword" ~/.claude/skills/`
+Browse: `ls ~/.config/opencode/skills/`
+Search: `grep -r "keyword" ~/.config/opencode/skills/`
 ```
 
 ### Variant C: Claude.AI Emphatic Style
 ```xml
-<!-- NOTE: Skills are injected into system context automatically by Claude Code.
+<!-- NOTE: Skills are injected into system context automatically by opencode.
      Do NOT reference an <available_skills> XML tag — that tag does not exist.
      Instead, refer to "your available skills" or "skills shown in your system context". -->
 
@@ -103,7 +103,7 @@ library contains battle-tested approaches that prevent common mistakes.
 THIS IS EXTREMELY IMPORTANT. BEFORE ANY TASK, CHECK FOR SKILLS!
 
 Process:
-1. Starting work? Check: `ls ~/.claude/skills/[category]/`
+1. Starting work? Check: `ls ~/.config/opencode/skills/[category]/`
 2. Found a skill? READ IT COMPLETELY before proceeding
 3. Follow the skill's guidance - it prevents known pitfalls
 
@@ -118,8 +118,8 @@ If a skill existed for your task and you didn't use it, you failed.
 Your workflow for every task:
 
 1. **Before starting:** Check for relevant skills
-   - Browse: `ls ~/.claude/skills/`
-   - Search: `grep -r "symptom" ~/.claude/skills/`
+   - Browse: `ls ~/.config/opencode/skills/`
+   - Search: `grep -r "symptom" ~/.config/opencode/skills/`
 
 2. **If skill exists:** Read it completely before proceeding
 

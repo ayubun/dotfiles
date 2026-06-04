@@ -12,7 +12,7 @@ then drives each issue's review/fix/PR pipeline independently as
 subagent completions arrive.
 
 **Core principle:** Orchestrator-async pipeline. Subagents in this
-Claude Code harness cannot dispatch their own subagents — the
+opencode harness cannot dispatch their own subagents — the
 dispatch tool is reserved for the top-level orchestrator. To get
 true per-issue parallelism without nested dispatch, the orchestrator
 uses `run_in_background: true` on every subagent it dispatches and
@@ -284,7 +284,7 @@ Final summary to the operator:
 
 An earlier draft of this skill had each issue-owner subagent dispatch
 its own code-reviewer + bug-fixer subagents. Empirical testing
-confirmed that subagents in this Claude Code harness do NOT have
+confirmed that subagents in this opencode harness do NOT have
 access to the `Task` / `Agent` dispatch tool — the tool is reserved
 for the top-level orchestrator, presumably to keep the context tree
 shallow and bounded.

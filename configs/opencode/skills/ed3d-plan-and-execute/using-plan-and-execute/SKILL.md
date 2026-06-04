@@ -48,7 +48,7 @@ If a skill for your task exists, you must use it or you will fail at your task.
 
 ## Skills with Checklists
 
-If a skill has a checklist, YOU MUST create task todos for EACH item using TaskCreate (or TodoWrite in older Claude Code versions).
+If a skill has a checklist, YOU MUST create task todos for EACH item using TaskCreate (or TodoWrite in older opencode versions).
 
 **Don't:**
 - Work through checklist mentally
