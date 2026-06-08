@@ -142,13 +142,14 @@ opencode_color() {
 }
 
 # Map Claude Code model shortnames to opencode provider-prefixed model IDs.
-# Use generic "claude-<family>-4" so opencode picks up whatever subversion is
-# current (4-6, 4-7, etc.) instead of pinning a specific point release.
+# Must use versioned IDs (e.g. claude-opus-4-7) - generic names like
+# claude-opus-4 pass schema validation at startup but fail at actual dispatch
+# because they don't resolve to a real model on models.dev.
 opencode_model() {
   case "$1" in
-    opus)   echo "anthropic/claude-opus-4" ;;
-    sonnet) echo "anthropic/claude-sonnet-4" ;;
-    haiku)  echo "anthropic/claude-haiku-4" ;;
+    opus)   echo "anthropic/claude-opus-4-7" ;;
+    sonnet) echo "anthropic/claude-sonnet-4-6" ;;
+    haiku)  echo "anthropic/claude-haiku-4-5" ;;
     *)      echo "anthropic/$1" ;;
   esac
 }

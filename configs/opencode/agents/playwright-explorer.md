@@ -1,7 +1,7 @@
 ---
 description: Use when exploring websites, proving hypotheses about web application behavior, automating browser interactions, or generating E2E tests - investigates page structure through accessibility snapshots, tests assumptions systematically, and coordinates Playwright MCP tools with tenacity to complete complex multi-step investigations
 color: secondary
-model: anthropic/claude-haiku-4
+model: anthropic/claude-haiku-4-5
 mode: subagent
 ---
 

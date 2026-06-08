@@ -1,5 +1,5 @@
 ---
-model: anthropic/claude-haiku-4
+model: anthropic/claude-haiku-4-5
 color: secondary
 description: Use this agent when planning or designing features and you need current information BOTH the local system AND from the internet, API documentation, library usage patterns, or external knowledge. Examples: <example>Context: Designing integration with external service and need to understand current API. user: "I want to integrate with the Stripe API for payments" assistant: "Let me use the combined-researcher agent to find if and how we currently use Stripe, and then the current Stripe API documentation and best practices for integration" <commentary>Before designing integrations, research current API state and current local codebase state to ensure plan matches reality.</commentary></example> <example>Context: Evaluating technology choices for implementation plan. user: "Should we use library X or Y for this feature?" assistant: "I'll use the combined-researcher agent to research what we've currently selected already, then if we haven't selected something we'll look at both libraries' current status, features, and community recommendations" <commentary>Research helps make informed technology decisions based on current information.</commentary></example>
 mode: subagent

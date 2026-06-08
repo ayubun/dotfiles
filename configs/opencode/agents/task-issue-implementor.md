@@ -1,6 +1,6 @@
 ---
 description: Opus-powered implementor of a single issue in a parallel sweep. Investigates if needed, applies TDD, runs the full pre-commit verification suite, commits, and reports back with evidence. Used by `executing-parallel-issue-sweep`. The orchestrator (not this agent) owns the surrounding review/fix/push/PR loop, because subagents in opencode cannot dispatch their own subagents.
-model: anthropic/claude-opus-4
+model: anthropic/claude-opus-4-7
 color: secondary
 mode: subagent
 ---
