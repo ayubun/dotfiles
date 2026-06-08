@@ -29,7 +29,9 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 SOURCE_DIR="${REPO_ROOT}/configs/dependencies/skills-sources"
 
 OPENCODE_DEST="${REPO_ROOT}/configs/opencode/skills"
+OPENCODE_AGENTS_DEST="${REPO_ROOT}/configs/opencode/agents"
 CLAUDE_DEST="${REPO_ROOT}/configs/claude/skills"
+CLAUDE_AGENTS_DEST="${REPO_ROOT}/configs/claude/agents"
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -56,11 +58,13 @@ fi
 
 # --- Prepare destinations ---------------------------------------------------
 
-mkdir -p "$OPENCODE_DEST" "$CLAUDE_DEST"
+mkdir -p "$OPENCODE_DEST" "$OPENCODE_AGENTS_DEST" "$CLAUDE_DEST" "$CLAUDE_AGENTS_DEST"
 
 # Idempotency: wipe every managed tree. Non-ed3d dirs are preserved.
 find "$OPENCODE_DEST" -mindepth 1 -maxdepth 1 -type d -name 'ed3d-*' -exec rm -rf {} +
+find "$OPENCODE_AGENTS_DEST" -mindepth 1 -maxdepth 1 -type f -name '*.md' -exec rm -f {} +
 find "$CLAUDE_DEST" -mindepth 1 -maxdepth 1 -type d -exec rm -rf {} +
+find "$CLAUDE_AGENTS_DEST" -mindepth 1 -maxdepth 1 -type f -name '*.md' -exec rm -f {} +
 
 # --- opencode frontmatter filter --------------------------------------------
 
@@ -115,6 +119,62 @@ extract_value() {
   ' "$1"
 }
 
+# --- opencode agent frontmatter filter ----------------------------------------
+
+# Whitelist for agent frontmatter keys.
+AGENT_ALLOWED_KEYS='^(description|model|color|mode|permission|hidden|steps|options|temperature|top_p)$'
+
+# Map Claude Code model shortnames to opencode provider-prefixed model IDs.
+opencode_model() {
+  case "$1" in
+    opus)   echo "anthropic/claude-opus-4" ;;
+    sonnet) echo "anthropic/claude-sonnet-4" ;;
+    haiku)  echo "anthropic/claude-haiku-4" ;;
+    *)      echo "anthropic/$1" ;;
+  esac
+}
+
+# awk program for agent frontmatter: keeps whitelisted keys, translates
+# model, injects mode: subagent, drops name (filename is the identifier).
+AGENT_AWK_FILTER='
+BEGIN { in_fm = 0; fm_done = 0; skip = 0; wrote_mode = 0 }
+/^---[ \t]*$/ {
+  if (!fm_done && !in_fm) {
+    in_fm = 1
+    print
+    next
+  }
+  if (in_fm) {
+    if (!wrote_mode) { print "mode: subagent"; wrote_mode = 1 }
+    in_fm = 0; fm_done = 1; skip = 0
+    print
+    next
+  }
+}
+in_fm {
+  if (match($0, /^[A-Za-z_][A-Za-z0-9_-]*[ \t]*:/)) {
+    key = $0
+    sub(/[ \t]*:.*/, "", key)
+    if (key == "name") { skip = 1; next }
+    if (key == "tools") { skip = 1; next }
+    if (key == "model") {
+      val = $0
+      sub(/^model[ \t]*:[ \t]*/, "", val)
+      sub(/[ \t]+$/, "", val)
+      print "model: " model_map[val]
+      skip = 1
+      next
+    }
+    if (key == "mode") { print; wrote_mode = 1; skip = 0; next }
+    if (key ~ allowed) { skip = 0; print } else { skip = 1 }
+    next
+  }
+  if (!skip) print
+  next
+}
+{ print }
+'
+
 # --- opencode renaming helpers -----------------------------------------------
 
 # Rename map for directory / skill / plugin names.
@@ -123,6 +183,7 @@ opencode_rename() {
   name="${name//extending-claude/extending-opencode}"
   name="${name//writing-claude-md-files/writing-agents-md-files}"
   name="${name//writing-claude-directives/writing-opencode-directives}"
+  name="${name//project-claude-librarian/project-opencode-librarian}"
   echo "$name"
 }
 
@@ -205,7 +266,55 @@ for plugin_path in "$SOURCE_DIR"/plugins/*/; do
 done
 shopt -u nullglob
 
-echo "converted $count skills"
+# --- Convert agents ----------------------------------------------------------
+
+agent_count=0
+shopt -s nullglob
+for plugin_path in "$SOURCE_DIR"/plugins/*/; do
+  plugin_name="$(basename "$plugin_path")"
+  [[ -d "${plugin_path}agents" ]] || continue
+  for agent_file in "${plugin_path}agents"/*.md; do
+    agent_name="$(basename "$agent_file" .md)"
+    [[ "$agent_name" == ".keep" ]] && continue
+
+    fm_desc="$(extract_value "$agent_file" description)"
+    fm_model="$(extract_value "$agent_file" model)"
+
+    if [[ -z "$fm_desc" ]]; then
+      echo "warn: ${plugin_name}/agents/${agent_name}.md missing 'description'; skipping" >&2
+      continue
+    fi
+
+    # Rename agent name if it contains "claude".
+    oc_agent_name="$(opencode_rename "$agent_name")"
+
+    # Build model map for awk.
+    oc_model="$(opencode_model "${fm_model:-sonnet}")"
+
+    # Rewrite frontmatter + body text replacements.
+    awk -v allowed="$AGENT_ALLOWED_KEYS" \
+        -v "model_map_opus=$(opencode_model opus)" \
+        -v "model_map_sonnet=$(opencode_model sonnet)" \
+        -v "model_map_haiku=$(opencode_model haiku)" \
+        "BEGIN {
+          model_map[\"opus\"] = model_map_opus
+          model_map[\"sonnet\"] = model_map_sonnet
+          model_map[\"haiku\"] = model_map_haiku
+        }
+        $AGENT_AWK_FILTER" "$agent_file" \
+      | opencode_text_replace > "$OPENCODE_AGENTS_DEST/${oc_agent_name}.md"
+
+    # -- claude code: original agent verbatim --
+    cp "$agent_file" "$CLAUDE_AGENTS_DEST/${agent_name}.md"
+
+    agent_count=$((agent_count + 1))
+  done
+done
+shopt -u nullglob
+
+echo "converted $count skills, $agent_count agents"
 echo "  source:  $SOURCE_DIR"
-echo "  opencode: $OPENCODE_DEST"
-echo "  claude:   $CLAUDE_DEST"
+echo "  opencode skills:  $OPENCODE_DEST"
+echo "  opencode agents:  $OPENCODE_AGENTS_DEST"
+echo "  claude skills:    $CLAUDE_DEST"
+echo "  claude agents:    $CLAUDE_AGENTS_DEST"
