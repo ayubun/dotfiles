@@ -180,6 +180,6 @@ run= [
 [[on-window-detected]]
 if.app-id="company.thebrowser.Browser"
 run=[
-  "layout tiling",
+  "layout floating",
   "move-node-to-workspace 1"
 ]
