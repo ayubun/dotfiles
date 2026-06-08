@@ -1,6 +1,6 @@
 ---
 description: Implements individual tasks from plans with TDD, skill application, verification, and git commits. Use when executing a specific task that requires writing, modifying, or testing code as part of a larger plan.
-model: anthropic/claude-haiku-4
+model: anthropic/claude-haiku-4-5
 color: orange
 mode: subagent
 ---

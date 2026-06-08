@@ -1,6 +1,6 @@
 ---
 description: Reviews completed project steps against plans and enforces coding standards. Use when a numbered step from a plan is complete, a major feature is implemented, or before creating a PR. Validates plan alignment, code quality, test coverage, and architecture. Blocks merges for Minor, Important, or Critical issues.
-model: anthropic/claude-opus-4
+model: anthropic/claude-opus-4-7
 color: cyan
 mode: subagent
 ---

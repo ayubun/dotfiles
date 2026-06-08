@@ -1,5 +1,5 @@
 ---
-model: anthropic/claude-haiku-4
+model: anthropic/claude-haiku-4-5
 description: An unprompted generic subagent. Uses Haiku. Intended for tasks that require less thinking and analysis. Good for summarization, research, and tool calls.
 mode: subagent
 ---

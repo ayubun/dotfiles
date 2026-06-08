@@ -125,11 +125,12 @@ extract_value() {
 AGENT_ALLOWED_KEYS='^(description|model|color|mode|permission|hidden|steps|options|temperature|top_p)$'
 
 # Map Claude Code model shortnames to opencode provider-prefixed model IDs.
+# Model IDs must match what models.dev recognizes; opencode validates this.
 opencode_model() {
   case "$1" in
-    opus)   echo "anthropic/claude-opus-4" ;;
-    sonnet) echo "anthropic/claude-sonnet-4" ;;
-    haiku)  echo "anthropic/claude-haiku-4" ;;
+    opus)   echo "anthropic/claude-opus-4-7" ;;
+    sonnet) echo "anthropic/claude-sonnet-4-6" ;;
+    haiku)  echo "anthropic/claude-haiku-4-5" ;;
     *)      echo "anthropic/$1" ;;
   esac
 }
