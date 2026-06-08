@@ -1,5 +1,5 @@
 ---
-model: anthropic/claude-sonnet-4-6
+model: anthropic/claude-sonnet-4
 description: An unprompted generic subagent. Uses Sonnet. Intended for tasks that require attention to detail, thinking, and analysis.
 mode: subagent
 ---

@@ -1,7 +1,7 @@
 ---
 description: Fixes issues identified by code-reviewer and triggers re-review. Use when code-reviewer returns any issues that need to be addressed before merge approval.
-model: anthropic/claude-haiku-4-5
-color: orange
+model: anthropic/claude-haiku-4
+color: accent
 mode: subagent
 ---
 

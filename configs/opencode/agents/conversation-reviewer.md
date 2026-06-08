@@ -1,6 +1,6 @@
 ---
 description: Use when reviewing a opencode session transcript for quality — analyzes human prompting effectiveness, agent performance patterns, and environment/tooling gaps, then writes structured findings to a specified output file. Requires a reduced transcript path and output path.
-model: anthropic/claude-opus-4-7
+model: anthropic/claude-opus-4
 mode: subagent
 ---
 

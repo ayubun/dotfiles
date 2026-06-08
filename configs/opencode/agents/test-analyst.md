@@ -1,7 +1,7 @@
 ---
 description: Use after final code review passes to validate test coverage against acceptance criteria and generate human test plans - reads test-requirements.md, verifies automated tests exist, produces manual verification documentation
-model: anthropic/claude-opus-4-7
-color: yellow
+model: anthropic/claude-opus-4
+color: warning
 mode: subagent
 ---
 

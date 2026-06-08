@@ -122,15 +122,33 @@ extract_value() {
 # --- opencode agent frontmatter filter ----------------------------------------
 
 # Whitelist for agent frontmatter keys.
-AGENT_ALLOWED_KEYS='^(description|model|color|mode|permission|hidden|steps|options|temperature|top_p)$'
+# Note: 'color' is rewritten separately by the awk filter so it can be
+# mapped from Claude Code names to opencode's enum.
+AGENT_ALLOWED_KEYS='^(description|model|mode|permission|hidden|steps|options|temperature|top_p)$'
+
+# Map Claude Code color names to opencode theme colors (or strip if no match).
+# opencode only accepts hex codes or these enum values:
+#   primary, secondary, accent, success, warning, error, info
+opencode_color() {
+  case "$1" in
+    cyan|blue)   echo "info" ;;
+    green)       echo "success" ;;
+    yellow)      echo "warning" ;;
+    red)         echo "error" ;;
+    orange)      echo "accent" ;;
+    purple|pink) echo "secondary" ;;
+    *)           echo "" ;;
+  esac
+}
 
 # Map Claude Code model shortnames to opencode provider-prefixed model IDs.
-# Model IDs must match what models.dev recognizes; opencode validates this.
+# Use generic "claude-<family>-4" so opencode picks up whatever subversion is
+# current (4-6, 4-7, etc.) instead of pinning a specific point release.
 opencode_model() {
   case "$1" in
-    opus)   echo "anthropic/claude-opus-4-7" ;;
-    sonnet) echo "anthropic/claude-sonnet-4-6" ;;
-    haiku)  echo "anthropic/claude-haiku-4-5" ;;
+    opus)   echo "anthropic/claude-opus-4" ;;
+    sonnet) echo "anthropic/claude-sonnet-4" ;;
+    haiku)  echo "anthropic/claude-haiku-4" ;;
     *)      echo "anthropic/$1" ;;
   esac
 }
@@ -163,6 +181,16 @@ in_fm {
       sub(/^model[ \t]*:[ \t]*/, "", val)
       sub(/[ \t]+$/, "", val)
       print "model: " model_map[val]
+      skip = 1
+      next
+    }
+    if (key == "color") {
+      val = $0
+      sub(/^color[ \t]*:[ \t]*/, "", val)
+      sub(/[ \t]+$/, "", val)
+      if (color_map[val] != "") {
+        print "color: " color_map[val]
+      }
       skip = 1
       next
     }
@@ -297,10 +325,26 @@ for plugin_path in "$SOURCE_DIR"/plugins/*/; do
         -v "model_map_opus=$(opencode_model opus)" \
         -v "model_map_sonnet=$(opencode_model sonnet)" \
         -v "model_map_haiku=$(opencode_model haiku)" \
+        -v "color_cyan=$(opencode_color cyan)" \
+        -v "color_blue=$(opencode_color blue)" \
+        -v "color_green=$(opencode_color green)" \
+        -v "color_yellow=$(opencode_color yellow)" \
+        -v "color_red=$(opencode_color red)" \
+        -v "color_orange=$(opencode_color orange)" \
+        -v "color_purple=$(opencode_color purple)" \
+        -v "color_pink=$(opencode_color pink)" \
         "BEGIN {
           model_map[\"opus\"] = model_map_opus
           model_map[\"sonnet\"] = model_map_sonnet
           model_map[\"haiku\"] = model_map_haiku
+          color_map[\"cyan\"] = color_cyan
+          color_map[\"blue\"] = color_blue
+          color_map[\"green\"] = color_green
+          color_map[\"yellow\"] = color_yellow
+          color_map[\"red\"] = color_red
+          color_map[\"orange\"] = color_orange
+          color_map[\"purple\"] = color_purple
+          color_map[\"pink\"] = color_pink
         }
         $AGENT_AWK_FILTER" "$agent_file" \
       | opencode_text_replace > "$OPENCODE_AGENTS_DEST/${oc_agent_name}.md"
