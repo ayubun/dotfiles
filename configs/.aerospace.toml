@@ -1,0 +1,151 @@
+config-version = 2
+
+start-at-login = true
+
+enable-normalization-flatten-containers = true
+enable-normalization-opposite-orientation-for-nested-containers = true
+
+accordion-padding = 30
+default-root-container-layout = 'tiles'
+default-root-container-orientation = 'auto'
+
+on-focused-monitor-changed = ['move-mouse monitor-lazy-center']
+
+persistent-workspaces = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"]
+
+[key-mapping]
+preset = 'qwerty'
+
+[gaps]
+inner.horizontal = 0
+inner.vertical = 0
+outer.left = 0
+outer.bottom = 0
+outer.top = 0
+outer.right = 0
+
+[mode.main.binding]
+
+alt-enter = '''exec-and-forget osascript -e '
+tell application "Ghostty"
+    activate
+end tell'
+'''
+
+# alt-d = 'exec-and-forget open -a "Spotlight"'
+alt-d = 'exec-and-forget open -a "Raycast"'
+
+alt-q = 'close'
+alt-shift-q = 'close'
+alt-f4 = 'close'
+
+alt-shift-c = 'reload-config'
+
+alt-l = '''exec-and-forget osascript -e '
+tell application "System Events"
+    keystroke "q" using {control down, command down}
+end tell'
+'''
+
+alt-left = 'focus left'
+alt-down = 'focus down'
+alt-up = 'focus up'
+alt-right = 'focus right'
+
+alt-h = 'focus left'
+alt-j = 'focus down'
+alt-k = 'focus up'
+
+alt-shift-left = 'move left'
+alt-shift-down = 'move down'
+alt-shift-up = 'move up'
+alt-shift-right = 'move right'
+
+alt-shift-h = 'move left'
+alt-shift-j = 'move down'
+alt-shift-k = 'move up'
+alt-shift-l = 'move right'
+
+alt-1 = 'workspace 1'
+alt-2 = 'workspace 2'
+alt-3 = 'workspace 3'
+alt-4 = 'workspace 4'
+alt-5 = 'workspace 5'
+alt-6 = 'workspace 6'
+alt-7 = 'workspace 7'
+alt-8 = 'workspace 8'
+alt-9 = 'workspace 9'
+alt-0 = 'workspace 10'
+
+alt-shift-1 = 'move-node-to-workspace 1'
+alt-shift-2 = 'move-node-to-workspace 2'
+alt-shift-3 = 'move-node-to-workspace 3'
+alt-shift-4 = 'move-node-to-workspace 4'
+alt-shift-5 = 'move-node-to-workspace 5'
+alt-shift-6 = 'move-node-to-workspace 6'
+alt-shift-7 = 'move-node-to-workspace 7'
+alt-shift-8 = 'move-node-to-workspace 8'
+alt-shift-9 = 'move-node-to-workspace 9'
+alt-shift-0 = 'move-node-to-workspace 10'
+
+alt-ctrl-shift-right = 'move-workspace-to-monitor --wrap-around next'
+alt-ctrl-shift-left = 'move-workspace-to-monitor --wrap-around prev'
+
+alt-n = 'join-with right'
+alt-m = 'join-with down'
+
+alt-f = 'fullscreen'
+
+alt-shift-space = 'layout floating tiling'
+
+alt-r = 'mode resize'
+
+alt-ctrl-left = 'resize smart -50'
+alt-ctrl-right = 'resize smart +50'
+alt-ctrl-up = 'resize smart -50'
+alt-ctrl-down = 'resize smart +50'
+
+alt-shift-s = 'exec-and-forget screencapture -i -c'
+
+alt-tab = 'workspace-back-and-forth'
+
+alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+
+[mode.resize.binding]
+left = 'resize smart -50'
+down = 'resize smart +50'
+up = 'resize smart -50'
+right = 'resize smart +50'
+enter = 'mode main'
+esc = 'mode main'
+
+[[on-window-detected]]
+if.app-id = 'com.spotify.client'
+run = 'move-node-to-workspace 9'
+
+[[on-window-detected]]
+if.app-id = 'com.mitchellh.ghostty'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.tinyspeck.slackmacgap'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.DiscordApp.Discord'
+run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.systempreferences'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id = 'com.apple.finder'
+if.window-title-regex-substring = 'copy|move|delete'
+run = 'layout floating'
+
+[[on-window-detected]]
+if.app-id="com.mitchellh.ghostty"
+run= [
+  "layout tiling",
+]

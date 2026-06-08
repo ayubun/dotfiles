@@ -8,10 +8,11 @@ Files and dirs managed here are symlinked into `~/.config/opencode/` by
 ```
 configs/opencode/
   opencode.json                            # global config; symlinked
-  skills/                                  # converted Claude Code skills; symlinked
+  skills/                                  # converted skills; symlinked
     ed3d-<plugin>/<skill>/SKILL.md
-  sources/
-    ed3d-plugins-hailz/                    # git submodule (read-only)
+configs/dependencies/
+  skills-sources/                          # git submodule (read-only)
+configs/agents.md                          # shared directives; symlinked to both tools
 ```
 
 `skills/` is **fully owned** by `updaters/skills.sh`. Do not hand-edit
@@ -22,7 +23,7 @@ non-`ed3d-*` skill dirs placed here are preserved.
 
 ```sh
 # 1. Bump the submodule to the upstream commit you want
-git submodule update --remote configs/opencode/sources/ed3d-plugins-hailz
+git submodule update --remote configs/dependencies/skills-sources
 
 # 2. Regenerate (emits both opencode and claude code output)
 ./updaters/skills.sh

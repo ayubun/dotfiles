@@ -9,7 +9,7 @@
 #
 # Typical workflow:
 #   1. Bump the submodule to the upstream commit you want:
-#        git submodule update --remote configs/opencode/sources/ed3d-plugins-hailz
+#        git submodule update --remote configs/dependencies/skills-sources
 #      (or cd in and check out a specific ref)
 #   2. Regenerate:
 #        ./updaters/skills.sh
@@ -26,7 +26,7 @@ set -euo pipefail
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-SOURCE_DIR="${REPO_ROOT}/configs/opencode/sources/ed3d-plugins-hailz"
+SOURCE_DIR="${REPO_ROOT}/configs/dependencies/skills-sources"
 
 OPENCODE_DEST="${REPO_ROOT}/configs/opencode/skills"
 CLAUDE_DEST="${REPO_ROOT}/configs/claude/skills"

@@ -17,3 +17,6 @@ ln -s "$HOME/dotfiles/configs/opencode/opencode.json" "$HOME/.config/opencode/op
 
 rm -rf "$HOME/.config/opencode/skills"
 ln -s "$HOME/dotfiles/configs/opencode/skills" "$HOME/.config/opencode/skills"
+
+rm -f "$HOME/.config/opencode/AGENTS.md"
+ln -s "$HOME/dotfiles/configs/agents.md" "$HOME/.config/opencode/AGENTS.md"

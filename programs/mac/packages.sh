@@ -16,6 +16,7 @@ casks=(
   spotify
   batfi
   steam
+  nikitabobko/tap/aerospace
 )
 
 formulae=(
@@ -89,6 +90,10 @@ echo "Installing source formulae..."
 for pkg in "${source_formulae[@]}"; do
   brew install "$pkg"
 done
+
+# AeroSpace tiling window manager config
+rm -f ~/.aerospace.toml
+ln -s ~/dotfiles/configs/.aerospace.toml ~/.aerospace.toml
 
 echo ""
 echo "All done~ (* ・ｖ・)"

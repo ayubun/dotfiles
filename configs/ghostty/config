@@ -15,6 +15,10 @@ keybind = ctrl+j=unbind
 keybind = ctrl+k=unbind
 keybind = ctrl+l=unbind
 
+# conflicts with some of my preferred tmux bindings
+keybind = ctrl+left=unbind
+keybind = ctrl+right=unbind
+
 clipboard-read = allow
 clipboard-write = allow
 

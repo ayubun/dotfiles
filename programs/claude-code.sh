@@ -9,3 +9,6 @@ ln -sF ~/dotfiles/configs/claude/settings.json ~/.claude/settings.json
 rm -rf ~/.claude/skills
 ln -s ~/dotfiles/configs/claude/skills ~/.claude/skills
 
+rm -f ~/.claude/CLAUDE.md
+ln -s ~/dotfiles/configs/agents.md ~/.claude/CLAUDE.md
+
