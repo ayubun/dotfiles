@@ -24,6 +24,7 @@ formulae=(
   nano
   neofetch # TODO: switch off neofetch
   onefetch
+  fastfetch
   htop
   btop
   gcc

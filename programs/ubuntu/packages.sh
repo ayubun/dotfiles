@@ -13,6 +13,7 @@ packages=(
   'manpages-dev'
   'dnsutils'
   # neofetch installed separately below (deprecated upstream, may be unavailable on Ubuntu 24.10+)
+  'fastfetch'
   'onefetch'
   'net-tools'
   'htop'
@@ -35,6 +36,7 @@ packages=(
   'ncdu'
 )
 apt_repositories=(
+  'ppa:zhangsongcui3371/fastfetch'
   'ppa:o2sh/onefetch'
   'ppa:neovim-ppa/stable'
   # 'ppa:pi-rho/dev'

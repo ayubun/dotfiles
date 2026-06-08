@@ -24,6 +24,12 @@ else
   echo 'lsd could not be found on this system (ls will remain unaliased)'
 fi
 
+unalias neofetch &>/dev/null
+alias trueneofetch=$(which neofetch)
+which fastfetch &> /dev/null
+if [ $? -eq 0 ]; then
+  alias neofetch="fastfetch"
+fi
 #
 
 alias g="git"
