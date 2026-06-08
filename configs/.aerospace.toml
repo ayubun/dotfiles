@@ -123,9 +123,9 @@ esc = 'mode main'
 if.app-id = 'com.spotify.client'
 run = 'move-node-to-workspace 9'
 
-[[on-window-detected]]
-if.app-id = 'com.mitchellh.ghostty'
-run = 'layout tiling'
+# [[on-window-detected]]
+# if.app-id = 'com.mitchellh.ghostty'
+# run = 'layout tiling'
 
 [[on-window-detected]]
 if.app-id = 'com.tinyspeck.slackmacgap'
@@ -134,6 +134,32 @@ run = 'layout tiling'
 [[on-window-detected]]
 if.app-id = 'com.DiscordApp.Discord'
 run = 'layout tiling'
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.Discord'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 4'
+]
+
+[[on-window-detected]]
+if.app-id = 'com.hnc.DiscordCanary'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 3'
+]
+[[on-window-detected]]
+if.app-id = 'org.whispersystems.signal-desktop'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 5'
+]
+[[on-window-detected]]
+if.app-id = 'com.apple.MobileSMS'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 5'
+]
 
 [[on-window-detected]]
 if.app-id = 'com.apple.systempreferences'
@@ -148,4 +174,12 @@ run = 'layout floating'
 if.app-id="com.mitchellh.ghostty"
 run= [
   "layout tiling",
+  "move-node-to-workspace 2"
+]
+
+[[on-window-detected]]
+if.app-id="company.thebrowser.Browser"
+run=[
+  "layout tiling",
+  "move-node-to-workspace 1"
 ]
