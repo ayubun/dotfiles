@@ -1,4 +1,13 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "permission": "allow"
+  "skills": {
+    "paths": [
+      "~/dotfiles/configs/opencode/skills",
+      "~/work/skills"
+    ]
+  },
+  "instructions": [
+    "~/dotfiles/configs/agents.md",
+    "~/work/AGENTS.md"
+  ]
 }

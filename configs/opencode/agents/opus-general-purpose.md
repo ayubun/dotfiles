@@ -1,5 +1,5 @@
 ---
-model: anthropic/claude-opus-4-7
+model: anthropic/claude-opus-4-8
 description: An unprompted generic subagent. Uses Opus. Intended for tasks that require deep reasoning, complex analysis, or nuanced judgment.
 mode: subagent
 ---

@@ -147,7 +147,7 @@ opencode_color() {
 # because they don't resolve to a real model on models.dev.
 opencode_model() {
   case "$1" in
-    opus)   echo "anthropic/claude-opus-4-7" ;;
+    opus)   echo "anthropic/claude-opus-4-8" ;;
     sonnet) echo "anthropic/claude-sonnet-4-6" ;;
     haiku)  echo "anthropic/claude-haiku-4-5" ;;
     *)      echo "anthropic/$1" ;;
