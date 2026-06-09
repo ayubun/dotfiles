@@ -60,19 +60,66 @@ return {
     build = "cd app && yarn install",
     init = function()
       vim.g.mkdp_filetypes = { "markdown" }
-      vim.g.mkdp_port = "48923"
-      vim.g.mkdp_open_ip = "127.0.0.1"
-      vim.g.mkdp_open_to_the_world = 1
-      vim.g.mkdp_echo_preview_url = 1
-      local is_remote = os.getenv("SSH_CLIENT") ~= nil
-        or os.getenv("SSH_TTY") ~= nil
-        or os.getenv("SSH_CONNECTION") ~= nil
 
+      -- On a remote host (always Linux in this setup) the browser lives on the
+      -- local Mac. Serve the preview on a localhost port that SSH forwards back
+      -- to the Mac (LocalForward of the 48923-48932 range, see
+      -- configs/ssh/lemonade.conf), and hand the URL to `lemonade open` so it
+      -- opens in the Mac's browser via the SSH reverse tunnel (RemoteForward 2489).
+      -- See also configs/lemonade.toml.
+      --
+      -- The missing piece before was mkdp_browserfunc: without it, mkdp tried to
+      -- open a browser on the *remote* itself instead of shipping the URL home.
+      --
+      -- On the Mac (has("mac") == 1) the default behavior is kept: mkdp just
+      -- opens the local browser directly.
+      local is_remote = vim.fn.has("mac") == 0
       if is_remote then
-        -- when in a remote server, we have to choose to port forward something,
-        -- so this is my choice lol
-        vim.g.mkdp_port = "48923"
-        vim.g.mkdp_open_ip = "127.0.0.1"
+        -- Each nvim instance grabs its own free port from the forwarded range so
+        -- multiple instances (e.g. separate tmux panes / SSH sessions) can preview
+        -- at the same time. NOTE: multiple markdown buffers within ONE nvim already
+        -- share a single server via /page/<bufnr> paths, so this is only about
+        -- running several *separate* nvims. Keep this range in sync with the
+        -- LocalForward lines in configs/ssh/lemonade.conf.
+        local PORT_FIRST, PORT_LAST = 48923, 48927
+        local function pick_free_port(first, last)
+          local uv = vim.uv or vim.loop
+          local count = last - first + 1
+          -- Start at a pid-derived offset so concurrent instances spread across
+          -- the range instead of all racing for the first port.
+          local offset = vim.fn.getpid() % count
+          for i = 0, count - 1 do
+            local port = first + ((offset + i) % count)
+            local server = uv.new_tcp()
+            if server then
+              local ok = pcall(function()
+                assert(server:bind("127.0.0.1", port))
+              end)
+              server:close()
+              if ok then
+                return port
+              end
+            end
+          end
+          return first -- range exhausted; fall back to the first port
+        end
+
+        vim.g.mkdp_open_to_the_world = 0 -- bind 127.0.0.1 only (private to the box)
+        vim.g.mkdp_open_ip = "127.0.0.1" -- URL host the Mac browser will hit
+        vim.g.mkdp_port = tostring(pick_free_port(PORT_FIRST, PORT_LAST))
+        vim.g.mkdp_echo_preview_url = 1 -- also echo the URL in nvim as a fallback
+        vim.g.mkdp_browserfunc = "MkdpLemonadeOpen"
+        vim.cmd([[
+          function! MkdpLemonadeOpen(url) abort
+            if executable('lemonade')
+              call jobstart(['lemonade', 'open', a:url])
+            else
+              echohl WarningMsg
+              echom '[markdown-preview] lemonade not found in PATH; open manually: ' . a:url
+              echohl None
+            endif
+          endfunction
+        ]])
       end
     end,
     ft = { "markdown" },

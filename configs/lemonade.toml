@@ -1,0 +1,25 @@
+# lemonade config — shared by every machine (symlinked to ~/.config/lemonade.toml).
+# https://github.com/lemonade-command/lemonade
+#
+# Topology in this dotfiles setup:
+#   Mac   = where the browser lives -> runs `lemonade server` (see launchd agent)
+#   Linux = the remote you SSH into  -> runs `lemonade open <url>` (client)
+#
+# The Mac's server is reached from a remote via an SSH *reverse* tunnel
+# (RemoteForward 2489, see configs/ssh/lemonade.conf), so connections always
+# arrive on the Mac from loopback.
+
+# TCP port for both server (listen) and client (connect). Default 2489.
+port = 2489
+
+# [server] Only accept connections from loopback, i.e. the SSH reverse tunnel.
+# lemonade listens on all interfaces, so this allow-list is the real lockdown.
+allow = "127.0.0.0/8,::1/128"
+
+# [client] Do NOT rewrite loopback URLs to the client's IP. We rely on SSH
+# port-forwarding the preview server back to the Mac (LocalForward 8765), so the
+# literal http://127.0.0.1:<port> URL must reach the Mac unchanged.
+trans-loopback = false
+
+# [client] We only ever open forwarded URLs, never local file paths.
+trans-localfile = false

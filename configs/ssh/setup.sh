@@ -1,60 +1,44 @@
 #!/bin/bash
+#
+# Configures this machine's SSH *client* config so that markdown-preview.nvim and
+# `lemonade open <url>` on a remote host open in THIS Mac's browser.
+#
+# Mac only: the Mac is where the browser (and the `lemonade server`) lives, so it
+# is the side that initiates SSH connections and sets up the forwards. The actual
+# RemoteForward/LocalForward directives live in configs/ssh/lemonade.conf; here we
+# just make sure ~/.ssh/config Includes that file (idempotently, at the top).
+#
+# NOTE: this file is sourced by install.sh, so avoid `set -e` (it would leak into
+# the parent shell) and prefer `return` for early exit.
 
-set -e
+SSH_DIR="$HOME/.ssh"
+SSH_CONFIG="$SSH_DIR/config"
+INCLUDE_PATH="~/dotfiles/configs/ssh/lemonade.conf"
+INCLUDE_LINE="Include $INCLUDE_PATH"
 
-SSH_CONFIG_PATH="$HOME/.ssh/config"
-
-# this file is disabled for now since I don't need the default host block~
-return 0
-
-NEW_HOST_BLOCK="Host *
-  RemoteForward 2224 /tmp/ghostty-clipboard-socket"
-
-# Check if config file exists
-if [[ ! -f "$SSH_CONFIG_PATH" ]]; then
-    echo "SSH config file not found at $SSH_CONFIG_PATH"
-    echo "Creating a new one..."
-    mkdir -p "$(dirname "$SSH_CONFIG_PATH")"
-    touch "$SSH_CONFIG_PATH"
+# Only the Mac (SSH client + browser host) needs the lemonade forwards.
+if [[ "$OSTYPE" != darwin* ]]; then
+  echo "Not macOS -- skipping lemonade SSH client config"
+  return 0 2>/dev/null || exit 0
 fi
 
-# Create a temporary file for the new config
-temp_file=$(mktemp)
+mkdir -p "$SSH_DIR"
+chmod 700 "$SSH_DIR"
+touch "$SSH_CONFIG"
+chmod 600 "$SSH_CONFIG"
 
-# Check if Host * block exists
-if grep -q "^[[:space:]]*Host[[:space:]]*\*" "$SSH_CONFIG_PATH"; then
-    # Extract the Host * block
-    start_line=$(grep -n "^[[:space:]]*Host[[:space:]]*\*" "$SSH_CONFIG_PATH" | head -1 | cut -d: -f1)
-    
-    # Find the end of the block (next Host entry or end of file)
-    next_host=$(tail -n +$((start_line + 1)) "$SSH_CONFIG_PATH" | grep -n "^[[:space:]]*Host[[:space:]]" | head -1)
-    
-    # Initialize the new config file
-    > "$temp_file"
-    
-    # Add content before the Host * block if it's not at the beginning
-    if [ "$start_line" -gt 1 ]; then
-        head -n $((start_line - 1)) "$SSH_CONFIG_PATH" > "$temp_file"
-    fi
-    
-    # Add our new Host * block
-    echo "$NEW_HOST_BLOCK" >> "$temp_file"
-    
-    if [[ -n "$next_host" ]]; then
-        # Calculate end line number
-        next_host_rel_line=$(echo "$next_host" | cut -d: -f1)
-        end_line=$((start_line + next_host_rel_line - 1))
-        
-        # Add content after the Host * block
-        tail -n +$((end_line + 1)) "$SSH_CONFIG_PATH" >> "$temp_file"
-    fi
+if grep -qF "$INCLUDE_PATH" "$SSH_CONFIG"; then
+  echo "lemonade SSH Include already present in $SSH_CONFIG"
 else
-    # No Host * block exists, add one at the beginning
-    echo "$NEW_HOST_BLOCK" > "$temp_file"
-    echo "" >> "$temp_file"
-    cat "$SSH_CONFIG_PATH" >> "$temp_file"
+  # Prepend the Include so its Host-* forwards apply to every connection.
+  # Overwrite in place (via a temp copy) to preserve the file's 600 perms.
+  tmp="$(mktemp)"
+  {
+    echo "$INCLUDE_LINE"
+    echo ""
+    cat "$SSH_CONFIG"
+  } >"$tmp"
+  cat "$tmp" >"$SSH_CONFIG"
+  rm -f "$tmp"
+  echo "Added '$INCLUDE_LINE' to top of $SSH_CONFIG"
 fi
-
-# Replace the original file with our new one
-mv "$temp_file" "$SSH_CONFIG_PATH"
-
