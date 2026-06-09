@@ -54,6 +54,24 @@ return {
       }
     end,
   },
+  {
+    "iamcco/markdown-preview.nvim",
+    cmd = { "MarkdownPreviewToggle", "MarkdownPreview", "MarkdownPreviewStop" },
+    build = "cd app && yarn install",
+    init = function()
+      vim.g.mkdp_filetypes = { "markdown" }
+      local is_remote = os.getenv("SSH_CLIENT") ~= nil
+        or os.getenv("SSH_TTY") ~= nil
+        or os.getenv("SSH_CONNECTION") ~= nil
+
+      if is_remote then
+        -- when in a remote server, we have to choose to port forward something,
+        -- so this is my choice lol
+        vim.g.mkdp_port = '48923'
+      end
+    end,
+    ft = { "markdown" },
+  },
   -- this syncs neovim's env with the one that the user has
   { "direnv/direnv.vim" },
   -- https://github.com/avifenesh/claucode.nvim
