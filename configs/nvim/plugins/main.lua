@@ -60,6 +60,10 @@ return {
     build = "cd app && yarn install",
     init = function()
       vim.g.mkdp_filetypes = { "markdown" }
+      vim.g.mkdp_port = "48923"
+      vim.g.mkdp_open_ip = "127.0.0.1"
+      vim.g.mkdp_open_to_the_world = 1
+      vim.g.mkdp_echo_preview_url = 1
       local is_remote = os.getenv("SSH_CLIENT") ~= nil
         or os.getenv("SSH_TTY") ~= nil
         or os.getenv("SSH_CONNECTION") ~= nil
@@ -67,7 +71,8 @@ return {
       if is_remote then
         -- when in a remote server, we have to choose to port forward something,
         -- so this is my choice lol
-        vim.g.mkdp_port = '48923'
+        vim.g.mkdp_port = "48923"
+        vim.g.mkdp_open_ip = "127.0.0.1"
       end
     end,
     ft = { "markdown" },
