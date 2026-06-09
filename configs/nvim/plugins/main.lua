@@ -60,7 +60,7 @@ return {
     build = "cd app && yarn install",
     init = function()
       vim.g.mkdp_filetypes = { "markdown" }
-      vim.g.mkdp_auto_start = 1
+      vim.g.mkdp_auto_start = 0
 
       -- On a remote host (always Linux in this setup) the browser lives on the
       -- local Mac. Serve the preview on a localhost port that SSH forwards back
