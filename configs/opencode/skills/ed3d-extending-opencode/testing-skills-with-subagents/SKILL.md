@@ -13,7 +13,7 @@ You run scenarios without the skill (RED - watch agent fail), write skill addres
 
 **Core principle:** If you didn't watch an agent fail without the skill, you don't know if the skill prevents the right failures.
 
-**REQUIRED BACKGROUND:** You MUST understand superpowers:test-driven-development before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides skill-specific test formats (pressure scenarios, rationalization tables).
+**REQUIRED BACKGROUND:** You MUST understand the test-driven-development skill before using this skill. That skill defines the fundamental RED-GREEN-REFACTOR cycle. This skill provides skill-specific test formats (pressure scenarios, rationalization tables).
 
 **Complete worked example:** See examples/AGENTS_MD_TESTING.md for a full test campaign testing AGENTS.md documentation variants.
 
@@ -51,7 +51,7 @@ This is identical to TDD's "write failing test first" - you MUST see what agents
 
 ### Choosing the Model for RED
 
-Run RED-phase tests at the model level you expect in production. If the skill will primarily be used by Sonnet agents, test with `ed3d-basic-agents:sonnet-general-purpose`. If you're unsure which model users will run, use AskUserQuestion to ask — recommend Sonnet as the default.
+Run RED-phase tests at the model level you expect in production. If the skill will primarily be used by Sonnet agents, test with the `ed3d-sonnet-general-purpose` agent. If you're unsure which model users will run, use the `question` tool to ask — recommend Sonnet as the default.
 
 The RED phase needs realistic baseline behavior. A stronger model might avoid pitfalls naturally; a weaker one might fail for unrelated reasons. Test at the level that represents actual usage.
 
@@ -154,7 +154,7 @@ Forces explicit choice.
 
 **Best tests combine 3+ pressures.**
 
-**Why this works:** See persuasion-principles.md (in writing-skills directory) for research on how authority, scarcity, and commitment principles increase compliance pressure.
+**Why this works:** See persuasion-principles.md (shipped with this skill; its absolute path is shown in the file list when this skill loads) for research on how authority, scarcity, and commitment principles increase compliance pressure.
 
 ### Key Elements of Good Scenarios
 
@@ -339,7 +339,7 @@ Before deploying skill, verify you followed RED-GREEN-REFACTOR:
 - [ ] Added explicit counters for each loophole
 - [ ] Updated rationalization table
 - [ ] Updated red flags list
-- [ ] Updated description ith violation symptoms
+- [ ] Updated description with violation symptoms
 - [ ] Re-tested - agent still complies
 - [ ] Meta-tested to verify clarity
 - [ ] Agent follows rule under maximum pressure

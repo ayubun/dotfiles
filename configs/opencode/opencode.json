@@ -3,7 +3,7 @@
   "skills": {
     "paths": [
       "~/dotfiles/configs/opencode/skills",
-      "~/work/skills"
+      "~/work/opencode/skills"
     ]
   },
   "instructions": [

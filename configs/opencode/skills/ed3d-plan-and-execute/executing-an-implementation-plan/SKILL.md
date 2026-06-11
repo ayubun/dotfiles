@@ -26,7 +26,7 @@ Execute plan phase-by-phase, loading each phase just-in-time to minimize context
 
 **The human cannot see what subagents return. You are their window into the work.**
 
-After EVERY subagent completes (task-implementor, bug-fixer, code-reviewer), you MUST:
+After EVERY subagent completes (task-implementor, bug-fixer, ed3d-code-reviewer), you MUST:
 
 1. **Print the subagent's full response** to the user before taking any other action
 2. **Do not summarize or paraphrase** - show them what the subagent actually said
@@ -44,7 +44,7 @@ After EVERY subagent completes (task-implementor, bug-fixer, code-reviewer), you
 
 **DO NOT GUESS.** If the user has not provided a path to an implementation plan directory, you MUST ask for it.
 
-Use AskUserQuestion:
+Use the `question` tool:
 ```
 Question: "Which implementation plan should I execute?"
 Options:
@@ -73,7 +73,7 @@ head -10 [plan-directory]/phase_01.md
 grep -E "START_TASK_|START_SUBCOMPONENT_" [plan-directory]/phase_01.md
 ```
 
-The header includes the title (`# [Phase Title]`) and `**Goal:**` line. Extract the title for the task entry.
+The header includes the title (`# [Phase Title]`) and `**Goal:**` line. Extract the title for the todo entry.
 
 The grep output shows the task structure, e.g.:
 ```
@@ -124,11 +124,11 @@ mkdir -p "${SCRATCHPAD_DIR}"
 echo "${SCRATCHPAD_DIR}"
 ```
 
-This scratchpad ensures isolation when multiple execution sessions run in parallel. Pass it to code-reviewer invocations.
+This scratchpad ensures isolation when multiple execution sessions run in parallel. Pass it to ed3d-code-reviewer invocations.
 
-### 2. Create Phase-Level Task List
+### 2. Create Phase-Level Todo List
 
-Use TaskCreate to create **three task entries per phase** (or TodoWrite in older opencode versions). Include the title from the header:
+Use `todowrite` to create **three todo entries per phase**. Include the title from the header:
 
 ```
 - [ ] Phase 1a: Read /absolute/path/to/phase_01.md — Document Infrastructure Implementation Plan
@@ -140,7 +140,7 @@ Use TaskCreate to create **three task entries per phase** (or TodoWrite in older
 ...
 ```
 
-**Why absolute paths in task entries:** After compaction, context may be summarized. The absolute path in the task entry ensures you always know exactly which file to read.
+**Why absolute paths in todo entries:** After compaction, context may be summarized. The absolute path in the todo entry ensures you always know exactly which file to read.
 
 **Why include the title:** Gives visibility into what each phase covers without loading full content.
 
@@ -172,62 +172,58 @@ If a functionality task (code that does something) has no tests specified:
 
 Do NOT implement functionality without tests. Missing tests = plan gap, not something to skip.
 
-**Execute all tasks in sequence.** For each task, dispatch `task-implementor-fast` with the phase file path:
+**Execute all tasks in sequence.** For each task, dispatch `ed3d-task-implementor-fast` with the phase file path:
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-plan-and-execute:task-implementor-fast</parameter>
-<parameter name="description">Implementing Phase X, Task Y: [description]</parameter>
-<parameter name="prompt">
-  Implement Task N from the phase file.
+task:
+  subagent_type: ed3d-task-implementor-fast
+  description: Implementing Phase X, Task Y: [description]
+  prompt: |
+    Implement Task N from the phase file.
 
-  Phase file: [absolute path to phase file]
-  Task number: N
+    Phase file: [absolute path to phase file]
+    Task number: N
 
-  Read the phase file and implement Task N (look for `<!-- START_TASK_N -->`).
+    Read the phase file and implement Task N (look for `<!-- START_TASK_N -->`).
 
-  Your job is to:
-  1. Read the phase file to understand context
-  2. Apply all relevant skills, such as (if available) ed3d-house-style:coding-effectively
-  3. Implement exactly what Task N specifies
-  4. Verify with tests/build/lint
-  5. Commit your work
-  6. Report back with evidence
+    Your job is to:
+    1. Read the phase file to understand context
+    2. Apply all relevant skills, such as (if available) coding-effectively
+    3. Implement exactly what Task N specifies
+    4. Verify with tests/build/lint
+    5. Commit your work
+    6. Report back with evidence
 
-  Work from: [directory]
+    Work from: [directory]
 
-  Provide complete report per your agent instructions.
-</parameter>
-</invoke>
+    Provide complete report per your agent instructions.
 ```
 
 **For subcomponents** (grouped tasks), dispatch once for all tasks in the subcomponent:
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-plan-and-execute:task-implementor-fast</parameter>
-<parameter name="description">Implementing Phase X, Subcomponent A (Tasks 3-5): [description]</parameter>
-<parameter name="prompt">
-  Implement Subcomponent A (Tasks 3, 4, 5) from the phase file.
+task:
+  subagent_type: ed3d-task-implementor-fast
+  description: Implementing Phase X, Subcomponent A (Tasks 3-5): [description]
+  prompt: |
+    Implement Subcomponent A (Tasks 3, 4, 5) from the phase file.
 
-  Phase file: [absolute path to phase file]
-  Tasks: 3, 4, 5 (look for `<!-- START_SUBCOMPONENT_A -->`)
+    Phase file: [absolute path to phase file]
+    Tasks: 3, 4, 5 (look for `<!-- START_SUBCOMPONENT_A -->`)
 
-  Read the phase file and implement all tasks in this subcomponent.
+    Read the phase file and implement all tasks in this subcomponent.
 
-  Your job is to:
-  1. Read the phase file to understand context
-  2. Apply all relevant skills, such as (if available) ed3d-house-style:coding-effectively
-  3. Implement all tasks in sequence
-  4. Verify with tests/build/lint after completing all tasks
-  5. Commit your work (one commit per task, or logical commits)
-  6. Report back with evidence for each task
+    Your job is to:
+    1. Read the phase file to understand context
+    2. Apply all relevant skills, such as (if available) coding-effectively
+    3. Implement all tasks in sequence
+    4. Verify with tests/build/lint after completing all tasks
+    5. Commit your work (one commit per task, or logical commits)
+    6. Report back with evidence for each task
 
-  Work from: [directory]
+    Work from: [directory]
 
-  Provide complete report covering all tasks.
-</parameter>
-</invoke>
+    Provide complete report covering all tasks.
 ```
 
 **Print each task-implementor's response** before moving to the next task.
@@ -266,52 +262,51 @@ The phase changed too much for a single review. Chunk the review:
 
 **When issues are found:**
 
-1. **Create a task for EACH issue** (survives compaction):
+1. **Create a todo for EACH issue** (survives compaction). Add them with `todowrite`, and place the re-review todo last:
    ```
-   TaskCreate: "Phase N fix [Critical]: <VERBATIM issue description from reviewer>"
-   TaskCreate: "Phase N fix [Important]: <VERBATIM issue description from reviewer>"
-   TaskCreate: "Phase N fix [Minor]: <VERBATIM issue description from reviewer>"
-   ...one task per issue...
-   TaskCreate: "Phase N: Re-review after fixes"
-   TaskUpdate: set "Re-review" blocked by all fix tasks
+   - Phase N fix [Critical]: <VERBATIM issue description from reviewer>
+   - Phase N fix [Important]: <VERBATIM issue description from reviewer>
+   - Phase N fix [Minor]: <VERBATIM issue description from reviewer>
+   ...one todo per issue...
+   - Phase N: Re-review after fixes
    ```
 
-   **Copy issue descriptions VERBATIM**, even if long. After compaction, the task description is all that remains — it must contain the full issue details for the bug-fixer to understand what to fix.
+   The "Re-review after fixes" todo comes after all fix todos in the list — only start it once every fix todo is completed.
 
-2. **Dispatch `task-bug-fixer`** with the phase file:
+   **Copy issue descriptions VERBATIM**, even if long. After compaction, the todo content is all that remains — it must contain the full issue details for the bug-fixer to understand what to fix.
+
+2. **Dispatch `ed3d-task-bug-fixer`** with the phase file:
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-plan-and-execute:task-bug-fixer</parameter>
-<parameter name="description">Fixing review issues for Phase X</parameter>
-<parameter name="prompt">
-  Fix issues from code review for Phase X.
+task:
+  subagent_type: ed3d-task-bug-fixer
+  description: Fixing review issues for Phase X
+  prompt: |
+    Fix issues from code review for Phase X.
 
-  Phase file: [absolute path to phase file]
+    Phase file: [absolute path to phase file]
 
-  Code reviewer found these issues:
-  [list all issues - Critical, Important, and Minor]
+    Code reviewer found these issues:
+    [list all issues - Critical, Important, and Minor]
 
-  Read the phase file to understand the tasks and context.
+    Read the phase file to understand the tasks and context.
 
-  Your job is to:
-  1. Understand root cause of each issue
-  2. Apply fixes systematically (Critical → Important → Minor)
-  3. Verify with tests/build/lint
-  4. Commit your fixes
-  5. Report back with evidence
+    Your job is to:
+    1. Understand root cause of each issue
+    2. Apply fixes systematically (Critical → Important → Minor)
+    3. Verify with tests/build/lint
+    4. Commit your fixes
+    5. Report back with evidence
 
-  Work from: [directory]
+    Work from: [directory]
 
-  Fix ALL issues — including every Minor issue. The goal is ZERO issues on re-review.
-  Minor issues are not optional. Do not skip them.
-</parameter>
-</invoke>
+    Fix ALL issues — including every Minor issue. The goal is ZERO issues on re-review.
+    Minor issues are not optional. Do not skip them.
 ```
 
 3. **Mark "Fix issues" complete**, then re-review per the `requesting-code-review` skill.
 
-4. **If re-review finds more issues**, create new fix/re-review tasks. Continue loop until zero issues.
+4. **If re-review finds more issues**, create new fix/re-review todos. Continue loop until zero issues.
 
 5. **Mark "Re-review" complete** when zero issues.
 
@@ -332,33 +327,31 @@ Proceed to the next phase's "Read" step. Repeat 3a-3c for each phase.
 
 ### 4. Update Project Context
 
-After all phases complete, invoke the `ed3d-extending-opencode:project-opencode-librarian` subagent (when available) to review changes and update AGENTS.md files if needed.
+After all phases complete, invoke the `ed3d-project-opencode-librarian` subagent (when available) to review changes and update AGENTS.md files if needed.
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-extending-opencode:project-opencode-librarian</parameter>
-<parameter name="description">Updating project context after implementation</parameter>
-<parameter name="prompt">
-  Review what changed during this implementation and update AGENTS.md files if contracts or structure changed.
+task:
+  subagent_type: ed3d-project-opencode-librarian
+  description: Updating project context after implementation
+  prompt: |
+    Review what changed during this implementation and update AGENTS.md files if contracts or structure changed.
 
-  Base commit: <commit SHA at start of first phase>
-  Current HEAD: <current commit>
-  Working directory: <directory>
+    Base commit: <commit SHA at start of first phase>
+    Current HEAD: <current commit>
+    Working directory: <directory>
 
-  Follow the ed3d-extending-opencode:maintaining-project-context skill to:
-  1. Diff against base to see what changed
-  2. Identify contract/API/structure changes
-  3. Update affected AGENTS.md files
-  4. Commit documentation updates
+    Follow the maintaining-project-context skill to:
+    1. Diff against base to see what changed
+    2. Identify contract/API/structure changes
+    3. Update affected AGENTS.md files
+    4. Commit documentation updates
 
-  Report back with what was updated (or that no updates were needed).
-</parameter>
-</invoke>
+    Report back with what was updated (or that no updates were needed).
 ```
 
 **If librarian reports updates:** Review the changes, then proceed to final review.
 **If librarian reports no updates needed:** Proceed to final review.
-**If librarian subagent is unavailable:** skip this entire step. Say aloud that you're skipping it because the `ed3d-extending-opencode` plugin is not available.
+**If librarian subagent is unavailable:** skip this entire step. Say aloud that you're skipping it because the `ed3d-project-opencode-librarian` agent is not available.
 
 ### 5. Final Review Sequence
 
@@ -389,58 +382,54 @@ Continue the review loop until zero issues remain.
 
 **Skip this step if test-requirements.md does not exist.**
 
-The test-analyst agent performs two sequential tasks with shared analysis:
+The ed3d-test-analyst agent performs two sequential tasks with shared analysis:
 1. Validate coverage against acceptance criteria
 2. Generate human test plan (only if coverage passes)
 
-Dispatch the test-analyst agent:
+Dispatch the ed3d-test-analyst agent:
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-plan-and-execute:test-analyst</parameter>
-<parameter name="description">Analyzing test coverage and generating test plan</parameter>
-<parameter name="prompt">
-Analyze test implementation against acceptance criteria.
+task:
+  subagent_type: ed3d-test-analyst
+  description: Analyzing test coverage and generating test plan
+  prompt: |
+    Analyze test implementation against acceptance criteria.
 
-TEST_REQUIREMENTS_PATH: [absolute path to test-requirements.md]
-WORKING_DIRECTORY: [project root]
-BASE_SHA: [commit before first phase]
-HEAD_SHA: [current commit]
+    TEST_REQUIREMENTS_PATH: [absolute path to test-requirements.md]
+    WORKING_DIRECTORY: [project root]
+    BASE_SHA: [commit before first phase]
+    HEAD_SHA: [current commit]
 
-Phase 1: Validate that automated tests exist for all acceptance criteria.
-Phase 2: If coverage passes, generate human test plan using your analysis.
+    Phase 1: Validate that automated tests exist for all acceptance criteria.
+    Phase 2: If coverage passes, generate human test plan using your analysis.
 
-Return coverage validation result. If PASS, include the human test plan.
-</parameter>
-</invoke>
+    Return coverage validation result. If PASS, include the human test plan.
 ```
 
 **If analyst returns coverage FAIL:**
 
 1. Dispatch bug-fixer to add missing tests:
    ```
-   <invoke name="Task">
-   <parameter name="subagent_type">ed3d-plan-and-execute:task-bug-fixer</parameter>
-   <parameter name="description">Adding missing test coverage</parameter>
-   <parameter name="prompt">
-   Add missing tests identified by the test analyst.
+   task:
+     subagent_type: ed3d-task-bug-fixer
+     description: Adding missing test coverage
+     prompt: |
+       Add missing tests identified by the test analyst.
 
-   Missing coverage:
-   [list from analyst output]
+       Missing coverage:
+       [list from analyst output]
 
-   For each missing test:
-   1. Read the acceptance criterion carefully
-   2. Create the test file at the expected location
-   3. Write tests that verify the criterion's actual behavior—not just code that passes, but code that would fail if the criterion weren't met
-   4. Run tests to confirm they pass
-   5. Commit the new tests
+       For each missing test:
+       1. Read the acceptance criterion carefully
+       2. Create the test file at the expected location
+       3. Write tests that verify the criterion's actual behavior—not just code that passes, but code that would fail if the criterion weren't met
+       4. Run tests to confirm they pass
+       5. Commit the new tests
 
-   Work from: [directory]
-   </parameter>
-   </invoke>
+       Work from: [directory]
    ```
 
-2. Re-run test-analyst
+2. Re-run ed3d-test-analyst
 3. Repeat until coverage PASS or three attempts fail (then escalate to human)
 
 **If analyst returns coverage PASS:**
@@ -491,7 +480,7 @@ You: I'm using the `executing-an-implementation-plan` skill.
 [Discover phases: phase_01.md, phase_02.md, phase_03.md]
 [Read first 3 lines of each to get titles]
 
-[Create tasks with TaskCreate:]
+[Create todos with todowrite:]
 - [ ] Phase 1a: Read /path/to/phase_01.md — Project Setup
 - [ ] Phase 1b: Execute tasks
 - [ ] Phase 1c: Code review
@@ -509,10 +498,10 @@ You: I'm using the `executing-an-implementation-plan` skill.
 
 [Mark 1a complete, 1b in_progress]
 
-[Dispatch task-implementor-fast for Task 1]
+[Dispatch ed3d-task-implementor-fast for Task 1]
 → Created package.json, tsconfig.json.
 
-[Dispatch task-implementor-fast for Task 2]
+[Dispatch ed3d-task-implementor-fast for Task 2]
 → Created config files. Build succeeds.
 
 [Mark 1b complete, 1c in_progress]
@@ -546,7 +535,7 @@ You: I'm using the `executing-an-implementation-plan` skill.
 
 --- Finalize ---
 
-[Invoke project-opencode-librarian subagent]
+[Invoke ed3d-project-opencode-librarian subagent]
 → Updated AGENTS.md.
 
 [Use requesting-code-review skill for final review]

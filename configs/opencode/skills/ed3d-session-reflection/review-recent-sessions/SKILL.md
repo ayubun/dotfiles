@@ -5,112 +5,99 @@ description: Use when the user wants to review their recent opencode sessions fo
 
 # Review Recent Sessions
 
-Review multiple recent sessions from the current project directory to identify cross-session patterns.
+Review multiple recent sessions from the current project to identify cross-session patterns.
 
 ## Prerequisites
 
-- The `ed3d-extending-opencode` plugin must be installed.
-- The `ed3d-session-reflection` plugin must be installed (provides the `conversation-reviewer` agent and `reduce-transcript.py` script).
-- The current session's transcript path must be available (to determine the project directory).
+- The `opencode` CLI must be available on PATH (provides `opencode session list` and `opencode export`).
+- The `ed3d-conversation-reviewer` agent and the `writing-opencode-directives` skill must be available (the reviewer loads that skill).
+- This skill ships `scripts/reduce-transcript.py` (its absolute path is shown in the file list when this skill loads).
 
 ## Invocation
 
-The user may invoke this as:
-- `/review-recent-sessions` — review last 5 sessions
-- `/review-recent-sessions 10` — review last 10 sessions
+The user may ask to:
+- review recent sessions — default to the last 5
+- review the last N sessions — use their N
 
 ## Steps
 
-### 1. Find the project's session directory
+### 1. List recent sessions
 
-Use the current session's transcript path to determine the project directory. The transcript path looks like:
-```
-~/.claude/projects/-Users-ed-Development-.../SESSION_ID.jsonl
-```
-
-The directory containing it is the project's session directory.
-
-If you cannot determine the project directory, ask the user.
-
-### 2. List recent sessions
-
-Find the most recent JSONL files in the project directory, sorted by modification time, limited to the requested count (default 5).
+List the current project's sessions (newest first):
 
 ```bash
-ls -t "<project_session_dir>"/*.jsonl | head -<count>
+opencode session list
 ```
 
-Exclude the current session's transcript (the user doesn't want to review the review session itself).
+Session IDs match `ses_[A-Za-z0-9]+`.
 
-If fewer than 2 sessions are found, tell the user there aren't enough sessions to do a cross-session review and suggest using `/review-session` instead.
+Exclude the current session (the user doesn't want to review the review session itself): it is the most recently updated one and its title matches the running conversation — ask the user if it's ambiguous. **Never export the active session** — a session still being written can truncate mid-write. Take the requested count (default 5) from the remaining sessions.
 
-### 3. Reduce all transcripts
+If fewer than 2 sessions remain, tell the user there aren't enough sessions to do a cross-session review and suggest the `review-session` skill instead.
 
-Create a working directory:
+### 2. Export and reduce all transcripts
+
+Create a working directory, then for each selected session export it and run `scripts/reduce-transcript.py` (shipped with this skill; its absolute path is shown in the file list when this skill loads):
+
 ```bash
 mkdir -p /tmp/session-review-batch
+opencode export <sessionID-N> > /tmp/session-review-batch/session-N.json
+python3 scripts/reduce-transcript.py /tmp/session-review-batch/session-N.json /tmp/session-review-batch/reduced-N.txt
 ```
 
-For each session, run the reduction script:
-```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/reduce-transcript.py" "<session.jsonl>" "/tmp/session-review-batch/reduced-<N>.txt"
+This can be done in a single bash command with a loop over the selected session IDs.
+
+### 3. Dispatch parallel reviewers
+
+For each reduced transcript, dispatch a `ed3d-conversation-reviewer` agent:
+
+```
+task:
+  subagent_type: ed3d-conversation-reviewer
+  description: Review session N of M
+  prompt: |
+    Review the reduced opencode session transcript.
+
+    Transcript path: /tmp/session-review-batch/reduced-N.txt
+    Write your findings to: /tmp/session-review-batch/findings-N.md
+
+    Read the transcript, analyze it, and write your findings following your output format.
 ```
 
-This can be done in a single bash command with a loop.
+Dispatch ALL reviewers in a single message so they run in parallel; react to completion notifications — do not poll or sleep. Tell the user you've dispatched N reviewers and are waiting for results.
 
-### 4. Dispatch parallel reviewers
-
-For each reduced transcript, dispatch a `conversation-reviewer` agent **in the background**:
-
-<invoke name="Agent">
-<parameter name="subagent_type">ed3d-session-reflection:conversation-reviewer</parameter>
-<parameter name="description">Review session N of M</parameter>
-<parameter name="model">opus</parameter>
-<parameter name="run_in_background">true</parameter>
-<parameter name="prompt">
-Review the reduced opencode session transcript.
-
-Transcript path: /tmp/session-review-batch/reduced-N.txt
-Write your findings to: /tmp/session-review-batch/findings-N.md
-
-Read the transcript, analyze it, and write your findings following your output format.
-</parameter>
-</invoke>
-
-Dispatch ALL reviewers in a single message to maximize parallelism. Tell the user you've dispatched N reviewers and are waiting for results.
-
-### 5. Synthesize findings
+### 4. Synthesize findings
 
 Once all reviewers complete, dispatch a general-purpose Sonnet agent to synthesize:
 
-<invoke name="Agent">
-<parameter name="subagent_type">ed3d-basic-agents:sonnet-general-purpose</parameter>
-<parameter name="description">Synthesize session reviews</parameter>
-<parameter name="prompt">
-You are synthesizing findings from multiple opencode session reviews into a cross-session analysis.
+```
+task:
+  subagent_type: ed3d-sonnet-general-purpose
+  description: Synthesize session reviews
+  prompt: |
+    You are synthesizing findings from multiple opencode session reviews into a cross-session analysis.
 
-Read all findings files in /tmp/session-review-batch/findings-*.md
+    Read all findings files in /tmp/session-review-batch/findings-*.md
 
-Produce a synthesis that identifies:
+    Produce a synthesis that identifies:
 
-1. **Recurring patterns** — issues that appear across multiple sessions. These are the highest-value findings because they represent systematic problems.
+    1. **Recurring patterns** — issues that appear across multiple sessions. These are the highest-value findings because they represent systematic problems.
 
-2. **Progression** — is the user getting better or worse at prompting over time? Is the agent handling certain tasks better or worse?
+    2. **Progression** — is the user getting better or worse at prompting over time? Is the agent handling certain tasks better or worse?
 
-3. **Highest-impact recommendations** — across all sessions, which recommendations would have the biggest effect? Prioritize:
-   - AGENTS.md changes (things the user keeps correcting)
-   - Hooks (behaviors that should be enforced automatically)
-   - Skills/workflows (multi-step processes that keep being done manually)
+    3. **Highest-impact recommendations** — across all sessions, which recommendations would have the biggest effect? Prioritize:
+       - AGENTS.md changes (things the user keeps correcting)
+       - Plugin hooks or permission rules (behaviors that should be enforced automatically)
+       - Skills/workflows (multi-step processes that keep being done manually)
 
-4. **Session-specific highlights** — any single-session finding that's particularly noteworthy even if it didn't recur.
+    4. **Session-specific highlights** — any single-session finding that's particularly noteworthy even if it didn't recur.
 
-Write your synthesis to /tmp/session-review-batch/synthesis.md
+    Write your synthesis to /tmp/session-review-batch/synthesis.md
 
-Format as Markdown. Be specific — reference which sessions showed which patterns. Be concise — this is a summary, not a repetition of individual findings.
-</parameter>
-</invoke>
+    Format as Markdown. Be specific — reference which sessions showed which patterns. Be concise — this is a summary, not a repetition of individual findings.
+```
 
-### 6. Present synthesis
+### 5. Present synthesis
 
 Read `/tmp/session-review-batch/synthesis.md` and present the full synthesis to the user.
 

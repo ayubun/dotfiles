@@ -8,7 +8,7 @@ description: Use when writing documentation, guides, API references, or technica
 ## Overview
 
 **Core principle:** Technical writing must be clear, concise, and authentic. Clarity and technical depth are not opposites - you can have both. Avoid AI writing patterns that make content feel robotic or inauthentic.
-￼
+
 **Why this matters:** Developers value their time. Clear documentation builds trust. AI-like writing patterns (identified through research) make content feel generic and untrustworthy. Technical depth without clarity frustrates users. Clarity without depth leaves them stuck.
 
 ## When to Use

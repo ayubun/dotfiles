@@ -1,48 +1,19 @@
 ---
 name: maintaining-project-context
-description: Use when completing development phases or branches to identify and update AGENTS.md or AGENTS.md files that may have become stale - analyzes what changed, determines affected contracts and documentation, and coordinates updates
+description: Use when completing development phases or branches to identify and update AGENTS.md files that may have become stale - analyzes what changed, determines affected contracts and documentation, and coordinates updates
 ---
 
 # Maintaining Project Context
 
-**REQUIRED SUB-SKILL:** Use ed3d-extending-opencode:writing-agents-md-files for all context file creation and updates.
+**REQUIRED SUB-SKILL:** Use the writing-agents-md-files skill for all context file creation and updates.
 
 ## Core Principle
 
-Context files (AGENTS.md or AGENTS.md) document contracts and architectural intent. When code changes contracts, the documentation must update. Stale documentation is worse than no documentation.
+Context files (AGENTS.md) document contracts and architectural intent. When code changes contracts, the documentation must update. Stale documentation is worse than no documentation.
+
+We use OUR format structure (Purpose, Contracts, Dependencies, Invariants, etc.) — AGENTS.md is the cross-platform AI agent context filename.
 
 **Trigger:** End of development phase, branch completion, or any work that changed contracts, APIs, or domain structure.
-
-## Format Detection (MANDATORY FIRST STEP)
-
-Before any updates, detect what format this repository uses:
-
-```bash
-# Check for AGENTS.md at root
-ls -la AGENTS.md 2>/dev/null
-
-# Check for AGENTS.md at root
-ls -la AGENTS.md 2>/dev/null
-```
-
-| Root AGENTS.md? | Format | Action |
-|-----------------|--------|--------|
-| Yes | AGENTS.md-canonical | Update AGENTS.md files, create companion AGENTS.md |
-| No | AGENTS.md-canonical | Update AGENTS.md files directly |
-
-**Key principle:** We use OUR format structure (Purpose, Contracts, Dependencies, Invariants, etc.) regardless of filename. AGENTS.md is just for cross-platform AI agent compatibility.
-
-### AGENTS.md-Canonical Repos
-
-When the repo uses AGENTS.md:
-
-1. **Read AGENTS.md first** before making any updates
-2. **Write content to AGENTS.md** using our standard structure
-3. **Create companion AGENTS.md** next to each AGENTS.md with exactly this content:
-
-```markdown
-Read @./AGENTS.md and treat its contents as if they were in AGENTS.md
-```
 
 ## When to Update Context Files
 
@@ -83,14 +54,12 @@ For each significant change, determine which context file should document it:
 
 | Change Location | Context File Location |
 |-----------------|----------------------|
-| Project-wide pattern | Root context file |
-| New domain | `<domain>/` context file (create) |
-| Existing domain contract | `<domain>/` context file (update) |
+| Project-wide pattern | Root AGENTS.md |
+| New domain | `<domain>/AGENTS.md` (create) |
+| Existing domain contract | `<domain>/AGENTS.md` (update) |
 | Cross-domain dependency | Both affected domains |
 
 **Hierarchy rule:** Information belongs at the lowest level where it applies. Domain-specific contracts go in domain files, not root.
-
-**For AGENTS.md-canonical repos:** When creating new domain context files, create both `AGENTS.md` (with content) and `AGENTS.md` (companion pointer).
 
 ### Step 3: Verify Contracts Still Hold
 
@@ -112,25 +81,16 @@ grep -r "from '\.\." <domain>/
 ### Step 4: Update or Create Context Files
 
 **For updates:**
-1. Read existing file first (especially for AGENTS.md)
+1. Read the existing file first
 2. Update freshness date via `date +%Y-%m-%d`
 3. Update affected sections
 4. Remove stale content
 5. Verify under token budget (<100 lines for domain files)
 
-**For new domains (AGENTS.md-canonical repos):**
-1. Create `<domain>/AGENTS.md` using template from writing-agents-md-files
+**For new domains:**
+1. Create `<domain>/AGENTS.md` using the template from writing-agents-md-files
 2. Document purpose, contracts, dependencies, invariants
 3. Set freshness date
-
-**For new domains (AGENTS.md-canonical repos):**
-1. Create `<domain>/AGENTS.md` using template from writing-agents-md-files
-2. Document purpose, contracts, dependencies, invariants
-3. Set freshness date
-4. Create companion `<domain>/AGENTS.md`:
-   ```markdown
-   Read @./AGENTS.md and treat its contents as if they were in AGENTS.md
-   ```
 
 ### Step 5: Commit Documentation Updates
 
@@ -144,21 +104,18 @@ git commit -m "docs: update project context for <branch-name>"
 ```
 Has code changed?
 ├─ No → Skip (nothing to update)
-└─ Yes → Detect format first (AGENTS.md at root?)
-    │
-    └─ What changed?
-        ├─ Only tests/internal details → Skip
-        └─ Contracts/APIs/structure → Continue
-            │
-            ├─ New domain created?
-            │   ├─ AGENTS.md repo → Create AGENTS.md + companion AGENTS.md
-            │   └─ AGENTS.md repo → Create AGENTS.md
-            │
-            ├─ Existing domain changed?
-            │   └─ Update domain context file (read first!)
-            │
-            └─ Project-wide pattern changed?
-                └─ Update root context file
+└─ Yes → What changed?
+    ├─ Only tests/internal details → Skip
+    └─ Contracts/APIs/structure → Continue
+        │
+        ├─ New domain created?
+        │   └─ Create <domain>/AGENTS.md
+        │
+        ├─ Existing domain changed?
+        │   └─ Update domain AGENTS.md (read first!)
+        │
+        └─ Project-wide pattern changed?
+            └─ Update root AGENTS.md
 ```
 
 ## Quick Reference
@@ -185,16 +142,14 @@ Has code changed?
 | Documenting implementation | Document contracts and intent |
 | Putting domain info in root | Use domain context files for domain contracts |
 | Skipping verification | Read the code, confirm contracts hold |
-| Skipping format detection | Always check for AGENTS.md first |
 | Writing AGENTS.md without reading | Always read existing content before updating |
-| Forgetting companion AGENTS.md | AGENTS.md repos need both files |
 
 ## Integration Points
 
 **Called by:**
-- **project-opencode-librarian agent** - Uses this skill to coordinate updates
+- **ed3d-project-opencode-librarian agent** - Uses this skill to coordinate updates
 - **executing-an-implementation-plan** (Step 5b) - After all tasks complete
 - **finishing-a-development-branch** (Step 4b) - Before merge/PR
 
 **Uses:**
-- **writing-agents-md-files** - For actual context file creation/updates (works for both AGENTS.md and AGENTS.md)
+- **writing-agents-md-files** - For actual context file creation/updates

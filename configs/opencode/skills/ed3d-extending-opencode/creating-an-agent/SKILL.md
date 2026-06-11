@@ -1,20 +1,20 @@
 ---
 name: creating-an-agent
-description: Use when creating specialized subagents for opencode plugins or the Task tool - covers description writing for auto-delegation, tool selection, prompt structure, and testing agents
+description: Use when creating specialized subagents for opencode or the task tool - covers description writing for auto-delegation, tool selection, prompt structure, and testing agents
 ---
 
 # Creating an Agent
 
-**REQUIRED BACKGROUND:** Read ed3d-extending-opencode:writing-opencode-directives for foundational guidance on token efficiency, compliance techniques, and directive structure. This skill focuses on agent-specific patterns.
+**REQUIRED BACKGROUND:** Read the writing-opencode-directives skill for foundational guidance on token efficiency, compliance techniques, and directive structure. This skill focuses on agent-specific patterns.
 
 ## What is an Agent?
 
-An **agent** is a specialized Claude instance with:
-- Defined tools (Read, Edit, Bash, etc.)
+An **agent** is a specialized assistant instance with:
+- Its own model and tool permissions
 - Specific responsibilities (code review, security audit, research)
 - A focused system prompt
 
-Agents are spawned via the Task tool or defined in plugin `agents/` directories.
+Agents are defined as Markdown files in an agents directory (`~/.config/opencode/agents/` for the user) and dispatched via the `task` tool. The filename (minus `.md`) is the agent's name.
 
 ## When to Create an Agent
 
@@ -26,7 +26,7 @@ Agents are spawned via the Task tool or defined in plugin `agents/` directories.
 
 **Don't create for:**
 - Simple, one-off tasks
-- Tasks the main Claude handles well
+- Tasks the main agent handles well
 - Purely conversational interactions
 
 ## Agent File Structure
@@ -39,10 +39,9 @@ agents/
 **Template:**
 ```markdown
 ---
-name: agent-name
 description: Use when [specific triggers] - [what agent does]
-tools: Read, Grep, Glob, Bash
-model: sonnet
+mode: subagent
+model: anthropic/claude-sonnet-4-6
 ---
 
 # Agent Name
@@ -58,9 +57,11 @@ model: sonnet
 2. Step 2
 ```
 
+There is no `name` field — the filename is the identifier. `mode: subagent` makes the agent dispatchable via the `task` tool (rather than a primary agent you switch to).
+
 ## Description: The Critical Field
 
-The `description` field determines when Claude auto-delegates to your agent. It's searched when matching tasks to available agents.
+The `description` field determines when the main agent auto-delegates to your agent. It's searched when matching tasks to available agents.
 
 ### Writing Effective Descriptions
 
@@ -85,30 +86,40 @@ description: Use when reviewing code for security vulnerabilities, analyzing aut
 - File types or patterns if relevant
 - Actions the agent performs
 
-**Length:** Max 1024 characters. Be specific, not verbose.
+**Length:** Be specific, not verbose. A few sentences at most.
 
-## Tool Selection
+## Tools and Permissions
 
-Choose tools based on agent responsibilities:
+Agents get the standard opencode toolset by default:
 
-| Tool | When to Include |
-|------|-----------------|
-| Read | Reading files, analyzing code |
-| Grep | Searching code patterns |
-| Glob | Finding files by pattern |
-| Edit | Modifying existing files |
-| Write | Creating new files |
-| Bash | Running commands, git, tests |
-| TaskCreate/TaskUpdate | Tracking multi-step workflows (TodoWrite in older versions) |
-| Task | Spawning sub-agents |
-| WebFetch/WebSearch | Research tasks |
+| Tool | What the agent uses it for |
+|------|----------------------------|
+| `read` | Reading files, analyzing code |
+| `grep` | Searching code patterns |
+| `glob` | Finding files by pattern |
+| `edit` | Modifying existing files |
+| `write` | Creating new files |
+| `bash` | Running commands, git, tests |
+| `todowrite` | Tracking multi-step workflows |
+| `task` | Spawning sub-agents |
+| `webfetch` / `websearch` | Research tasks |
 
-**Principle:** Include only what the agent needs. Fewer tools = more focused behavior.
+**Principle:** Restrict what the agent doesn't need. Fewer capabilities = more focused behavior. Express restrictions as a `permission:` block in frontmatter (the deprecated `tools:` list should not be used):
+
+```yaml
+# Read-only agent (e.g. a reviewer)
+permission:
+  edit: deny
+
+# Agent that must ask before running shell commands
+permission:
+  bash: ask
+```
 
 **Example restrictions:**
-- Code reviewer: `Read, Grep, Glob` (no write access)
-- Implementor: `Read, Edit, Write, Bash, Grep, Glob`
-- Researcher: `Read, WebFetch, WebSearch, Glob`
+- Code reviewer: `edit: deny` (no write access)
+- Implementor: default permissions (full access)
+- Researcher: `edit: deny`, relies on `read`/`webfetch`/`websearch`
 
 ## Agent Prompt Structure
 
@@ -137,9 +148,9 @@ Step-by-step process:
 ```markdown
 ## Workflow
 
-1. **Scan:** Use Grep to find common vulnerability patterns
-2. **Analyze:** Use Read to examine flagged files
-3. **Verify:** Use Bash to run security audit tools
+1. **Scan:** Use `grep` to find common vulnerability patterns
+2. **Analyze:** Use `read` to examine flagged files
+3. **Verify:** Use `bash` to run security audit tools
 4. **Report:** Provide structured findings
 ```
 
@@ -172,13 +183,13 @@ What the agent should NOT do:
 
 | Model | Use For |
 |-------|---------|
-| haiku | Simple tasks, fast iteration, high volume |
-| sonnet | Balanced capability/cost, most tasks |
-| opus | Complex reasoning, critical decisions, code review |
+| `anthropic/claude-haiku-4-5` | Simple tasks, fast iteration, high volume |
+| `anthropic/claude-sonnet-4-6` | Balanced capability/cost, most tasks |
+| `anthropic/claude-opus-4-8` | Complex reasoning, critical decisions, code review |
 
 Specify in frontmatter:
 ```yaml
-model: opus
+model: anthropic/claude-opus-4-8
 ```
 
 ## Testing Agents
@@ -196,7 +207,7 @@ Run with agent. Verify:
 - Agent is auto-delegated (description triggers correctly)
 - Workflow is followed
 - Output matches expected format
-- Tool restrictions are respected
+- Permission restrictions are respected
 
 ### 3. Edge Case Testing
 
@@ -219,10 +230,11 @@ If agent fails:
 
 ```markdown
 ---
-name: code-reviewer
 description: Use when reviewing code changes, pull requests, or verifying implementation quality - analyzes for bugs, style issues, and best practices
-tools: Read, Grep, Glob, Bash
-model: opus
+mode: subagent
+model: anthropic/claude-opus-4-8
+permission:
+  edit: deny
 ---
 
 # Code Reviewer
@@ -252,10 +264,11 @@ For each issue:
 
 ```markdown
 ---
-name: researcher
 description: Use when gathering information from the web, investigating APIs, or synthesizing documentation from multiple sources
-tools: Read, WebFetch, WebSearch, Glob
-model: sonnet
+mode: subagent
+model: anthropic/claude-sonnet-4-6
+permission:
+  edit: deny
 ---
 
 # Research Agent
@@ -269,8 +282,8 @@ You are a research specialist gathering and synthesizing information.
 4. Cite sources
 
 ## Workflow
-1. WebSearch for relevant sources
-2. WebFetch promising results
+1. `websearch` for relevant sources
+2. `webfetch` promising results
 3. Extract and organize findings
 4. Return structured synthesis with citations
 ```
@@ -279,10 +292,9 @@ You are a research specialist gathering and synthesizing information.
 
 ```markdown
 ---
-name: task-implementor
 description: Use when implementing specific tasks from plans - writes code, runs tests, commits changes following TDD workflow
-tools: Read, Edit, Write, Bash, Grep, Glob, TaskCreate, TaskUpdate, TaskList
-model: sonnet
+mode: subagent
+model: anthropic/claude-sonnet-4-6
 ---
 
 # Task Implementor
@@ -306,7 +318,7 @@ You implement tasks following TDD principles.
 | Mistake | Fix |
 |---------|-----|
 | Vague description | Include specific triggers and symptoms |
-| Too many tools | Restrict to what's needed |
+| Unrestricted permissions | Add `permission:` block (e.g. `edit: deny`) when the agent shouldn't modify files |
 | No workflow | Add step-by-step process |
 | No output format | Define expected structure |
 | First-person description | Write in third person |
@@ -317,7 +329,8 @@ You implement tasks following TDD principles.
 
 - [ ] Description starts with "Use when...", third person
 - [ ] Description includes specific triggers/symptoms
-- [ ] Tools restricted to necessary set
+- [ ] `mode: subagent` set
+- [ ] Permissions restricted where the role calls for it
 - [ ] Model appropriate for task complexity
 - [ ] Responsibilities clearly listed
 - [ ] Workflow is step-by-step

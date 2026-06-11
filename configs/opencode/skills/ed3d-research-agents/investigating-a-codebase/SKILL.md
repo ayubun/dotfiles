@@ -21,13 +21,13 @@ Understand current codebase state to ground planning and design decisions in rea
 
 **Don't use for:**
 - Information available in external docs (use internet research)
-- Questions answered by reading 1-2 specific known files (use Read directly)
+- Questions answered by reading 1-2 specific known files (use the `read` tool directly)
 - General programming questions not specific to this codebase
 
 ## Core Investigation Workflow
 
 1. **Start with entry points** - main files, index, package.json, config
-2. **Use multiple search strategies** - Glob patterns, Grep keywords, Read files
+2. **Use multiple search strategies** - `glob` patterns, `grep` keywords, `read` files
 3. **Follow traces** - imports, references, component relationships
 4. **Verify don't assume** - confirm file locations and structure
 5. **Report definitively** - exact paths or "not found" with search strategy
@@ -51,7 +51,7 @@ When given design assumptions to verify:
 
 | Task | Strategy |
 |------|----------|
-| **Where is X** | Glob likely names → Grep keywords → Read matches |
+| **Where is X** | `glob` likely names → `grep` keywords → `read` matches |
 | **How does X work** | Find entry point → Follow imports → Read implementation |
 | **What patterns exist** | Find examples → Compare implementations → Extract conventions |
 | **Does X exist** | Multiple searches → Definitive yes/no → Evidence |
@@ -60,9 +60,9 @@ When given design assumptions to verify:
 ## Investigation Strategies
 
 **Multiple search approaches:**
-- Glob for file patterns across codebase
-- Grep for keywords, function names, imports
-- Read key files to understand implementation
+- `glob` for file patterns across codebase
+- `grep` for keywords, function names, imports
+- `read` key files to understand implementation
 - Follow imports and references for relationships
 - Check package.json, config files for dependencies
 
@@ -73,7 +73,7 @@ When given design assumptions to verify:
 - Follow both usage and definition traces
 
 **Verify everything:**
-- Never assume file locations - always verify with Read/Glob
+- Never assume file locations - always verify with `read`/`glob`
 - Never assume structure - explore and confirm
 - Document search strategy when reporting "not found"
 - Distinguish "doesn't exist" from "couldn't locate"
@@ -102,7 +102,7 @@ When given design assumptions to verify:
 
 | Mistake | Fix |
 |---------|-----|
-| Assuming file locations | Always verify with Read/Glob before reporting |
+| Assuming file locations | Always verify with `read`/`glob` before reporting |
 | Stopping at first result | Explore multiple paths to verify findings |
 | Vague locations ("in auth folder") | Exact paths (src/auth/index.ts:42) |
 | Not documenting search strategy | Explain what was checked when reporting "not found" |

@@ -28,7 +28,7 @@ Orchestrate the complete design workflow from initial idea to implementation-rea
 
 **REQUIRED: Create task tracker at start**
 
-Use TaskCreate to create todos for each phase (or TodoWrite in older opencode versions):
+Use the `todowrite` tool to create todos for each phase:
 
 - Phase 1: Context Gathering (initial information collected)
 - (conditional) Read project design guidance (if `.ed3d/design-plan-guidance.md` exists)
@@ -38,15 +38,15 @@ Use TaskCreate to create todos for each phase (or TodoWrite in older opencode ve
 - Phase 5: Design Documentation (design written to docs/design-plans/)
 - Phase 6: Planning Handoff (implementation plan offered/created)
 
-Use TaskUpdate to mark each phase as in_progress when working on it, completed when finished (or TodoWrite in older versions).
+Use `todowrite` to mark each phase as in_progress when working on it, completed when finished.
 
 ### Phase 1: Context Gathering
 
 **Never skip this phase.** Even if the user provides detailed information, ask for anything missing.
 
-Use TaskUpdate to mark Phase 1 as in_progress.
+Use `todowrite` to mark Phase 1 as in_progress.
 
-**Ask the user to provide (freeform, not AskUserQuestion):**
+**Ask the user to provide (freeform, not the `question` tool):**
 
 "I need some information to start the design process. Please provide what you have:
 
@@ -83,13 +83,12 @@ Before clarification, check for project-specific design guidance.
 
 **Check if `.ed3d/design-plan-guidance.md` exists:**
 
-Use the Read tool to check if `.ed3d/design-plan-guidance.md` exists in the session's working directory.
+Use the `read` tool to check if `.ed3d/design-plan-guidance.md` exists in the session's working directory.
 
 **If the file exists:**
 
-1. Use TaskCreate to add: "Read project design guidance from [absolute path to .ed3d/design-plan-guidance.md]"
-   - Set this task as blocked by Phase 1 (Context Gathering)
-   - Update Phase 2 (Clarification) to be blocked by this new task
+1. Use `todowrite` to add: "Read project design guidance from [absolute path to .ed3d/design-plan-guidance.md]"
+   - Place it after Phase 1 (Context Gathering) and before Phase 2 (Clarification) in the todo list — it must happen between them
 2. Mark the task in_progress
 3. Read the file and incorporate the guidance into your understanding
 4. Mark the task completed
@@ -110,9 +109,9 @@ The guidance informs what questions you ask during clarification.
 
 ### Phase 2: Clarification
 
-Use TaskUpdate to mark Phase 2 as in_progress.
+Use `todowrite` to mark Phase 2 as in_progress.
 
-**REQUIRED SUB-SKILL:** Use ed3d-plan-and-execute:asking-clarifying-questions
+**REQUIRED SUB-SKILL:** Use asking-clarifying-questions
 
 Announce: "I'm using the asking-clarifying-questions skill to make sure I understand your requirements correctly."
 
@@ -131,7 +130,7 @@ Mark Phase 2 as completed when requirements are disambiguated.
 
 Before brainstorming the *how*, lock in the *what*. Brainstorming explores texture and approach — it assumes the goal is already clear.
 
-Use TaskUpdate to mark Phase 3 as in_progress.
+Use `todowrite` to mark Phase 3 as in_progress.
 
 **Synthesize the Definition of Done from context gathered so far:**
 
@@ -142,7 +141,7 @@ From Phases 1-2 (Context Gathering and Clarification), you should be able to inf
 
 **If the Definition of Done is clear:**
 
-State it back to the user and confirm using AskUserQuestion:
+State it back to the user and confirm using the `question` tool:
 
 ```
 Question: "Before we explore approaches, let me confirm what success looks like:"
@@ -158,7 +157,7 @@ Present the Definition of Done as a brief statement (2-4 sentences) covering:
 
 **If the Definition of Done is unclear:**
 
-Ask targeted questions to nail it down. Use AskUserQuestion when there are discrete options, or open-ended questions when you need the user to describe their vision.
+Ask targeted questions to nail it down. Use the `question` tool when there are discrete options, or open-ended questions when you need the user to describe their vision.
 
 Examples of clarifying questions:
 - "What's the primary deliverable here — is it [X] or [Y]?"
@@ -180,7 +179,7 @@ The slug becomes part of all acceptance criteria identifiers (e.g., `my-feature.
 - **Terse but unambiguous** — prefer short forms that don't create confusion (e.g., `authn` not `authentication`, but not `auth` since that's ambiguous with `authz`)
 - Recognizable months later
 
-**Use AskUserQuestion:**
+**Use the `question` tool:**
 
 ```
 Question: "What should we call this design plan? The name becomes the prefix for all acceptance criteria (e.g., `{slug}.AC1.1`) and appears in test names.
@@ -233,9 +232,9 @@ Mark Phase 3 as completed when user confirms the Definition of Done AND the file
 
 With clear understanding from Phases 1-3, explore design alternatives and validate the approach.
 
-Use TaskUpdate to mark Phase 4 as in_progress.
+Use `todowrite` to mark Phase 4 as in_progress.
 
-**REQUIRED SUB-SKILL:** Use ed3d-plan-and-execute:brainstorming
+**REQUIRED SUB-SKILL:** Use brainstorming
 
 Announce: "I'm using the brainstorming skill to explore design alternatives and validate the approach."
 
@@ -259,9 +258,9 @@ Mark Phase 4 as completed when design is validated.
 
 Append the validated design to the document created in Phase 3.
 
-Use TaskUpdate to mark Phase 5 as in_progress.
+Use `todowrite` to mark Phase 5 as in_progress.
 
-**REQUIRED SUB-SKILL:** Use ed3d-plan-and-execute:writing-design-plans
+**REQUIRED SUB-SKILL:** Use writing-design-plans
 
 Announce: "I'm using the writing-design-plans skill to complete the design document."
 
@@ -289,9 +288,9 @@ Mark Phase 5 as completed when design document is committed.
 
 After design is documented, guide user to create implementation plan in fresh context.
 
-Use TaskUpdate to mark Phase 6 as in_progress.
+Use `todowrite` to mark Phase 6 as in_progress.
 
-**Do NOT create implementation plan directly.** The user needs to /clear context first.
+**Do NOT create implementation plan directly.** The user needs to start a fresh session first.
 
 Announce design completion and provide next steps:
 
@@ -300,28 +299,27 @@ Design complete! Design document committed to `docs/design-plans/[filename]`.
 
 Ready to create the implementation plan? This requires fresh context to work effectively.
 
-**IMPORTANT: Copy the command below BEFORE running /clear (it will erase this conversation).**
+**IMPORTANT: Copy the message below BEFORE running /new (it will leave this conversation).**
 
-(1) Copy this command now:
+(1) Copy this message now:
 ```
-/ed3d-plan-and-execute:start-implementation-plan @docs/design-plans/[full-filename].md .
-```
-(the `.` at the end is necessary or else opencode will eat the command and do the wrong thing.)
-
-(2) Clear your context:
-```
-/clear
+Use the starting-an-implementation-plan skill with the design plan at @docs/design-plans/[full-filename].md
 ```
 
-(3) Paste and run the copied command.
-
-The start-implementation-plan command will create detailed tasks, set up a branch, and prepare for execution.
+(2) Start a fresh session:
+```
+/new
 ```
 
-**Why /clear instead of continuing:**
+(3) Paste and run the copied message.
+
+The starting-an-implementation-plan skill will create detailed tasks, set up a branch, and prepare for execution.
+```
+
+**Why a fresh session instead of continuing:**
 - Implementation planning needs fresh context for codebase investigation
 - Long conversations accumulate context that degrades quality
-- /clear gives the next phase a clean slate
+- A fresh session gives the next phase a clean slate
 
 Mark Phase 6 as completed after providing instructions.
 
@@ -346,7 +344,7 @@ You can and should go backward when:
 | "I know what done looks like, skip confirmation" | Confirm Definition of Done explicitly. Always run Phase 3. |
 | "Simple idea, skip brainstorming" | Brainstorming explores alternatives. Always run Phase 4. |
 | "Design is in conversation, don't need documentation" | Documentation is contract with writing-implementation-plans. Always run Phase 5. |
-| "Can invoke implementation planning directly" | Must /clear first. Provide copy-then-clear workflow. |
+| "Can invoke implementation planning directly" | Must start a fresh session first. Provide copy-then-new-session workflow. |
 | "I can combine phases for efficiency" | Each phase has distinct purpose. Run all six. |
 | "User knows what they want, less structure needed" | Structure ensures nothing is missed. Follow all phases. |
 
@@ -361,5 +359,5 @@ You can and should go backward when:
 | **Clarify before ideating** | Phase 2 prevents building the wrong thing |
 | **Lock in the goal before exploring** | Phase 3 confirms what "done" means before brainstorming the how |
 | **All brains in skills** | This skill orchestrates; sub-skills contain domain expertise |
-| **Task tracking** | YOU MUST create todos with TaskCreate and update with TaskUpdate for all phases (or TodoWrite in older versions) |
+| **Task tracking** | YOU MUST create todos with `todowrite` and update them for all phases |
 | **Flexible progression** | Go backward when needed to fill gaps |

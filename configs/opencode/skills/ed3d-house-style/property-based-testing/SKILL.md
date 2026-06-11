@@ -72,7 +72,7 @@ Always aim for the strongest property that applies.
 | Java | jqwik | `@Property` annotations |
 | Haskell | QuickCheck | `import Test.QuickCheck` |
 
-**For library-specific syntax and patterns:** Use `@ed3d-research-agents:internet-researcher` to get current documentation.
+**For library-specific syntax and patterns:** Use the `ed3d-internet-researcher` agent to get current documentation.
 
 ## Input Strategy Best Practices
 

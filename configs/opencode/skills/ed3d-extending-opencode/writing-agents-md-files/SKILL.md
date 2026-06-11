@@ -5,7 +5,7 @@ description: Use when creating or updating AGENTS.md files for projects or subdi
 
 # Writing AGENTS.md Files
 
-**REQUIRED BACKGROUND:** Read ed3d-extending-opencode:writing-opencode-directives for foundational guidance on token efficiency, compliance techniques, and directive structure.
+**REQUIRED BACKGROUND:** Read the writing-opencode-directives skill for foundational guidance on token efficiency, compliance techniques, and directive structure.
 
 ## Core Principle
 
@@ -17,7 +17,7 @@ AGENTS.md files bridge Claude's statelessness. They preserve context so humans d
 
 ## File Hierarchy
 
-Claude automatically reads AGENTS.md files from current directory up to root:
+opencode automatically reads AGENTS.md files from the current directory up to the root; subdirectory AGENTS.md files document the domain where they live:
 
 ```
 project/
@@ -182,7 +182,7 @@ All downstream services trust the auth token without re-validating.
 
 Every AGENTS.md MUST include a "Last verified" date.
 
-**CRITICAL:** Use Bash to get the actual date. Do NOT hallucinate dates.
+**CRITICAL:** Use bash to get the actual date. Do NOT hallucinate dates.
 
 ```bash
 date +%Y-%m-%d
@@ -239,7 +239,7 @@ Don't create for:
 
 When updating any AGENTS.md:
 
-1. **Update the freshness date** using Bash `date +%Y-%m-%d`
+1. **Update the freshness date** using bash `date +%Y-%m-%d`
 2. **Verify contracts still hold** - read the code, check invariants
 3. **Remove stale content** - better short and accurate than long and wrong
 4. **Keep token-efficient** - <300 lines top-level, <100 lines subdirectory
@@ -249,7 +249,7 @@ When updating any AGENTS.md:
 | Mistake | Fix |
 |---------|-----|
 | Describing WHAT code does | Focus on WHY it exists, contracts it keeps |
-| Missing freshness date | Always include, always use Bash for real date |
+| Missing freshness date | Always include, always use bash for real date |
 | Using @ to reference files | Just name files, let Claude read on demand |
 | Too much detail | Subdirectory files should be <100 lines |
 | Duplicating parent content | Subdirectory inherits parent; don't repeat |

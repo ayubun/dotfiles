@@ -48,7 +48,7 @@ Or ask: "This branch split from main - is that correct?"
 
 ### Step 3: Present Options
 
-Present exactly these 4 options in `AskUserQuestion`.
+Present exactly these 4 options with the `question` tool.
 
 ```
 Implementation complete. What would you like to do?
@@ -135,33 +135,31 @@ Then: Cleanup worktree (Step 6)
 
 ### Step 5: Update Project Context
 
-Before merging or creating a PR, invoke `ed3d-extending-opencode:project-opencode-librarian` to update AGENTS.md files if contracts or structure changed.
+Before merging or creating a PR, invoke `ed3d-project-opencode-librarian` to update AGENTS.md files if contracts or structure changed.
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-extending-opencode:project-opencode-librarian</parameter>
-<parameter name="description">Updating project context for <branch-name></parameter>
-<parameter name="prompt">
-  Review what changed in this branch and update AGENTS.md files if contracts or structure changed.
+task:
+  subagent_type: ed3d-project-opencode-librarian
+  description: Updating project context for <branch-name>
+  prompt: |
+    Review what changed in this branch and update AGENTS.md files if contracts or structure changed.
 
-  Base branch: <base-branch>
-  Feature branch: <feature-branch>
-  Working directory: <directory>
+    Base branch: <base-branch>
+    Feature branch: <feature-branch>
+    Working directory: <directory>
 
-  Follow the ed3d-extending-opencode:maintaining-project-context skill to:
-  1. Diff against base branch to see what changed
-  2. Identify contract/API/structure changes
-  3. Update affected AGENTS.md files
-  4. Commit documentation updates with message: "docs: update project context for <branch-name>"
+    Follow the maintaining-project-context skill to:
+    1. Diff against base branch to see what changed
+    2. Identify contract/API/structure changes
+    3. Update affected AGENTS.md files
+    4. Commit documentation updates with message: "docs: update project context for <branch-name>"
 
-  Report back with what was updated (or that no updates were needed).
-</parameter>
-</invoke>
+    Report back with what was updated (or that no updates were needed).
 ```
 
 **If librarian commits updates:** Include those commits in the merge/PR.
 **If librarian reports no updates needed:** Proceed with chosen option.
-**If librarian subagent is not available:** skip this step, saying aloud that you're skipping it because the `ed3d-extending-opencode` plugin is not available.
+**If librarian subagent is not available:** skip this step, saying aloud that you're skipping it because the `ed3d-project-opencode-librarian` agent is not available.
 
 **Skip this step for Option 4 (Discard).**
 

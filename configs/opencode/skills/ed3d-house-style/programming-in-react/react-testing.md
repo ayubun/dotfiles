@@ -2,7 +2,7 @@
 
 ## Investigate First
 
-**ALWAYS use codebase-investigator to find existing test patterns before writing tests.**
+**ALWAYS use ed3d-codebase-investigator to find existing test patterns before writing tests.**
 
 Check for:
 - Which testing library is used (React Testing Library, Enzyme, Playwright, Cypress)
@@ -72,7 +72,7 @@ await userEvent.click(button);
 
 **Better for product applications** - tests entire user flows.
 
-Check codebase for existing patterns with codebase-investigator.
+Check codebase for existing patterns with ed3d-codebase-investigator.
 
 **Playwright example:**
 ```typescript

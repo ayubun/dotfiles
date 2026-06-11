@@ -5,19 +5,20 @@ description: Use when creating a new opencode plugin or setting up plugin struct
 
 # Creating a Plugin
 
+*Reference note: this skill documents the **upstream Claude-plugin packaging format** used by the `skills-sources` repository that this skill library is generated from. opencode does not install packages in this format — opencode loads skills from `skills.paths` directories and agents from `~/.config/opencode/agents/`, and an "opencode plugin" is a different (JS/TS) mechanism entirely. Keep this as reference for editing the upstream plugin repo. The upstream plugin-root substitution variable is written `${PLUGIN_ROOT}` here.*
+
 ## Overview
 
-A **opencode plugin** packages reusable components (commands, agents, skills, hooks, MCP servers) for distribution. Create a plugin when you have components that work across multiple projects.
+A **Claude-plugin** packages reusable components (commands, agents, skills, hooks, MCP servers) for distribution. Create a plugin when you have components that work across multiple projects.
 
 **Don't create a plugin for:**
-- Project-specific configurations (use `.claude/` in project root)
+- Project-specific configurations (use project-local config in the project root)
 - One-off scripts or commands
 - Experimental features still in development
 
 **Plugin storage locations:**
 - Development: Anywhere during development, installed via `file:///` path
-- User-level: `~/.claude/plugins/` (after installation)
-- Project-level: `.claude/plugins/` (project-specific installations)
+- Installed: under the upstream harness's user-level or project-level plugin directories (opencode does not install these)
 
 ## Quick Start Checklist
 
@@ -38,19 +39,19 @@ Minimal viable plugin:
 
 ```
 my-plugin/
-
-   
-
-   
-
-   
-
-   
-       
-
-   
-
-
+├── .claude-plugin/
+│   └── plugin.json              # Required: plugin manifest
+├── commands/                    # Optional: slash commands
+│   └── my-command.md
+├── agents/                      # Optional: specialized subagents
+│   └── my-agent.md
+├── skills/                      # Optional: reusable techniques
+│   └── my-skill/
+│       └── SKILL.md
+├── hooks/                       # Optional: event handlers
+│   └── hooks.json
+├── .mcp.json                    # Optional: MCP server configs
+└── README.md                    # Recommended: documentation
 ```
 
 **Critical:** The `.claude-plugin/` directory with `plugin.json` inside must exist at plugin root.
@@ -111,7 +112,7 @@ my-plugin/
 
   "mcpServers": {                         // Optional: inline MCP configs
     "my-server": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/servers/my-server",
+      "command": "${PLUGIN_ROOT}/servers/my-server",
       "args": ["--port", "8080"],
       "env": {
         "API_KEY": "${API_KEY}"
@@ -123,7 +124,7 @@ my-plugin/
 
 **Key points:**
 - `name` is required, everything else is optional
-- Use `${CLAUDE_PLUGIN_ROOT}` to reference plugin directory
+- Use `${PLUGIN_ROOT}` to reference plugin directory
 - Commands/agents auto-discovered from `commands/` and `agents/` directories if not listed explicitly
 - Skills auto-discovered from `skills/*/SKILL.md` pattern
 
@@ -155,9 +156,9 @@ You can use:
 Example implementation instructions...
 ```
 
-**Frontmatter fields:**
+**Frontmatter fields (upstream command format):**
 - `description` - Brief description shown in `/help`
-- `allowed-tools` - Comma-separated list: `Read, Grep, Glob, Bash, Edit, Write, TodoWrite, Task`
+- `allowed-tools` - Comma-separated list of upstream tool names: `Read, Grep, Glob, Bash, Edit, Write, TodoWrite, Task`
 - `model` - Optional: `haiku`, `sonnet`, or `opus` (defaults to user's setting)
 - `argument-hint` - Optional: shown in help text
 - `disable-model-invocation` - Optional: `true` to prevent auto-run
@@ -191,9 +192,9 @@ Focus on critical issues first.
 
 ## Creating Agents
 
-**File location:** `agents/code-reviewer.md` creates agent named "code-reviewer"
+**File location:** `agents/ed3d-code-reviewer.md` creates agent named "ed3d-code-reviewer"
 
-**Template:**
+**Template (upstream agent format):**
 ```markdown
 ---
 name: agent-name
@@ -220,11 +221,13 @@ Detailed instructions and system prompt for this agent.
 2. Step 2
 ```
 
-**Frontmatter fields:**
+**Frontmatter fields (upstream agent format):**
 - `name` - Required: kebab-case identifier
 - `description` - Required: Max 1024 chars, used for auto-delegation
 - `tools` - Comma-separated list of allowed tools
 - `model` - Optional: `haiku`, `sonnet`, or `opus`
+
+(For agents that run under opencode, see the creating-an-agent skill — opencode agents drop `name`/`tools` and use `mode`, full model IDs, and `permission:` blocks instead.)
 
 **Complete example** (`agents/security-auditor.md`):
 ```markdown
@@ -274,7 +277,7 @@ For each finding:
 
 ## Creating Skills
 
-**REQUIRED SUB-SKILL:** Use `writing-skills` for complete guidance on skill structure, testing, and deployment.
+**REQUIRED SUB-SKILL:** Use the writing-skills skill for complete guidance on skill structure, testing, and deployment.
 
 Skills follow a specific structure.
 
@@ -312,7 +315,7 @@ Core principle in 1-2 sentences.
 - `description` starts with "Use when..." in third person
 - Keep token-efficient (<500 words if frequently loaded)
 - One excellent example beats many mediocre ones
-- Use `writing-skills` skill for complete guidance
+- Use the writing-skills skill for complete guidance
 
 ## Creating Hooks
 
@@ -335,7 +338,7 @@ Core principle in 1-2 sentences.
     {
       "event": "SessionStart",
       "matcher": "*",
-      "command": "${CLAUDE_PLUGIN_ROOT}/scripts/setup.sh"
+      "command": "${PLUGIN_ROOT}/scripts/setup.sh"
     }
   ]
 }
@@ -348,7 +351,7 @@ Core principle in 1-2 sentences.
 - `Stop` - When Claude finishes responding
 - `SessionStart` - Session initialization
 - `SessionEnd` - Session cleanup
-- `Notification` - On opencode notifications
+- `Notification` - On harness notifications
 - `SubagentStop` - When subagent completes
 - `PreCompact` - Before context compaction
 
@@ -372,8 +375,8 @@ Core principle in 1-2 sentences.
 {
   "mcpServers": {
     "database-tools": {
-      "command": "${CLAUDE_PLUGIN_ROOT}/servers/db-server",
-      "args": ["--config", "${CLAUDE_PLUGIN_ROOT}/config.json"],
+      "command": "${PLUGIN_ROOT}/servers/db-server",
+      "args": ["--config", "${PLUGIN_ROOT}/config.json"],
       "env": {
         "DB_URL": "${DB_URL}",
         "API_KEY": "${API_KEY:-default-key}"
@@ -393,7 +396,7 @@ Core principle in 1-2 sentences.
 - `env` - Environment variables (supports `${VAR}` or `${VAR:-default}`)
 
 **Special variable:**
-- `${CLAUDE_PLUGIN_ROOT}` - Resolves to plugin root directory
+- `${PLUGIN_ROOT}` - Resolves to plugin root directory
 
 ## Setting Up Dev Marketplace
 
@@ -403,7 +406,7 @@ For local development, create a marketplace to organize your plugins:
 
 ```json
 {
-  "$schema": "https://anthropic.com/opencode/marketplace.schema.json",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "my-dev-marketplace",
   "version": "1.0.0",
   "owner": {
@@ -441,17 +444,17 @@ For local development, create a marketplace to organize your plugins:
 **Directory structure:**
 ```
 dev-marketplace/
-
-   
-
-    
-       
-          
-       
-    
-        
-           
-        
+├── .claude-plugin/
+│   └── marketplace.json
+└── plugins/
+    ├── my-plugin-one/
+    │   ├── .claude-plugin/
+    │   │   └── plugin.json
+    │   └── commands/
+    └── my-plugin-two/
+        ├── .claude-plugin/
+        │   └── plugin.json
+        └── agents/
 ```
 
 **Install dev marketplace:**
@@ -497,10 +500,10 @@ dev-marketplace/
 - Skill names: `test-driven-development`
 
 **Filename mapping:**
-- `commands/my-command.md` � `/my-command`
-- `commands/project/build.md` � `/plugin-name:project:build`
-- `agents/code-reviewer.md` � agent name `code-reviewer`
-- `skills/my-skill/SKILL.md` � skill name `my-skill`
+- `commands/my-command.md` → `/my-command`
+- `commands/project/build.md` → `/plugin-name:project:build`
+- `agents/ed3d-code-reviewer.md` → agent name `ed3d-code-reviewer`
+- `skills/my-skill/SKILL.md` → skill name `my-skill`
 
 ## Testing Locally
 
@@ -522,8 +525,8 @@ dev-marketplace/
 4. Test functionality:
    ```bash
    /my-command arg1 arg2
-   # Use Task tool with your agent
-   # Use Skill tool with your skill
+   # Dispatch your agent on a task
+   # Invoke your skill
    ```
 
 5. Iterate:
@@ -550,10 +553,10 @@ dev-marketplace/
 |-------|---------|-----|
 | Missing `.claude-plugin/` | Plugin not recognized | Create `.claude-plugin/plugin.json` at root |
 | Invalid plugin.json | Parse error on load | Validate JSON syntax, ensure `name` field exists |
-| Wrong tool name | Tool not available in command/agent | Check spelling: `Read`, `Grep`, `Glob`, `Bash`, `Edit`, `Write` |
+| Wrong tool name | Tool not available in command/agent | Check spelling against the harness's tool list |
 | Description too long | Warning or truncation | Keep under 1024 characters total |
 | Not using third person | Description sounds wrong | Use "Use when..." not "I will..." |
-| Absolute paths in plugin.json | Breaks on other machines | Use relative paths or `${CLAUDE_PLUGIN_ROOT}` |
+| Absolute paths in plugin.json | Breaks on other machines | Use relative paths or `${PLUGIN_ROOT}` |
 | Forgetting `/plugin reload` | Changes not visible | Run `/plugin reload` after edits |
 | Command not found | Slash command doesn't work | Check filename matches expected command, reload plugin |
 | Agent not auto-delegated | Agent never gets used | Improve `description` with specific triggers and symptoms |
@@ -573,10 +576,10 @@ dev-marketplace/
 
 **For public distribution:**
 
-Refer to official opencode documentation for publishing to public marketplaces.
+Refer to the official upstream documentation for publishing to public marketplaces.
 
 ## Reference Links
 
-- Official plugin docs: https://docs.claude.com/en/docs/opencode/plugins
-- Plugin reference: https://docs.claude.com/en/docs/opencode/plugins-reference
-- MCP servers: https://docs.claude.com/en/docs/opencode/mcp-servers
+- Official plugin docs: https://docs.claude.com/en/docs/claude-code/plugins
+- Plugin reference: https://docs.claude.com/en/docs/claude-code/plugins-reference
+- MCP servers: https://docs.claude.com/en/docs/claude-code/mcp-servers

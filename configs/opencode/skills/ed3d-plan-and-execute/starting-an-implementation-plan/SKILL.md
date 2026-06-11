@@ -17,7 +17,7 @@ Orchestrate the transition from design document to executable implementation thr
 
 **DO NOT GUESS.** If the user has not provided a path to a design plan, you MUST ask for it.
 
-Use AskUserQuestion:
+Use the `question` tool:
 ```
 Question: "Which design plan should I create an implementation plan for?"
 Options:
@@ -39,22 +39,22 @@ This skill has three steps:
 
 **Step 0: Create orchestration task tracker**
 
-Use TaskCreate to track the orchestration steps:
+Use the `todowrite` tool to track the orchestration steps. The todo list is flat — express ordering by list order and work top to bottom:
 
 ```
-TaskCreate: "Branch setup"
-(conditional) TaskCreate: "Read project implementation guidance from [absolute path]"
-  → TaskUpdate: addBlockedBy: [Branch setup]
-  → (only if .ed3d/implementation-plan-guidance.md exists)
-TaskCreate: "Create implementation plan"
-  → TaskUpdate: addBlockedBy: [Branch setup] (or [Read guidance] if it exists)
-TaskCreate: "Re-read starting-an-implementation-plan skill (restore context)"
-  → (DO NOT set blockedBy yet - will be updated after granular tasks are created)
-TaskCreate: "Execution handoff"
-  → TaskUpdate: addBlockedBy: [Re-read skill]
+todowrite:
+- "Branch setup"
+- (conditional) "Read project implementation guidance from [absolute path]"
+  (only if .ed3d/implementation-plan-guidance.md exists; do after Branch setup)
+- "Create implementation plan"
+  (do after Branch setup — and after reading guidance, if that todo exists)
+- "Re-read starting-an-implementation-plan skill (restore context)"
+  (do NOT start until ALL granular planning tasks, including Finalization, are complete)
+- "Execution handoff"
+  (do after Re-read skill)
 ```
 
-**CRITICAL: The "Re-read skill" task must be re-pointed AFTER writing-implementation-plans creates the Finalization task.** See "After Planning: Update Dependencies" below.
+**CRITICAL: The "Re-read skill" todo must end up positioned AFTER the Finalization task that writing-implementation-plans creates.** See "After Planning: Keep Ordering Correct" below.
 
 The "Create implementation plan" task wraps the granular tasks created by writing-implementation-plans. The "Re-read skill" step ensures context is restored after potential compaction before handoff.
 
@@ -75,7 +75,7 @@ The slug ensures AC identifiers are globally unique across multiple plan-and-exe
 
 **Step 1: Ask about worktree**
 
-**REQUIRED: Use AskUserQuestion tool**
+**REQUIRED: Use the `question` tool**
 
 Ask:
 ```
@@ -89,7 +89,7 @@ Options:
 
 **If user chooses "Yes - create worktree":**
 
-1. **REQUIRED SUB-SKILL:** Use ed3d-plan-and-execute:using-git-worktrees
+1. **REQUIRED SUB-SKILL:** Use using-git-worktrees
 2. **CONDITIONAL SKILLS:** Activate any project-specific git worktree skills if they exist
 3. Announce: "I'm using the using-git-worktrees skill to create an isolated workspace."
 4. Ask user which branch to use for the worktree:
@@ -132,13 +132,12 @@ After branch setup, check for project-specific implementation guidance.
 
 **Check if `.ed3d/implementation-plan-guidance.md` exists:**
 
-Use the Read tool to check if `.ed3d/implementation-plan-guidance.md` exists in the session's working directory.
+Use the `read` tool to check if `.ed3d/implementation-plan-guidance.md` exists in the session's working directory.
 
 **If the file exists:**
 
-1. Use TaskCreate to add: "Read project implementation guidance from [absolute path to .ed3d/implementation-plan-guidance.md]"
-   - Set this task as blocked by "Branch setup"
-   - Update "Create implementation plan" to be blocked by this new task
+1. Use `todowrite` to add: "Read project implementation guidance from [absolute path to .ed3d/implementation-plan-guidance.md]"
+   - Place it after "Branch setup" and before "Create implementation plan" in the todo list — it must complete before planning starts
 2. Mark the task in_progress
 3. Read the file and incorporate the guidance into your understanding
 4. Mark the task completed
@@ -158,7 +157,7 @@ Proceed directly to Planning. Do not create a task or mention the missing file.
 
 Mark "Create implementation plan" task as in_progress.
 
-**REQUIRED SUB-SKILL:** Use ed3d-plan-and-execute:writing-implementation-plans
+**REQUIRED SUB-SKILL:** Use writing-implementation-plans
 
 Announce: "I'm using the writing-implementation-plans skill to create the detailed implementation plan."
 
@@ -173,27 +172,21 @@ The writing-implementation-plans skill will:
 
 Mark "Create implementation plan" task as completed.
 
-### After Planning: Update Dependencies
+### After Planning: Keep Ordering Correct
 
-**CRITICAL: Update the "Re-read skill" task to be blocked by Finalization.**
+**CRITICAL: Ensure the "Re-read skill" todo comes after the Finalization task.**
 
-The granular tasks are now created. Find the Finalization task ID and update dependencies:
+The granular tasks are now created. Rewrite the todo list with `todowrite` so "Re-read skill" and "Execution handoff" are the last two items, after Finalization:
 
 ```
-TaskUpdate: "Re-read starting-an-implementation-plan skill"
-  → addBlockedBy: [Finalization task ID]
-```
-
-This ensures the task list shows the correct order:
-```
-✔ #1 Branch setup
-✔ #2 Create implementation plan
-✔ #5 Phase 1A: Read [Phase Name] from /path/to/design.md
-✔ #6 Phase 1B: Investigate codebase for Phase 1
+✔ Branch setup
+✔ Create implementation plan
+✔ Phase 1A: Read [Phase Name] from /path/to/design.md
+✔ Phase 1B: Investigate codebase for Phase 1
 ...
-✔ #N Finalization: Run code-reviewer...
-◻ #3 Re-read skill › blocked by #N
-◻ #4 Execution handoff › blocked by #3
+✔ Finalization: Run ed3d-code-reviewer...
+◻ Re-read skill (after Finalization)
+◻ Execution handoff (after Re-read skill)
 ```
 
 ### Restore Context (Before Handoff)
@@ -202,14 +195,7 @@ Mark "Re-read starting-an-implementation-plan skill (restore context)" task as i
 
 **CRITICAL: Re-read this skill before proceeding to handoff.**
 
-After potentially long planning work (especially if context compaction occurred), re-read this skill file to ensure you have accurate instructions for the execution handoff:
-
-```bash
-# Re-read this skill to restore context
-cat /path/to/plugins/ed3d-plan-and-execute/skills/starting-an-implementation-plan/SKILL.md
-```
-
-Or use the Read tool on the skill file path.
+After potentially long planning work (especially if context compaction occurred), re-read this skill to ensure you have accurate instructions for the execution handoff: use the `skill` tool to load starting-an-implementation-plan again, or use the `read` tool on this skill's SKILL.md (its absolute path is shown in the file list when this skill loads).
 
 **Why this matters:** After compaction, you may have lost details about the handoff process. Re-reading ensures you provide correct absolute paths and instructions.
 
@@ -221,7 +207,7 @@ Mark "Execution handoff" task as in_progress.
 
 After planning is complete, hand off to execution.
 
-**Do NOT invoke execute-plan directly.** The user needs to /clear context first.
+**Do NOT invoke plan execution directly.** The user needs to start a fresh session first.
 
 **Step 1: Capture and verify absolute paths**
 
@@ -253,29 +239,29 @@ Implementation plan complete!
 
 Ready to execute? This requires fresh context to work effectively.
 
-**IMPORTANT: Copy the command below BEFORE running /clear (it will erase this conversation).**
+**IMPORTANT: Copy the message below BEFORE running /new (it will leave this conversation).**
 
-(1) Copy this command now:
+(1) Copy this message now:
 
-/ed3d-plan-and-execute:execute-implementation-plan /Users/ed/project/.worktrees/oauth2-feature/docs/implementation-plans/2025-01-17-oauth2-feature/ /Users/ed/project/.worktrees/oauth2-feature/
+Use the executing-an-implementation-plan skill with plan directory /Users/ed/project/.worktrees/oauth2-feature/docs/implementation-plans/2025-01-17-oauth2-feature/ and working directory /Users/ed/project/.worktrees/oauth2-feature/
 
-(2) Clear your context:
+(2) Start a fresh session:
 
-/clear
+/new
 
-(3) Paste and run the copied command.
+(3) Paste and run the copied message.
 
-The execute-implementation-plan command will implement the plan task-by-task with code review between tasks.
+The executing-an-implementation-plan skill will implement the plan task-by-task with code review between tasks.
 ```
 
 **Use the real paths from Step 1, not placeholders.** The example above shows the format — substitute your actual verified paths.
 
-**Why absolute paths:** After /clear, opencode returns to the original session directory (often the repo root, not the worktree). Absolute paths ensure execution happens in the correct directory regardless of where /clear returns.
+**Why absolute paths:** A fresh session starts in the original project directory (often the repo root, not the worktree). Absolute paths ensure execution happens in the correct directory regardless of where the new session starts.
 
-**Why /clear instead of continuing:**
+**Why a fresh session instead of continuing:**
 - Execution needs fresh context to work effectively
 - Long conversations accumulate context that degrades quality
-- /clear gives the execution phase a clean slate
+- A fresh session gives the execution phase a clean slate
 
 Mark "Execution handoff" task as completed.
 
@@ -283,16 +269,16 @@ Mark "Execution handoff" task as completed.
 
 | Mistake | Fix |
 |---------|-----|
-| Invoking execute-implementation-plan directly | Provide copy-paste instructions instead |
-| Not warning user to copy command before /clear | Always warn: "Copy this BEFORE running /clear" |
-| Using relative paths in handoff command | Run bash commands to get absolute paths, verify they exist |
+| Invoking executing-an-implementation-plan directly | Provide copy-paste instructions instead |
+| Not warning user to copy the message before /new | Always warn: "Copy this BEFORE running /new" |
+| Using relative paths in handoff message | Run bash commands to get absolute paths, verify they exist |
 | Outputting placeholder paths like `[WORKING_ROOT]` | Output real paths from `git rev-parse --show-toplevel` and `ls -d` |
-| Not verifying plan directory exists | Always `ls -d` the full plan path before outputting command |
+| Not verifying plan directory exists | Always `ls -d` the full plan path before outputting the message |
 | Passing phase_01.md instead of directory | Pass the directory so all phases execute |
-| Forgetting to mention /clear | Always tell user to /clear before execute |
+| Forgetting to mention /new | Always tell user to start a fresh session before executing |
 | Skipping "Re-read skill" step before handoff | Always re-read this skill to restore context post-compaction |
-| Not creating orchestration tasks at start | Create Branch setup, Planning, Re-read, Handoff tasks in Step 0 |
-| Not re-pointing "Re-read skill" after planning | Must update addBlockedBy to Finalization task, not "Create implementation plan" |
+| Not creating orchestration tasks at start | Create Branch setup, Planning, Re-read, Handoff todos in Step 0 |
+| Leaving "Re-read skill" mis-ordered after planning | It must come after the Finalization task in the todo list, not right after "Create implementation plan" |
 
 ## Integration with Workflow
 
@@ -300,10 +286,10 @@ This skill sits between design and execution:
 
 ```
 Design Plan (in docs/design-plans/)
-  -> User runs /start-implementation-plan with design path
+  -> User invokes this skill with the design path
 
 Starting Implementation Plan (this skill)
-  -> Step 0: Create orchestration tasks
+  -> Step 0: Create orchestration todos
     -> [ ] Branch setup
     -> [ ] Create implementation plan
     -> [ ] Re-read skill (restore context)
@@ -320,19 +306,19 @@ Starting Implementation Plan (this skill)
     -> Creates Finalization task (code review, fix ALL issues)
     -> Write to docs/implementation-plans/
 
-  -> After Planning: Update Dependencies
-    -> Re-point "Re-read skill" to be blocked by Finalization task
+  -> After Planning: Keep Ordering Correct
+    -> Move "Re-read skill" after the Finalization task in the todo list
     -> Ensures correct execution order in task list
 
-  -> Restore Context [tracked task, blocked by Finalization]
-    -> Re-read this skill file
+  -> Restore Context [tracked task, after Finalization]
+    -> Re-read this skill
     -> Ensures handoff instructions are accurate post-compaction
 
   -> Execution Handoff [tracked task]
     -> Run `git rev-parse --show-toplevel` for absolute paths
     -> Verify plan directory exists
-    -> Output command with verified absolute paths
-    -> Provide /clear command
+    -> Output message with verified absolute paths
+    -> Tell user to start a fresh session (/new)
 
 Execute Implementation Plan (next step)
   -> Reads implementation plan

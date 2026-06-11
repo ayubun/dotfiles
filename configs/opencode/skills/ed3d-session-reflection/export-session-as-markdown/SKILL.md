@@ -1,40 +1,44 @@
 ---
 name: export-session-as-markdown
-description: Use when the user wants to export a opencode session transcript as a readable Markdown file — converts the current session (or a specified transcript path) into GitHub-flavored Markdown with metadata header, collapsible tool results, and thinking blocks
+description: Use when the user wants to export an opencode session transcript as a readable Markdown file — converts a specified session (or the most recent non-active one) into GitHub-flavored Markdown with metadata header, collapsible tool results, and reasoning blocks
 ---
 
 # Export Session as Markdown
 
-Export a opencode session transcript to a human-readable GitHub-flavored Markdown file.
+Export an opencode session transcript to a human-readable GitHub-flavored Markdown file.
 
 ## Prerequisites
 
-- The `ed3d-session-reflection` plugin must be installed (provides the `reduce-transcript.py` script).
-- The current session's transcript path must be available (injected by the SessionStart hook). If it is not available, ask the user for the transcript path.
+- The `opencode` CLI must be available on PATH (provides `opencode session list` and `opencode export`).
+- This skill ships `scripts/reduce-transcript.py` (its absolute path is shown in the file list when this skill loads).
 
 ## Invocation
 
-The user may invoke this as:
-- `/export-session-as-markdown` — export the current session
-- `/export-session-as-markdown /path/to/transcript.jsonl` — export a specific transcript
-- `/export-session-as-markdown /path/to/transcript.jsonl /path/to/output.md` — export to a specific output path
+The user may ask to:
+- export "this session" or the most recent session — pick the most recent **non-active** session, or ask which one (see step 1)
+- export a specific session — identified by session ID (`ses_…`) or by title
+- export to a specific output path
 
 ## Steps
 
-### 1. Determine the transcript path
+### 1. Determine the session to export
 
-If an argument was provided, use it as the transcript path. Otherwise, use the current session's transcript path from the SessionStart hook injection.
+List the current project's sessions:
 
-If you cannot determine the transcript path, tell the user:
+```bash
+opencode session list
 ```
-I don't know the current session's transcript path.
-Either provide a path: /export-session-as-markdown /path/to/session.jsonl
-Or ensure the ed3d-session-reflection SessionStart hook is active.
-```
+
+Session IDs match `ses_[A-Za-z0-9]+`.
+
+**Never export the active session** — a session still being written can truncate mid-write. The active session is the most recently updated one (its title matches the running conversation).
+
+- If the user named a session (by ID or title), use that one.
+- If the user asked for "this session" or didn't specify: take the most recent non-active session, or ask the user which session they want if it's ambiguous.
 
 ### 2. Determine the output path
 
-If a second argument was provided, use it as the output path. Otherwise, default to the current working directory with a descriptive filename:
+If the user gave an output path, use it. Otherwise, default to the current working directory with a descriptive filename:
 
 ```
 session-transcript-YYYY-MM-DD.md
@@ -42,12 +46,13 @@ session-transcript-YYYY-MM-DD.md
 
 If a file with that name already exists, append a counter: `session-transcript-YYYY-MM-DD-2.md`.
 
-### 3. Export the transcript
+### 3. Export and convert
 
-Run the script with the `--markdown` flag:
+Export the session to JSON, then run `scripts/reduce-transcript.py` (shipped with this skill; its absolute path is shown in the file list when this skill loads) with the `--markdown` flag:
 
 ```bash
-python3 "${CLAUDE_PLUGIN_ROOT}/scripts/reduce-transcript.py" "<transcript_path>" "<output_path>" --markdown
+opencode export <sessionID> > /tmp/session-export.json
+python3 scripts/reduce-transcript.py /tmp/session-export.json "<output_path>" --markdown
 ```
 
 ### 4. Report the result
@@ -57,3 +62,5 @@ Tell the user where the file was written and its size. Example:
 ```
 Exported session transcript to ./session-transcript-2026-03-20.md (346 KB)
 ```
+
+Clean up the intermediate `/tmp/session-export.json` afterwards.

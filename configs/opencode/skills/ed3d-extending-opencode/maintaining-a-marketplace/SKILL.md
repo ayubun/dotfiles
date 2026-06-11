@@ -1,13 +1,15 @@
 ---
 name: maintaining-a-marketplace
-description: Use when creating, releasing, or maintaining a opencode Plugin Marketplace - covers marketplace.json schema, version management, release checklists, changelog conventions, and validation to prevent sync drift between plugin.json and marketplace.json
+description: Use when creating, releasing, or maintaining an opencode Plugin Marketplace - covers marketplace.json schema, version management, release checklists, changelog conventions, and validation to prevent sync drift between plugin.json and marketplace.json
 ---
 
 # Maintaining a Marketplace
 
+*Reference note: this skill documents the **upstream Claude-plugin marketplace format** used by the `skills-sources` repository that this skill library is generated from. opencode does not consume marketplaces — it loads skills from `skills.paths` directories and agents from `~/.config/opencode/agents/`. Keep this as reference for maintaining the upstream plugin repo. The `claude`/`/plugin` commands shown are the upstream harness's tooling.*
+
 ## Overview
 
-A opencode Plugin Marketplace is a git repository containing `.claude-plugin/marketplace.json` that catalogs plugins for discovery and installation. The primary maintenance challenge is **sync drift** — keeping versions, descriptions, and metadata consistent across `plugin.json`, `marketplace.json`, and `CHANGELOG.md`.
+A **Claude-plugin marketplace** is a git repository containing `.claude-plugin/marketplace.json` that catalogs plugins for discovery and installation. The primary maintenance challenge is **sync drift** — keeping versions, descriptions, and metadata consistent across `plugin.json`, `marketplace.json`, and `CHANGELOG.md`.
 
 ## When to Use
 
@@ -39,7 +41,7 @@ my-marketplace/
 
 ```json
 {
-  "$schema": "https://anthropic.com/opencode/marketplace.schema.json",
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
   "name": "my-marketplace",
   "owner": {
     "name": "Your Name",

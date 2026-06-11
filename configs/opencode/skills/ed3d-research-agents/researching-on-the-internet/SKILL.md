@@ -82,8 +82,8 @@ Always note source tier in findings.
 ## Search Strategies
 
 **Multiple approaches:**
-- WebSearch for overview and current information
-- WebFetch for specific documentation pages
+- `websearch` for overview and current information
+- `webfetch` for specific documentation pages
 - Check MCP servers (Context7, search tools) if available
 - Follow links to authoritative sources
 - Search official documentation before community resources

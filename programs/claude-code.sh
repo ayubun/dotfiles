@@ -6,29 +6,17 @@ mkdir -p ~/.claude
 
 ln -sF ~/dotfiles/configs/claude/settings.json ~/.claude/settings.json
 
-# Skills and agents must live as directories of per-resource symlinks so we
-# can merge sources (dotfiles + ~/work/{skills,agents}). Claude Code has no
-# multi-path config for either resource type. Real files placed by the user
-# are preserved - we only manage our own symlinks. Later sources win on
-# collision against earlier sources, but any user-placed real file always
-# wins over both.
+# RETIRED: skills/agents are no longer mirrored into ~/.claude/. The canonical
+# skill/agent trees are opencode-format (configs/opencode/* + ~/work/opencode/*,
+# see configs/opencode/CLAUDE-TO-OPENCODE.md). Claude Code is not
+# actively used; if it's ever revived, regenerate Claude-format copies from
+# configs/dependencies/skills-sources rather than re-linking here. We still
+# clean up any stale symlinks so opencode's external ~/.claude/skills scan
+# doesn't double-load them.
 for kind in skills agents; do
   dest="$HOME/.claude/$kind"
   [[ -L "$dest" ]] && rm "$dest"
-  mkdir -p "$dest"
-  find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
-  shopt -s nullglob
-  for src in "$HOME/dotfiles/configs/claude/$kind" "$HOME/work/$kind"; do
-    [[ -d "$src" ]] || continue
-    for entry in "$src"/*; do
-      name="$(basename "$entry")"
-      if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-        continue
-      fi
-      ln -sfn "$entry" "$dest/$name"
-    done
-  done
-  shopt -u nullglob
+  [[ -d "$dest" ]] && find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
 done
 
 # Global directive files. CLAUDE.md slot is owned by dotfiles; AGENTS.md slot

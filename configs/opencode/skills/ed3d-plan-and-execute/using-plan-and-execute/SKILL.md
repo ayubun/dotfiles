@@ -19,7 +19,7 @@ Before responding to ANY user message, you MUST complete this checklist:
 
 1. ☐ List to yourself ALL available skills (shown in your system context)
 2. ☐ Ask yourself: "Does ANY available skill match this request?"
-3. ☐ If yes: use the `Skill` tool to invoke the skill and follow the skill exactly.
+3. ☐ If yes: use the `skill` tool to invoke the skill and follow the skill exactly.
 
 **Responding WITHOUT completing this checklist = automatic failure.**
 
@@ -27,7 +27,7 @@ Before responding to ANY user message, you MUST complete this checklist:
 
 1. **Follow mandatory workflows.** Brainstorming before coding. Check for relevant skills before ANY task.
 
-2. Execute skills with the Skill tool
+2. Execute skills with the `skill` tool
 
 ## Common Rationalizations That Mean You're About To Fail
 
@@ -48,7 +48,7 @@ If a skill for your task exists, you must use it or you will fail at your task.
 
 ## Skills with Checklists
 
-If a skill has a checklist, YOU MUST create task todos for EACH item using TaskCreate (or TodoWrite in older opencode versions).
+If a skill has a checklist, YOU MUST create task todos for EACH item using the `todowrite` tool.
 
 **Don't:**
 - Work through checklist mentally
@@ -94,6 +94,6 @@ Your human partner's specific instructions describe WHAT to do, not HOW.
 3. Announce you're using it
 4. Follow what it says
 
-**Skill has checklist?** TaskCreate for every item (or TodoWrite in older versions).
+**Skill has checklist?** `todowrite` for every item.
 
 **Finding a relevant skill = mandatory to read and use it. Not optional.**

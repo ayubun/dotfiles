@@ -51,7 +51,7 @@ Tell the user:
 
 **After scope validation, ask how to handle phase reviews:**
 
-Use AskUserQuestion:
+Use the `question` tool:
 ```
 Question: "How would you like to review the implementation plan phases?"
 Options:
@@ -63,21 +63,21 @@ Options:
 
 ### 3. Codebase Verification
 
-**You MUST verify current codebase state before EACH AND EVERY PHASE. Use `codebase-investigator` to prove out your hypotheses and to ensure that current state aligns with what you want to write out.**
+**You MUST verify current codebase state before EACH AND EVERY PHASE. Use `ed3d-codebase-investigator` to prove out your hypotheses and to ensure that current state aligns with what you want to write out.**
 
 **YOU MUST verify current codebase state before writing ANY task.**
 
-**DO NOT verify codebase yourself. Use codebase-investigator agent.**
+**DO NOT verify codebase yourself. Use ed3d-codebase-investigator agent.**
 
 **Provide the agent with design assumptions so it can report discrepancies:**
 
-Dispatch one subagent codebase-investigator to understand testing behavior for this project.
+Dispatch one subagent ed3d-codebase-investigator to understand testing behavior for this project.
 - **DO NOT prescribe new requirements around testing. Follow how the codebase does it.**
    - For example: do NOT stipulate TDD unless you understand the scope of the problem to be a predominantly functional one OR you receive direction from a human otherwise and do not assume that mocking databases or other external dependencies is acceptable. 
 - If you find problems that are difficult to test in isolation with mocks, you should surface questions to the human operator as to how they want to proceed.
-- Instruct the subagent to seek out AGENTS.md or AGENTS.md files that include details on testing behavior, logic, and methodology, and include file references for you to provide in your plan for the executor to pass to its subagents.
+- Instruct the subagent to seek out AGENTS.md files that include details on testing behavior, logic, and methodology, and include file references for you to provide in your plan for the executor to pass to its subagents.
 
-Dispatch a second subagent codebase-investigator (simultaneously) with:
+Dispatch a second subagent ed3d-codebase-investigator (simultaneously — both dispatches in one message so they run in parallel) with:
 - "The design assumes these files exist: [list with expected paths/structure from design]"
 - "Verify each file exists and report any differences from these assumptions"
 - "The design says [feature] is implemented in [location]. Verify this is accurate"
@@ -120,7 +120,7 @@ Use a tiered approach—start with documentation, escalate to source code only w
 
 #### Tier 1: Internet Researcher (default)
 
-Use `internet-researcher` for:
+Use `ed3d-internet-researcher` for:
 - Official documentation and API references
 - Common usage patterns and examples
 - Standard specifications (OAuth2, JWT, HTTP, etc.)
@@ -130,7 +130,7 @@ Use `internet-researcher` for:
 
 #### Tier 2: Remote Code Researcher (escalation)
 
-Use `remote-code-researcher` when:
+Use `ed3d-remote-code-researcher` when:
 - Documentation doesn't cover your edge case
 - You need to understand internal implementation for extension/customization
 - Docs describe *what* but you need to know *how*
@@ -141,22 +141,22 @@ Use `remote-code-researcher` when:
 
 ```
 Phase involves external dependency?
-├─ No → codebase-investigator only
+├─ No → ed3d-codebase-investigator only
 └─ Yes → What do we need to know?
-    ├─ API usage, standard patterns → internet-researcher
-    ├─ Standard/spec implementation → internet-researcher
-    ├─ Implementation internals, extension points → remote-code-researcher
-    └─ Both local state + external info → combined-researcher
+    ├─ API usage, standard patterns → ed3d-internet-researcher
+    ├─ Standard/spec implementation → ed3d-internet-researcher
+    ├─ Implementation internals, extension points → ed3d-remote-code-researcher
+    └─ Both local state + external info → ed3d-combined-researcher
 ```
 
 #### When to Dispatch
 
-**Dispatch internet-researcher when phase mentions:**
+**Dispatch ed3d-internet-researcher when phase mentions:**
 - External packages/libraries to integrate
 - Third-party APIs to call
 - Standards to implement (OAuth, JWT, OpenAPI, etc.)
 
-**Escalate to remote-code-researcher when:**
+**Escalate to ed3d-remote-code-researcher when:**
 - Internet-researcher returns "docs don't cover this"
 - Task requires extending library behavior
 - Task requires matching internal patterns not in docs
@@ -175,7 +175,7 @@ Include external research findings alongside codebase verification:
 - 📖 Source: [Official docs | RFC spec | Source code @ commit]
 ```
 
-**Standards vs Implementation:** Standards questions (e.g., "how does OAuth2 work") are internet-researcher territory. Implementation questions (e.g., "how does auth0-js store tokens") may require remote-code-researcher.
+**Standards vs Implementation:** Standards questions (e.g., "how does OAuth2 work") are ed3d-internet-researcher territory. Implementation questions (e.g., "how does auth0-js store tokens") may require ed3d-remote-code-researcher.
 
 ## Bite-Sized Task Granularity
 
@@ -357,13 +357,13 @@ When tasks form a logical subcomponent (e.g., types → implementation → tests
 
 **Workflow depends on review mode selected above.**
 
-**Step 0: Create granular task tracker with dependencies**
+**Step 0: Create granular todo tracker in dependency order**
 
-After verifying scope (≤8 phases), use TaskCreate to create granular sub-tasks for EACH phase. This structure survives context compaction.
+After verifying scope (≤8 phases), use `todowrite` to create granular sub-todos for EACH phase. This structure survives context compaction.
 
-**CRITICAL: Include absolute paths and set up dependencies.**
+**CRITICAL: Include absolute paths and encode dependencies as list order.**
 
-Before creating tasks, capture absolute paths:
+Before creating todos, capture absolute paths:
 - `DESIGN_PATH`: Absolute path to design plan (e.g., `/Users/ed/project/docs/design-plans/2025-01-24-feature.md`)
 - `PLAN_DIR`: Absolute path to implementation plan directory (e.g., `/Users/ed/project/docs/implementation-plans/2025-01-24-feature/`)
 - `SCRATCHPAD_DIR`: Absolute path to temp directory for subagent scratch files (e.g., `/tmp/plan-2025-01-24-feature-a7f3b2/`)
@@ -386,105 +386,86 @@ The session ID (e.g., `a7f3b2`) ensures isolation between:
 2. Copy those AC entries literally into the phase's "Acceptance Criteria Coverage" header section
 3. Ensure tasks produce tests that verify each listed AC case
 
-**For each phase N, create these tasks with dependencies:**
+**For each phase N, create these todos, in this order:**
 
 ```markdown
 - [ ] Phase NA: Read [Phase Name] from {DESIGN_PATH}
-      → blocked by: Phase (N-1)D (or nothing if N=1)
 - [ ] Phase NB: Investigate codebase for Phase N and activate relevant skills
-      → blocked by: Phase NA
 - [ ] Phase NC: Research external deps (Phase N)
-      → blocked by: Phase NB
 - [ ] Phase ND: Write {PLAN_DIR}/phase_0N.md
-      → blocked by: Phase NC
 ```
 
-**VERBATIM TASK NAMES — DO NOT PARAPHRASE.** Copy task names exactly as shown above. "Investigate codebase for Phase N and activate relevant skills" must include "and activate relevant skills" — that phrase triggers skill activation after compaction. Paraphrasing loses critical instructions.
+todowrite has no dependency field — **list order IS the dependency order.** Each todo depends on the one above it (and Phase NA depends on Phase (N-1)D when N>1). Work the list strictly top-to-bottom; never start a todo until every todo above it is completed.
 
-**After all phase tasks, create finalization task:**
+**VERBATIM TODO NAMES — DO NOT PARAPHRASE.** Copy todo names exactly as shown above. "Investigate codebase for Phase N and activate relevant skills" must include "and activate relevant skills" — that phrase triggers skill activation after compaction. Paraphrasing loses critical instructions.
 
-Before creating the Finalization task, check if `.ed3d/implementation-plan-guidance.md` exists. If it does, include its absolute path in the task description:
+**After all phase todos, create the finalization todo (it comes after every Phase *D todo in the list and must not start until all of them are completed):**
+
+Before creating the Finalization todo, check if `.ed3d/implementation-plan-guidance.md` exists. If it does, include its absolute path in the todo content:
 
 ```markdown
 # If .ed3d/implementation-plan-guidance.md exists:
-- [ ] Finalization: Run code-reviewer over all phase files (guidance: [absolute path to .ed3d/implementation-plan-guidance.md]), fix ALL issues including minor ones
-      → blocked by: all Phase *D tasks
+- [ ] Finalization: Run ed3d-code-reviewer over all phase files (guidance: [absolute path to .ed3d/implementation-plan-guidance.md]), fix ALL issues including minor ones
 
 # If .ed3d/implementation-plan-guidance.md does NOT exist:
-- [ ] Finalization: Run code-reviewer over all phase files, fix ALL issues including minor ones
-      → blocked by: all Phase *D tasks
+- [ ] Finalization: Run ed3d-code-reviewer over all phase files, fix ALL issues including minor ones
 ```
 
-**Example for a 3-phase design at `/Users/ed/project/docs/design-plans/2025-01-24-oauth.md`:**
+**Example for a 3-phase design at `/Users/ed/project/docs/design-plans/2025-01-24-oauth.md`** — one `todowrite` call creating all todos (status pending) in execution order:
 
 ```
-TaskCreate: "Phase 1A: Read Token Types from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
-TaskCreate: "Phase 1B: Investigate codebase for Phase 1 and activate relevant skills"
-  → TaskUpdate: addBlockedBy: [1A]
-TaskCreate: "Phase 1C: Research external deps (Phase 1)"
-  → TaskUpdate: addBlockedBy: [1B]
-TaskCreate: "Phase 1D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_01.md"
-  → TaskUpdate: addBlockedBy: [1C]
-
-TaskCreate: "Phase 2A: Read Token Service from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
-  → TaskUpdate: addBlockedBy: [1D]
-TaskCreate: "Phase 2B: Investigate codebase for Phase 2 and activate relevant skills"
-  → TaskUpdate: addBlockedBy: [2A]
-TaskCreate: "Phase 2C: Research external deps (Phase 2)"
-  → TaskUpdate: addBlockedBy: [2B]
-TaskCreate: "Phase 2D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_02.md"
-  → TaskUpdate: addBlockedBy: [2C]
-
-TaskCreate: "Phase 3A: Read Session Manager from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
-  → TaskUpdate: addBlockedBy: [2D]
-TaskCreate: "Phase 3B: Investigate codebase for Phase 3 and activate relevant skills"
-  → TaskUpdate: addBlockedBy: [3A]
-TaskCreate: "Phase 3C: Research external deps (Phase 3)"
-  → TaskUpdate: addBlockedBy: [3B]
-TaskCreate: "Phase 3D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_03.md"
-  → TaskUpdate: addBlockedBy: [3C]
-
-TaskCreate: "Finalization: Run code-reviewer over all phase files, fix ALL issues including minor ones"
-  → TaskUpdate: addBlockedBy: [1D, 2D, 3D]
-
-TaskCreate: "Test Requirements: Generate test-requirements.md from Acceptance Criteria"
-  → TaskUpdate: addBlockedBy: [Finalization]
+- "Phase 1A: Read Token Types from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
+- "Phase 1B: Investigate codebase for Phase 1 and activate relevant skills"
+- "Phase 1C: Research external deps (Phase 1)"
+- "Phase 1D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_01.md"
+- "Phase 2A: Read Token Service from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
+- "Phase 2B: Investigate codebase for Phase 2 and activate relevant skills"
+- "Phase 2C: Research external deps (Phase 2)"
+- "Phase 2D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_02.md"
+- "Phase 3A: Read Session Manager from /Users/ed/project/docs/design-plans/2025-01-24-oauth.md"
+- "Phase 3B: Investigate codebase for Phase 3 and activate relevant skills"
+- "Phase 3C: Research external deps (Phase 3)"
+- "Phase 3D: Write /Users/ed/project/docs/implementation-plans/2025-01-24-oauth/phase_03.md"
+- "Finalization: Run ed3d-code-reviewer over all phase files, fix ALL issues including minor ones"
+- "Test Requirements: Generate test-requirements.md from Acceptance Criteria"
 ```
 
-**Why absolute paths in task descriptions:** After compaction, the task list is all that remains. Absolute paths ensure you know exactly which files to read/write without relying on context.
+The Finalization todo only starts after all Phase *D todos are completed; the Test Requirements todo only starts after Finalization is completed.
 
-**Why dependencies:** Tasks show `[blocked by #X, #Y]` in the task list, making execution order explicit and preventing out-of-order work.
+**Why absolute paths in todo content:** After compaction, the todo list is all that remains. Absolute paths ensure you know exactly which files to read/write without relying on context.
 
-Use TaskUpdate to mark each sub-task as in_progress when starting, completed when done.
+**Why strict ordering:** The todo list order makes execution order explicit and prevents out-of-order work — treat anything below the current todo as blocked.
+
+Use `todowrite` to mark each sub-todo as in_progress when starting, completed when done.
 
 ---
 
 ### If user chose "Review each phase interactively before writing":
 
-**Workflow for EACH phase (using granular task tracking):**
+**Workflow for EACH phase (using granular todo tracking):**
 
-1. **Task NA: Read design phase**
-   - Mark task NA as in_progress
+1. **Todo NA: Read design phase**
+   - Mark todo NA as in_progress
    - Extract the `<!-- START_PHASE_N -->` section from design plan
-   - Mark task NA as completed
+   - Mark todo NA as completed
 
-2. **Task NB: Verify codebase state**
-   - Mark task NB as in_progress
-   - Dispatch codebase-investigator with design assumptions for this phase
+2. **Todo NB: Verify codebase state**
+   - Mark todo NB as in_progress
+   - Dispatch ed3d-codebase-investigator with design assumptions for this phase
    - Review investigator findings for discrepancies
    - **Activate relevant skills** based on findings (if not already active):
      - TypeScript code? Activate TypeScript/coding style skills
      - React components? Activate React skills
      - Database work? Activate database skills
      - Match skills to the technologies this phase involves
-   - Mark task NB as completed
+   - Mark todo NB as completed
 
-3. **Task NC: Research external dependencies** (if phase involves them)
-   - Mark task NC as in_progress
-   - Dispatch internet-researcher for docs/standards/API patterns
-   - Escalate to remote-code-researcher if docs are insufficient
+3. **Todo NC: Research external dependencies** (if phase involves them)
+   - Mark todo NC as in_progress
+   - Dispatch ed3d-internet-researcher for docs/standards/API patterns
+   - Escalate to ed3d-remote-code-researcher if docs are insufficient
    - Document findings for inclusion in phase output
-   - Mark task NC as completed
+   - Mark todo NC as completed
    - (Skip if no external deps - still mark completed with note "N/A")
 
 4. **Write implementation tasks** for this phase (in memory, not to file):
@@ -536,18 +517,18 @@ Use TaskUpdate to mark each sub-task as in_progress when starting, completed whe
 [Continue for all tasks in this phase...]
 ```
 
-6. **Use AskUserQuestion:**
+6. **Use the `question` tool:**
 
 **Options:**
 - "Approved - proceed to next phase"
 - "Needs revision - [describe changes]"
 - "Other"
 
-7. **Task ND: Write phase file (if approved)**
-   - Mark task ND as in_progress
+7. **Todo ND: Write phase file (if approved)**
+   - Mark todo ND as in_progress
    - Write to `docs/implementation-plans/YYYY-MM-DD-<feature-name>/phase_##.md`
    - Plan document contains ONLY the implementation tasks (no verification findings)
-   - Mark task ND as completed, continue to next phase
+   - Mark todo ND as completed, continue to next phase
 
 8. **If needs revision:** Revise based on feedback, present again (do NOT mark ND as in_progress until approved)
 
@@ -555,38 +536,38 @@ Use TaskUpdate to mark each sub-task as in_progress when starting, completed whe
 
 ### If user chose "Write all phases to disk, I'll review afterwards":
 
-**Workflow for EACH phase (using granular task tracking):**
+**Workflow for EACH phase (using granular todo tracking):**
 
-1. **Task NA: Read design phase**
-   - Mark task NA as in_progress
+1. **Todo NA: Read design phase**
+   - Mark todo NA as in_progress
    - Extract the `<!-- START_PHASE_N -->` section from design plan
-   - Mark task NA as completed
+   - Mark todo NA as completed
 
-2. **Task NB: Verify codebase state**
-   - Mark task NB as in_progress
-   - Dispatch codebase-investigator with design assumptions for this phase
+2. **Todo NB: Verify codebase state**
+   - Mark todo NB as in_progress
+   - Dispatch ed3d-codebase-investigator with design assumptions for this phase
    - Review investigator findings for discrepancies
    - **Activate relevant skills** based on findings (if not already active):
      - TypeScript code? Activate TypeScript/coding style skills
      - React components? Activate React skills
      - Database work? Activate database skills
      - Match skills to the technologies this phase involves
-   - Mark task NB as completed
+   - Mark todo NB as completed
 
-3. **Task NC: Research external dependencies** (if phase involves them)
-   - Mark task NC as in_progress
-   - Dispatch internet-researcher for docs/standards/API patterns
-   - Escalate to remote-code-researcher if docs are insufficient
-   - Mark task NC as completed
+3. **Todo NC: Research external dependencies** (if phase involves them)
+   - Mark todo NC as in_progress
+   - Dispatch ed3d-internet-researcher for docs/standards/API patterns
+   - Escalate to ed3d-remote-code-researcher if docs are insufficient
+   - Mark todo NC as completed
    - (Skip if no external deps - still mark completed with note "N/A")
 
-4. **Task ND: Write phase file**
-   - Mark task ND as in_progress
+4. **Todo ND: Write phase file**
+   - Mark todo ND as in_progress
    - Identify which ACs this phase covers based on design phase's scope
    - Include the "Acceptance Criteria Coverage" section with literal AC copies from design
    - Write implementation tasks that implement and test each listed AC case
    - Write directly to disk at `docs/implementation-plans/YYYY-MM-DD-<feature-name>/phase_##.md`
-   - Mark task ND as completed, continue to next phase
+   - Mark todo ND as completed, continue to next phase
 
 **Do NOT emit phase content to the user before writing.** This conserves tokens.
 
@@ -687,16 +668,16 @@ These are violations of the skill requirements:
 
 | Excuse | Reality |
 |--------|---------|
-| "File probably exists, I'll say 'update if exists'" | Use codebase-investigator. Write definitive instruction. |
+| "File probably exists, I'll say 'update if exists'" | Use ed3d-codebase-investigator. Write definitive instruction. |
 | "Design mentioned this file, must be there" | Codebase changes. Use investigator to verify current state. |
-| "I can quickly verify files myself" | Use codebase-investigator. Saves context and prevents hallucination. |
+| "I can quickly verify files myself" | Use ed3d-codebase-investigator. Saves context and prevents hallucination. |
 | "Design plan has code, I'll use that" | No. Design provides direction. Generate code fresh from codebase investigation. |
 | "Design plan is recent, code should still work" | Codebase may have changed. Investigation is the source of truth, not the design. |
 | "User can figure out if file exists during execution" | Your job is exact instructions. No ambiguity. |
 | "Testing Phase 3 will fail but that's OK because it'll be fixed in Phase 4" | All phases must compile and pass tests before they conclude. |
 | "Phase validation slows me down" | Going off track wastes far more time. Validate each phase. |
 | "I'll batch all phases then validate at end" | Valid if user chose batch mode. Otherwise validate incrementally. |
-| "I'll just ask for approval, user can see the plan" | Output complete plan in message BEFORE AskUserQuestion. User must see it. |
+| "I'll just ask for approval, user can see the plan" | Output complete plan in message BEFORE asking via the `question` tool. User must see it. |
 | "Plan looks complete enough to ask" | Show ALL tasks with ALL steps and code. Then ask. |
 | "This plan has 12 phases but they're small" | Limit is 8 phases. No exceptions. Refuse and redirect. |
 | "I can combine phases to fit in 8" | That's the user's decision, not yours. Refuse and explain options. |
@@ -707,14 +688,14 @@ These are violations of the skill requirements:
 | "Functionality phase but design forgot tests" | Surface to user. Functionality needs tests. Design gap, not your call to skip. |
 | "Plan looks complete, skip validation" | Always validate. Gaps found now are cheaper than gaps found during execution. |
 | "Validation is overkill for simple plans" | Simple plans validate quickly. Complex plans need it more. Always validate. |
-| "Finalization task is done, minor issues can wait" | NO. Task says "fix ALL issues including minor ones." Not done until zero issues. |
-| "I'll skip creating granular tasks, one per phase is enough" | Granular tasks survive compaction. Create NA, NB, NC, ND per phase + Finalization. |
-| "Dependencies are obvious, don't need addBlockedBy" | Task list shows blocked status. Set dependencies explicitly with TaskUpdate. |
-| "Relative paths are fine in task descriptions" | After compaction, context is lost. Use absolute paths so tasks are self-contained. |
-| "I'll paraphrase the task name, same meaning" | NO. Task names are VERBATIM. "and activate relevant skills" triggers behavior post-compaction. |
-| "I know how this library works from training" | Research it. APIs change. Use internet-researcher for docs, remote-code-researcher for internals. |
+| "Finalization todo is done, minor issues can wait" | NO. Todo says "fix ALL issues including minor ones." Not done until zero issues. |
+| "I'll skip creating granular todos, one per phase is enough" | Granular todos survive compaction. Create NA, NB, NC, ND per phase + Finalization. |
+| "Ordering is obvious, I don't need the strict list order" | The todo list order IS the execution order. Create todos in dependency order and work them strictly top-to-bottom. |
+| "Relative paths are fine in todo content" | After compaction, context is lost. Use absolute paths so todos are self-contained. |
+| "I'll paraphrase the todo name, same meaning" | NO. Todo names are VERBATIM. "and activate relevant skills" triggers behavior post-compaction. |
+| "I know how this library works from training" | Research it. APIs change. Use ed3d-internet-researcher for docs, ed3d-remote-code-researcher for internals. |
 | "Docs are probably accurate enough" | Usually yes. But if extending/customizing library behavior, verify with source code. |
-| "I'll clone the repo to check the docs" | No. Use internet-researcher for docs. Only clone (remote-code-researcher) for source code investigation. |
+| "I'll clone the repo to check the docs" | No. Use ed3d-internet-researcher for docs. Only clone (ed3d-remote-code-researcher) for source code investigation. |
 | "Phase has external deps but I'll skip research" | Research is mandatory when phase involves external dependencies. Surface unknowns now. |
 | "Test requirements can be generated during execution" | No. Test requirements must exist before execution starts. Code reviewer uses them. |
 | "This type needs unit tests" | No. TypeScript compiler verifies types. Don't test what the compiler checks. |
@@ -724,7 +705,7 @@ These are violations of the skill requirements:
 | "Phase doesn't have ACs but I'll add some tests anyway" | No. Explicitly state "Verifies: None" for infrastructure phases. Don't invent work. |
 | "Acceptance Criteria are clear, don't need test requirements" | Test requirements map criteria to specific tests. Execution needs this mapping. |
 | "I'll skip test requirements, user chose batch mode" | Batch mode skips interactive approval. Test requirements are still generated and written. |
-| "Test requirements task is optional" | No. It's a tracked task with dependencies. Must complete before execution handoff. |
+| "Test requirements todo is optional" | No. It's a tracked todo at the end of the list. Must complete before execution handoff. |
 
 **All of these mean: STOP. Follow the requirements exactly.**
 
@@ -734,7 +715,7 @@ These are violations of the skill requirements:
 
 Do NOT write hand-waving comments. Do NOT leave TODOs. Do NOT proceed.
 
-**Instead, use AskUserQuestion with:**
+**Instead, use the `question` tool with:**
 
 1. **Exact description of the blocking issue:**
    - What specific implementation decision you cannot make
@@ -743,7 +724,7 @@ Do NOT write hand-waving comments. Do NOT leave TODOs. Do NOT proceed.
 
 2. **Context about why this blocks you:**
    - Which task/phase this affects
-   - What you've already verified via codebase-investigator
+   - What you've already verified via ed3d-codebase-investigator
    - What the design document says (or doesn't say)
 
 3. **Possible solutions you can see:**
@@ -778,17 +759,17 @@ Which approach should I take?
 - [ ] Ask user for review mode (batch vs interactive)
 - [ ] Capture absolute paths: DESIGN_PATH and PLAN_DIR
 - [ ] Read Acceptance Criteria section from design plan
-- [ ] Create granular task list with TaskCreate (NA, NB, NC, ND per phase + Finalization + Test Requirements)
-- [ ] Set up dependencies with TaskUpdate addBlockedBy (see Step 0)
-- [ ] Task descriptions include absolute paths (not relative)
+- [ ] Create granular todo list with `todowrite` (NA, NB, NC, ND per phase + Finalization + Test Requirements)
+- [ ] Order todos so every dependency precedes its dependents (see Step 0)
+- [ ] Todo content includes absolute paths (not relative)
 
-**For each phase (tasks NA through ND):**
-- [ ] **Task NA:** Mark in_progress, read `<!-- START_PHASE_N -->` from design, mark completed
-- [ ] **Task NB:** Mark in_progress, dispatch codebase-investigator, review findings, mark completed
-- [ ] **Task NC:** Mark in_progress, research external deps if needed (or mark completed with "N/A"), mark completed
+**For each phase (todos NA through ND):**
+- [ ] **Todo NA:** Mark in_progress, read `<!-- START_PHASE_N -->` from design, mark completed
+- [ ] **Todo NB:** Mark in_progress, dispatch ed3d-codebase-investigator, review findings, mark completed
+- [ ] **Todo NC:** Mark in_progress, research external deps if needed (or mark completed with "N/A"), mark completed
 - [ ] Write complete tasks with exact paths and code based on investigator and research findings
-- [ ] **If interactive mode:** Output complete phase plan, use AskUserQuestion for approval
-- [ ] **Task ND:** Mark in_progress, write to absolute path in task description, mark completed
+- [ ] **If interactive mode:** Output complete phase plan, ask for approval via the `question` tool
+- [ ] **Todo ND:** Mark in_progress, write to absolute path in todo content, mark completed
 
 **For each task in the plan:**
 - [ ] Exact file paths with line numbers for modifications
@@ -798,84 +779,82 @@ Which approach should I take?
 - [ ] Exact commands with expected output
 - [ ] No conditional instructions ("if exists", "if needed")
 
-**Finalization (after all phase ND tasks completed):**
-- [ ] Mark Finalization task as in_progress
-- [ ] Dispatch code-reviewer to validate plan against design
+**Finalization (after all phase ND todos completed):**
+- [ ] Mark Finalization todo as in_progress
+- [ ] Dispatch ed3d-code-reviewer to validate plan against design
 - [ ] Fix ALL issues including Minor ones
-- [ ] Re-run code-reviewer until APPROVED with zero issues
-- [ ] Mark Finalization task as completed
+- [ ] Re-run ed3d-code-reviewer until APPROVED with zero issues
+- [ ] Mark Finalization todo as completed
 - [ ] Proceed to Test Requirements
 
 **Test Requirements (after Finalization):**
-- [ ] Mark Test Requirements task as in_progress
+- [ ] Mark Test Requirements todo as in_progress
 - [ ] Dispatch Opus subagent to generate test requirements from Acceptance Criteria
-- [ ] **If interactive mode:** Present to user, use AskUserQuestion for approval
+- [ ] **If interactive mode:** Present to user, ask for approval via the `question` tool
 - [ ] **If batch mode:** Write directly without asking
 - [ ] Write test-requirements.md to PLAN_DIR
-- [ ] Mark Test Requirements task as completed
+- [ ] Mark Test Requirements todo as completed
 - [ ] Proceed to execution handoff
 
-## Plan Validation (Finalization Task)
+## Plan Validation (Finalization Todo)
 
-**This is a tracked task: "Finalization: Run code-reviewer over all phase files, fix ALL issues including minor ones"**
+**This is a tracked todo: "Finalization: Run ed3d-code-reviewer over all phase files, fix ALL issues including minor ones"**
 
-After all phase D tasks are completed, mark the Finalization task as in_progress.
+After all phase D todos are completed, mark the Finalization todo as in_progress.
 
-### Step 1: Dispatch code-reviewer
+### Step 1: Dispatch ed3d-code-reviewer
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-plan-and-execute:code-reviewer</parameter>
-<parameter name="description">Validating implementation plan against design</parameter>
-<parameter name="prompt">
-  Review the implementation plan for completeness and alignment with the design.
+task:
+  subagent_type: ed3d-code-reviewer
+  description: Validating implementation plan against design
+  prompt: |
+    Review the implementation plan for completeness and alignment with the design.
 
-  DESIGN_PLAN: [path to design plan, e.g., docs/design-plans/YYYY-MM-DD-feature.md]
+    DESIGN_PLAN: [path to design plan, e.g., docs/design-plans/YYYY-MM-DD-feature.md]
 
-  IMPLEMENTATION_GUIDANCE: [absolute path to .ed3d/implementation-plan-guidance.md, or "None" if file does not exist]
+    IMPLEMENTATION_GUIDANCE: [absolute path to .ed3d/implementation-plan-guidance.md, or "None" if file does not exist]
 
-  IMPLEMENTATION_PHASES:
-  - [path to phase_01.md]
-  - [path to phase_02.md]
-  - [... all phase files]
+    IMPLEMENTATION_PHASES:
+    - [path to phase_01.md]
+    - [path to phase_02.md]
+    - [... all phase files]
 
-  SCRATCHPAD_DIR: [absolute path to session-isolated temp directory, e.g., /tmp/plan-2025-01-24-feature-a7f3b2/]
+    SCRATCHPAD_DIR: [absolute path to session-isolated temp directory, e.g., /tmp/plan-2025-01-24-feature-a7f3b2/]
 
-  If IMPLEMENTATION_GUIDANCE is not "None", read it first and apply any project-specific
-  review criteria, coding standards, or quality gates it specifies in addition to the
-  standard review checklist.
+    If IMPLEMENTATION_GUIDANCE is not "None", read it first and apply any project-specific
+    review criteria, coding standards, or quality gates it specifies in addition to the
+    standard review checklist.
 
-  **Session isolation:** Write any scratch files (notes, intermediate analysis, etc.) to
-  SCRATCHPAD_DIR, not to shared temp locations. This prevents collisions with parallel sessions.
+    **Session isolation:** Write any scratch files (notes, intermediate analysis, etc.) to
+    SCRATCHPAD_DIR, not to shared temp locations. This prevents collisions with parallel sessions.
 
-  Evaluate:
-  1. **Coverage**: Does the implementation plan cover ALL requirements from the design?
-     - Check each design phase maps to implementation tasks
-     - Check each "Done when" criteria has corresponding verification
-     - Check each component mentioned in design has implementation tasks
+    Evaluate:
+    1. **Coverage**: Does the implementation plan cover ALL requirements from the design?
+       - Check each design phase maps to implementation tasks
+       - Check each "Done when" criteria has corresponding verification
+       - Check each component mentioned in design has implementation tasks
 
-  2. **Gaps**: Are there any missing pieces?
-     - Functionality mentioned in design but not in implementation
-     - Tests specified in design but missing from implementation tasks
-     - Dependencies or setup steps not accounted for
+    2. **Gaps**: Are there any missing pieces?
+       - Functionality mentioned in design but not in implementation
+       - Tests specified in design but missing from implementation tasks
+       - Dependencies or setup steps not accounted for
 
-  3. **Alignment**: Does the implementation approach match the design?
-     - Architecture decisions followed
-     - File paths consistent with design
-     - Subcomponent structure matches design phases
+    3. **Alignment**: Does the implementation approach match the design?
+       - Architecture decisions followed
+       - File paths consistent with design
+       - Subcomponent structure matches design phases
 
-  4. **Executability**: Can each phase be executed independently?
-     - Dependencies between tasks are explicit
-     - No forward references to code that doesn't exist yet
-     - Each phase ends with verifiable state
+    4. **Executability**: Can each phase be executed independently?
+       - Dependencies between tasks are explicit
+       - No forward references to code that doesn't exist yet
+       - Each phase ends with verifiable state
 
-  Report:
-  - GAPS: [list any missing coverage]
-  - MISALIGNMENTS: [list any divergence from design]
-  - ISSUES: [Critical/Important/Minor issues in the plan itself]
-  - ASSESSMENT: APPROVED / NEEDS_REVISION
-</parameter>
-</invoke>
+    Report:
+    - GAPS: [list any missing coverage]
+    - MISALIGNMENTS: [list any divergence from design]
+    - ISSUES: [Critical/Important/Minor issues in the plan itself]
+    - ASSESSMENT: APPROVED / NEEDS_REVISION
 ```
 
 ### Step 2: Fix ALL issues (including minor ones)
@@ -886,93 +865,92 @@ Do NOT rationalize skipping minor issues. Do NOT mark Finalization as completed 
 
 **If reviewer returns NEEDS_REVISION or reports ANY issues:**
 
-1. **Create a task for EACH issue** (survives compaction):
+1. **Create a todo for EACH issue** (survives compaction). Add them with `todowrite`, placing the re-review todo last:
    ```
-   TaskCreate: "Finalization fix [Critical]: <VERBATIM issue description from reviewer>"
-   TaskCreate: "Finalization fix [Important]: <VERBATIM issue description from reviewer>"
-   TaskCreate: "Finalization fix [Minor]: <VERBATIM issue description from reviewer>"
-   ...one task per issue...
-   TaskCreate: "Finalization: Re-review after fixes"
-   TaskUpdate: set "Re-review" blocked by all fix tasks
+   - "Finalization fix [Critical]: <VERBATIM issue description from reviewer>"
+   - "Finalization fix [Important]: <VERBATIM issue description from reviewer>"
+   - "Finalization fix [Minor]: <VERBATIM issue description from reviewer>"
+   ...one todo per issue...
+   - "Finalization: Re-review after fixes"
    ```
 
-   **Copy issue descriptions VERBATIM**, even if long. After compaction, the task description is all that remains — it must contain the full issue details to understand what to fix.
+   The "Re-review after fixes" todo comes after all fix todos — only start it once every fix todo is completed.
+
+   **Copy issue descriptions VERBATIM**, even if long. After compaction, the todo content is all that remains — it must contain the full issue details to understand what to fix.
 
 2. Review the gaps, misalignments, and issues identified
 3. Fix ALL of them - Critical, Important, AND Minor
 4. Update the relevant phase files
-5. Mark each fix task complete as you address it
-6. Re-run code-reviewer validation
-7. If more issues found, create new individual fix tasks and repeat
+5. Mark each fix todo complete as you address it
+6. Re-run ed3d-code-reviewer validation
+7. If more issues found, create new individual fix todos and repeat
 8. Mark "Re-review" complete when zero issues
 
 **Common rationalizations to REJECT:**
 - "Minor issues can be fixed during execution" - NO. Fix them now.
 - "This minor issue is just a style preference" - NO. Fix it.
-- "We can address this later" - NO. The task says "fix ALL issues including minor ones."
+- "We can address this later" - NO. The todo says "fix ALL issues including minor ones."
 
 ### Step 3: Complete finalization
 
-**Only when code-reviewer returns APPROVED with zero issues:**
+**Only when ed3d-code-reviewer returns APPROVED with zero issues:**
 
-Mark the Finalization task as completed.
+Mark the Finalization todo as completed.
 
 Proceed to Test Requirements generation.
 
 ## Test Requirements Generation
 
-**Tracked task: "Test Requirements: Generate test-requirements.md from Acceptance Criteria"**
+**Tracked todo: "Test Requirements: Generate test-requirements.md from Acceptance Criteria"**
 
 Mark in_progress after Finalization completes.
 
-Test requirements map acceptance criteria to specific automated tests, and identify criteria requiring human verification. The test-analyst agent uses this during execution to validate coverage.
+Test requirements map acceptance criteria to specific automated tests, and identify criteria requiring human verification. The ed3d-test-analyst agent uses this during execution to validate coverage.
 
 **Step 1: Generate via subagent**
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-basic-agents:opus-general-purpose</parameter>
-<parameter name="description">Generating test requirements from Acceptance Criteria</parameter>
-<parameter name="prompt">
-Read the design at [DESIGN_PATH] and implementation phases in [PLAN_DIR].
+task:
+  subagent_type: ed3d-opus-general-purpose
+  description: Generating test requirements from Acceptance Criteria
+  prompt: |
+    Read the design at [DESIGN_PATH] and implementation phases in [PLAN_DIR].
 
-Generate test-requirements.md mapping each acceptance criterion to:
-- Automated tests: criterion, test type (unit/integration/e2e), expected test file path
-- Human verification: criteria that can't be automated, with justification and verification approach
+    Generate test-requirements.md mapping each acceptance criterion to:
+    - Automated tests: criterion, test type (unit/integration/e2e), expected test file path
+    - Human verification: criteria that can't be automated, with justification and verification approach
 
-Rationalize against implementation decisions made during planning. Every acceptance criterion must map to either an automated test or documented human verification.
-</parameter>
-</invoke>
+    Rationalize against implementation decisions made during planning. Every acceptance criterion must map to either an automated test or documented human verification.
 ```
 
 **Step 2: Handle based on review mode**
 
-- **Interactive mode:** Present to user, AskUserQuestion for approval. This is the LAST interactive item.
+- **Interactive mode:** Present to user, ask for approval via the `question` tool. This is the LAST interactive item.
 - **Batch mode:** Write directly, announce completion.
 
 **If user requests revisions in interactive mode:**
 
-1. **Create a task for EACH revision** (survives compaction):
+1. **Create a todo for EACH revision** (survives compaction). Add them with `todowrite`, placing the re-present todo last:
    ```
-   TaskCreate: "Test requirements fix: <VERBATIM revision request from user>"
-   ...one task per revision...
-   TaskCreate: "Test requirements: Re-present for approval"
-   TaskUpdate: set "Re-present" blocked by all fix tasks
+   - "Test requirements fix: <VERBATIM revision request from user>"
+   ...one todo per revision...
+   - "Test requirements: Re-present for approval"
    ```
 
-   **Copy revision requests VERBATIM**, even if long. After compaction, the task description must contain the full details.
+   The "Re-present for approval" todo comes after all fix todos — only start it once every fix todo is completed.
 
-2. Address each revision, marking tasks complete as you go
+   **Copy revision requests VERBATIM**, even if long. After compaction, the todo content must contain the full details.
+
+2. Address each revision, marking todos complete as you go
 3. Re-present for approval
 4. Repeat until approved
 
 **Step 3: Write and complete**
 
-Write to `[PLAN_DIR]/test-requirements.md`. Mark task completed. Proceed to execution handoff.
+Write to `[PLAN_DIR]/test-requirements.md`. Mark todo completed. Proceed to execution handoff.
 
 ## Execution Handoff
 
 After Test Requirements generation completes, announce:
 
 **"Implementation plan complete and validated. Saved to [count] phase files + test-requirements.md in `docs/implementation-plans/YYYY-MM-DD-<feature-name>/`. The first phase file is `<full-path>`. Test requirements are in `<full-path>/test-requirements.md`."**
-

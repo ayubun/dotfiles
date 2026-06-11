@@ -30,9 +30,9 @@ Do NOT use for:
 
 ## Before Clarifying
 
-Try to answer your own questions and disambiguate from the context of the working directory. Use available subagents, such as `codebase-investigator`, to explore for existing work that can help explain the the subject under clarification. When you recognize elements such as common technologies or proper nouns, use `combined-researcher` instead to synthesize both the codebase and internet searches.
+Try to answer your own questions and disambiguate from the context of the working directory. Use available subagents, such as `ed3d-codebase-investigator`, to explore for existing work that can help explain the the subject under clarification. When you recognize elements such as common technologies or proper nouns, use `ed3d-combined-researcher` instead to synthesize both the codebase and internet searches.
 
-You may have other skills or MCPs containing useful information, such as connections to remote datastores used for product management purposes. You should send out `haiku-general-purpose` subagents to investigate them when they're appropriate.
+You may have other skills or MCPs containing useful information, such as connections to remote datastores used for product management purposes. You should send out `ed3d-haiku-general-purpose` subagents to investigate them when they're appropriate.
 
 ## What to Clarify
 
@@ -95,7 +95,7 @@ User says "caching" -> Ask: What layer?
 - HTTP caching (CDN, browser cache)
 - Database query caching
 
-**Use AskUserQuestion for these** - present specific options with trade-offs.
+**Use the `question` tool for these** - present specific options with trade-offs.
 
 ### 2. Scope Boundaries
 
@@ -121,7 +121,7 @@ User says "reporting" -> Ask: What scope?
 - Scheduled automated reports
 - Real-time analytics
 
-**Use AskUserQuestion** - present distinct scope options.
+**Use the `question` tool** - present distinct scope options.
 
 ### 3. Assumptions and Constraints
 
@@ -188,7 +188,7 @@ The Definition of Done answers: "What does success look like? What are the deliv
 
 2. **If you have a firm grasp**, state it back and confirm:
    ```
-   Use AskUserQuestion:
+   Use the question tool:
    "Based on our discussion, here's what I understand success looks like:
 
    [State the definition of done in 2-4 bullet points]
@@ -212,7 +212,7 @@ The Definition of Done answers: "What does success look like? What are the deliv
 
 ## Question Techniques
 
-### Use AskUserQuestion for Choices
+### Use the question Tool for Choices
 
 When there are 2-4 distinct options with trade-offs:
 
@@ -248,7 +248,7 @@ When you need to understand reasoning or context:
 
 When you need to verify something factual:
 
-- Dispatch codebase-investigator: "Is library X already in use?"
+- Dispatch ed3d-codebase-investigator: "Is library X already in use?"
 - Quick web search: "What's the current version of API Y?"
 - File read: "Check package.json for existing auth dependencies"
 

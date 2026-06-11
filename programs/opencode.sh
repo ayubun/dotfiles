@@ -29,7 +29,7 @@ dest="$HOME/.config/opencode/agents"
 mkdir -p "$dest"
 find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
 shopt -s nullglob
-for src in "$HOME/dotfiles/configs/opencode/agents" "$HOME/work/agents"; do
+for src in "$HOME/dotfiles/configs/opencode/agents" "$HOME/work/opencode/agents"; do
   [[ -d "$src" ]] || continue
   for f in "$src"/*.md; do
     name="$(basename "$f")"

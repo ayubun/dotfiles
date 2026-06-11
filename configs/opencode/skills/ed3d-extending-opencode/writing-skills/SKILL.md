@@ -5,7 +5,7 @@ description: Use when creating new skills, editing existing skills, or verifying
 
 # Writing Skills
 
-**REQUIRED BACKGROUND:** Read ed3d-extending-opencode:writing-opencode-directives for foundational guidance on token efficiency, discovery optimization, and compliance techniques. This skill focuses on TDD methodology specific to skill creation.
+**REQUIRED BACKGROUND:** Read the writing-opencode-directives skill for foundational guidance on token efficiency, discovery optimization, and compliance techniques. This skill focuses on TDD methodology specific to skill creation.
 
 ## Core Principle
 
@@ -55,6 +55,8 @@ skills/
     supporting-file.*     # Only if needed
 ```
 
+Skills live in a directory opencode scans: `.opencode/skills/` in a project, `~/.config/opencode/skills/`, or any directory listed in `skills.paths` in opencode's config. The folder name must equal the `name` field in frontmatter.
+
 **Separate files for:** Heavy reference (100+ lines), reusable tools/scripts
 
 **Keep inline:** Principles, code patterns (<50 lines), everything else
@@ -63,7 +65,7 @@ skills/
 
 ```markdown
 ---
-name: Skill-Name-With-Hyphens
+name: skill-name-with-hyphens
 description: Use when [triggers/symptoms] - [what it does, third person]
 ---
 
@@ -106,7 +108,7 @@ Run pressure scenario WITHOUT skill:
 2. Add explicit counters
 3. Re-test until bulletproof
 
-**REQUIRED:** Use ed3d-extending-opencode:testing-skills-with-subagents for complete methodology.
+**REQUIRED:** Use the testing-skills-with-subagents skill for complete methodology.
 
 ## Testing by Skill Type
 
@@ -138,7 +140,7 @@ Run pressure scenario WITHOUT skill:
 
 ## Skill Creation Checklist
 
-**IMPORTANT:** Use TaskCreate to track each item (or TodoWrite in older opencode versions).
+**IMPORTANT:** Use `todowrite` to track each item.
 
 **RED Phase:**
 - [ ] Create pressure scenarios (3+ combined pressures for discipline skills)
@@ -146,7 +148,7 @@ Run pressure scenario WITHOUT skill:
 - [ ] Identify rationalization patterns
 
 **GREEN Phase:**
-- [ ] Name uses letters, numbers, hyphens only
+- [ ] Name uses letters, numbers, hyphens only and matches the skill folder name
 - [ ] Description starts with "Use when...", third person
 - [ ] Address specific baseline failures
 - [ ] One excellent example (not multi-language)

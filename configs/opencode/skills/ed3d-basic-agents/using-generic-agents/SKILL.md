@@ -15,17 +15,17 @@ description: Use to decide what kind of basic agent you should use
 
 ## When to Use Each
 
-Use `haiku-general-purpose` for:
+Use `ed3d-haiku-general-purpose` for:
 - Extremely well scoped tasks with detailed prompts
 - Execution where speed is preferable over quality
 - Efficient search of summarizing of text
 
-Use `sonnet-general-purpose` for:
+Use `ed3d-sonnet-general-purpose` for:
 - Reasoning across multiple files
 - Well scoped tasks that require some judgement or thinking
 - Simple coding work, like small refactors or updates
 
-Use `opus-general-purpose` for:
+Use `ed3d-opus-general-purpose` for:
 - Tasks that require sustained focus and judgement
 - Ambiguous tasks that require sufficient reasoning and judgement to work through
 - Tasks that Sonnet has failed at multiple times

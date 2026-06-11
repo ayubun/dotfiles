@@ -307,7 +307,7 @@ The second example is doing implementation planning's job. Design plans stay at 
 
 ## Writing Style
 
-**REQUIRED SUB-SKILL:** Use house-style:writing-for-a-technical-audience if available.
+**REQUIRED SUB-SKILL:** Use writing-for-a-technical-audience if available.
 
 Otherwise follow these guidelines:
 
@@ -482,7 +482,7 @@ For design plan `2025-01-18-oauth2-svc-authn.md`, the slug is `oauth2-svc-authn`
 
 ### Validation
 
-Present generated criteria to the user. Use AskUserQuestion: "Review the acceptance criteria. Approve to continue, or describe what's missing or needs revision."
+Present generated criteria to the user. Use the `question` tool: "Review the acceptance criteria. Approve to continue, or describe what's missing or needs revision."
 
 Loop until approved. Then replace the placeholder in the document and proceed to Summary/Glossary.
 
@@ -529,39 +529,37 @@ The body has been appended and Acceptance Criteria validated:
 
 **Step 2: Dispatch extraction subagent**
 
-Use the Task tool to generate Summary and Glossary:
+Use the `task` tool to generate Summary and Glossary:
 
 ```
-<invoke name="Task">
-<parameter name="subagent_type">ed3d-basic-agents:sonnet-general-purpose</parameter>
-<parameter name="description">Generating Summary and Glossary for design document</parameter>
-<parameter name="prompt">
-Read the design document at [file path].
+task:
+  subagent_type: ed3d-sonnet-general-purpose
+  description: Generating Summary and Glossary for design document
+  prompt: |
+    Read the design document at [file path].
 
-Generate two sections to replace the placeholders in the document:
+    Generate two sections to replace the placeholders in the document:
 
-1. **Summary**: Write 1-2 paragraphs summarizing what is being built and the
-   high-level approach. This should be understandable to someone unfamiliar
-   with the codebase. The Definition of Done section already exists — your
-   summary should complement it by explaining the "how" rather than restating
-   the "what."
+    1. **Summary**: Write 1-2 paragraphs summarizing what is being built and the
+       high-level approach. This should be understandable to someone unfamiliar
+       with the codebase. The Definition of Done section already exists — your
+       summary should complement it by explaining the "how" rather than restating
+       the "what."
 
-2. **Glossary**: List domain terms from the application and third-party concepts
-   (libraries, frameworks, patterns) that a reviewer needs to understand this
-   document. Format as:
-   - **[Term]**: [Brief explanation]
+    2. **Glossary**: List domain terms from the application and third-party concepts
+       (libraries, frameworks, patterns) that a reviewer needs to understand this
+       document. Format as:
+       - **[Term]**: [Brief explanation]
 
-   Include only terms that appear in the document and would benefit from
-   explanation.
+       Include only terms that appear in the document and would benefit from
+       explanation.
 
-3. **Omitted Terms**: List terms you considered but skipped as too obvious or
-   generic. Only include borderline cases — terms that a less technical reviewer
-   might not know. Format as a simple comma-separated list.
+    3. **Omitted Terms**: List terms you considered but skipped as too obvious or
+       generic. Only include borderline cases — terms that a less technical reviewer
+       might not know. Format as a simple comma-separated list.
 
-Return all three sections. The first two are markdown ready to insert; the
-third is for transparency about what was excluded.
-</parameter>
-</invoke>
+    Return all three sections. The first two are markdown ready to insert; the
+    third is for transparency about what was excluded.
 ```
 
 **Step 3: Review omitted terms with user**

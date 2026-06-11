@@ -43,7 +43,7 @@ If no directory exists and no AGENTS.md preference:
 No worktree directory found. Where should I create worktrees?
 
 1. .worktrees/ (project-local, hidden)
-2. ~/.claude/worktrees/<project-name>/ (global location)
+2. ~/.config/opencode/worktrees/<project-name>/ (global location)
 
 Which would you prefer?
 ```
@@ -68,7 +68,7 @@ Per Jesse's rule "Fix broken things immediately":
 
 **Why critical:** Prevents accidentally committing worktree contents to repository.
 
-### For Global Directory (~/.claude/worktrees)
+### For Global Directory (~/.config/opencode/worktrees)
 
 No .gitignore verification needed - outside project entirely.
 
@@ -88,8 +88,8 @@ case $LOCATION in
   .worktrees|worktrees)
     path="$LOCATION/$BRANCH_NAME"
     ;;
-  ~/.claude/worktrees/*)
-    path="~/.claude/worktrees/$project/$BRANCH_NAME"
+  ~/.config/opencode/worktrees/*)
+    path="~/.config/opencode/worktrees/$project/$BRANCH_NAME"
     ;;
 esac
 

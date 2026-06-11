@@ -17,29 +17,29 @@ Transform rough ideas into fully-formed designs through structured questioning a
 
 | Phase | Key Activities | Tool Usage | Output |
 |-------|---------------|------------|--------|
-| **1. Understanding** | Ask questions (one at a time) | AskUserQuestion for choices, agents for research | Purpose, constraints, criteria |
-| **2. Exploration** | Propose 2-3 approaches | AskUserQuestion for approach selection, agents for patterns | Architecture options with trade-offs |
+| **1. Understanding** | Ask questions (one at a time) | question tool for choices, agents for research | Purpose, constraints, criteria |
+| **2. Exploration** | Propose 2-3 approaches | question tool for approach selection, agents for patterns | Architecture options with trade-offs |
 | **3. Design Presentation** | Present in 200-300 word sections | Open-ended questions | Complete design with validation |
 
 ## The Process
 
 **REQUIRED: Create task tracker at start**
 
-Use TaskCreate to create todos for each phase (or TodoWrite in older opencode versions):
+Use the `todowrite` tool to create todos for each phase:
 
 - Phase 1: Understanding (purpose, constraints, criteria gathered)
 - Phase 2: Exploration (2-3 approaches proposed and evaluated)
 - Phase 3: Design Presentation (design validated in sections)
 
-Use TaskUpdate to mark each phase as in_progress when working on it, completed when finished (or TodoWrite in older versions).
+Use `todowrite` to mark each phase as in_progress when working on it, completed when finished.
 
 ## Research Agents
 
 **DO NOT perform deep research yourself. Delegate to specialized agents.**
 
-### When to Use codebase-investigator
+### When to Use ed3d-codebase-investigator
 
-**Use codebase-investigator when you need to:**
+**Use ed3d-codebase-investigator when you need to:**
 - Understand how existing features are implemented
 - Find where specific functionality lives in the codebase
 - Identify existing patterns to follow
@@ -49,12 +49,12 @@ Use TaskUpdate to mark each phase as in_progress when working on it, completed w
 **Example delegation:**
 ```
 Question: "How is authentication currently implemented?"
-Action: Dispatch codebase-investigator with: "Find authentication implementation, including file locations, patterns used, and dependencies"
+Action: Dispatch ed3d-codebase-investigator with: "Find authentication implementation, including file locations, patterns used, and dependencies"
 ```
 
-### When to Use internet-researcher
+### When to Use ed3d-internet-researcher
 
-**Use @agent-ed3d-research-agents:internet-researcher when available. Otherwise use WebSearch/WebFetch aggressively.**
+**Use the `ed3d-internet-researcher` subagent when available. Otherwise use `websearch`/`webfetch` aggressively.**
 
 **Use internet research when you need to:**
 - Find current API documentation for external services
@@ -68,14 +68,14 @@ Action: Dispatch codebase-investigator with: "Find authentication implementation
 **Example delegation (with agent):**
 ```
 Question: "What's the recommended way to handle file uploads with this framework?"
-Action: Dispatch internet-researcher with: "Find current best practices for file uploads in [framework], including official docs and common patterns"
+Action: Dispatch ed3d-internet-researcher with: "Find current best practices for file uploads in [framework], including official docs and common patterns"
 ```
 
-**Example without agent (use WebSearch):**
+**Example without agent (use websearch):**
 ```
 Question: "What's the current Stripe API for subscriptions?"
-Action: Use WebSearch for: "Stripe subscriptions API latest version 2025"
-Then use WebFetch to read the official docs
+Action: Use websearch for: "Stripe subscriptions API latest version 2025"
+Then use webfetch to read the official docs
 ```
 
 **When to use internet research:**
@@ -87,7 +87,7 @@ Then use WebFetch to read the official docs
 
 **Don't overdo it:**
 - Don't research things Claude already knows well
-- Don't research project-specific code (use codebase-investigator)
+- Don't research project-specific code (use ed3d-codebase-investigator)
 - Don't research for every small decision
 
 **Balance:** Use research for external knowledge and current information. Use Claude's existing knowledge for general programming concepts.
@@ -95,7 +95,7 @@ Then use WebFetch to read the official docs
 ### Research Protocol
 
 **If codebase pattern exists:**
-1. Use codebase-investigator to find it
+1. Use ed3d-codebase-investigator to find it
 2. Unless pattern is clearly unwise, assume it's the correct approach
 3. Design should follow existing patterns for consistency
 
@@ -105,7 +105,7 @@ Then use WebFetch to read the official docs
 3. Let user choose which pattern to adopt
 
 **If agent/research can't find answer:**
-- Redirect question to user via AskUserQuestion
+- Redirect question to user via the `question` tool
 - Explain what was searched and not found
 - Present as a design decision for user to make
 
@@ -119,20 +119,20 @@ Then use WebFetch to read the official docs
 **Before asking questions:**
 
 1. **Investigate current state** - DON'T do this yourself:
-   - Dispatch codebase-investigator to verify project structure
+   - Dispatch ed3d-codebase-investigator to verify project structure
    - Ask investigator to find existing architecture and patterns
    - Ask investigator to identify constraints from current codebase
    - Review investigator's findings before proceeding
 
 2. **Then gather requirements:**
-   - Use TaskUpdate to mark Phase 1 as in_progress
+   - Use `todowrite` to mark Phase 1 as in_progress
    - Ask ONE question at a time to refine the idea
-   - **Use AskUserQuestion tool** when you have multiple choice options
+   - **Use the `question` tool** when you have multiple choice options
    - **Use agents** when you need to verify technical information
    - Gather: Purpose, constraints, success criteria
    - Mark Phase 1 as completed when understanding is clear
 
-**Example using AskUserQuestion:**
+**Example using the `question` tool:**
 ```
 Question: "Where should the authentication data be stored?"
 Options:
@@ -142,9 +142,9 @@ Options:
 ```
 
 **When to delegate vs ask user:**
-- "Where is auth implemented?" -> codebase-investigator
-- "What auth library should we use?" -> internet-researcher (if not in codebase)
-- "Do you want JWT or sessions?" -> AskUserQuestion (design decision)
+- "Where is auth implemented?" -> ed3d-codebase-investigator
+- "What auth library should we use?" -> ed3d-internet-researcher (if not in codebase)
+- "Do you want JWT or sessions?" -> `question` tool (design decision)
 
 **Ask only useful, coherent, and effective questions:**
 Do not ask a question when only one answer is useful, coherent, and effective. For example, in an auth system with magic links and social logins:
@@ -192,20 +192,20 @@ No reasonably secure system would do either options #2 or #3. The way this quest
 **Before proposing approaches:**
 
 1. **Research existing patterns** - DON'T do this yourself:
-   - Dispatch codebase-investigator: "Find similar features and patterns used"
+   - Dispatch ed3d-codebase-investigator: "Find similar features and patterns used"
    - If similar feature exists, base one approach on that pattern
    - If no codebase pattern, use internet research: "Find recommended approaches for [problem]"
    - Review research findings before proposing
 
 2. **Then propose approaches:**
-   - Use TaskUpdate to mark Phase 2 as in_progress
+   - Use `todowrite` to mark Phase 2 as in_progress
    - Propose 2-3 different approaches based on research
    - At least one approach should follow codebase patterns (if they exist)
    - For each: Core architecture, trade-offs, complexity assessment
-   - **Use AskUserQuestion tool** to present approaches as structured choices
+   - **Use the `question` tool** to present approaches as structured choices
    - Mark Phase 2 as completed when approach is selected
 
-**Example using AskUserQuestion:**
+**Example using the `question` tool:**
 ```
 Question: "Which architectural approach should we use?"
 Options:
@@ -221,7 +221,7 @@ Options:
 
 ## Phase 3: Design Presentation
 
-- Use TaskUpdate to mark Phase 3 as in_progress
+- Use `todowrite` to mark Phase 3 as in_progress
 - Present in 200-300 word sections
 - Cover: Architecture, components, data flow, error handling, testing
 - **Use research agents if you need to verify technical details during presentation**
@@ -240,9 +240,9 @@ The distinction: contracts define boundaries between components. Implementation 
 
 ## Question Patterns
 
-### When to Use AskUserQuestion Tool
+### When to Use the question Tool
 
-**Use AskUserQuestion for:**
+**Use the `question` tool for:**
 - Phase 1: Clarifying questions with 2-4 clear options
 - Phase 2: Architectural approach selection (2-3 alternatives)
 - Any decision with distinct, mutually exclusive choices
@@ -263,12 +263,12 @@ The distinction: contracts define boundaries between components. Implementation 
 - When structured options would limit creative input
 
 **Example decision flow:**
-- "What authentication method?" -> Use AskUserQuestion (2-4 options)
+- "What authentication method?" -> Use the `question` tool (2-4 options)
 - "Does this design handle your use case?" -> Open-ended (validation)
 
 ### When to Use Research Agents
 
-**Use codebase-investigator for:**
+**Use ed3d-codebase-investigator for:**
 - "How is X implemented?" -> Agent finds and reports
 - "Where does Y live?" -> Agent locates files
 - "What pattern exists for Z?" -> Agent identifies pattern
@@ -319,7 +319,7 @@ These are violations of the skill requirements:
 | "Idea is simple, can skip exploring alternatives" | Always propose 2-3 approaches. Comparison reveals issues. |
 | "Partner knows what they want, can skip questions" | Questions reveal hidden constraints. Always ask. |
 | "I'll present whole design at once for efficiency" | Incremental validation catches problems early. |
-| "Checklist is just a suggestion" | Create task todos with TaskCreate. Track progress properly. |
+| "Checklist is just a suggestion" | Create task todos with `todowrite`. Track progress properly. |
 | "I can research this quickly myself" | Use agents or web tools. You'll hallucinate or consume excessive context. |
 | "Agent didn't find it on first try, must not exist" | Be persistent. Refine query and try again. |
 | "Partner said yes, done with brainstorming" | Design is in conversation. Next step is documentation. |
@@ -334,15 +334,15 @@ These are violations of the skill requirements:
 
 | Principle | Application |
 |-----------|-------------|
-| **One question at a time** | YOU MUST ask single questions in Phase 1, use AskUserQuestion for choices |
+| **One question at a time** | YOU MUST ask single questions in Phase 1, use the `question` tool for choices |
 | **Delegate research** | YOU MUST use agents or web tools for codebase and internet research, never do it yourself |
 | **Be persistent with research** | If search doesn't find answer, refine query and try again before asking user |
 | **Follow existing patterns** | If codebase pattern exists and is reasonable, design must follow it |
-| **Structured choices** | YOU MUST use AskUserQuestion tool for 2-4 options with trade-offs |
+| **Structured choices** | YOU MUST use the `question` tool for 2-4 options with trade-offs |
 | **YAGNI ruthlessly** | Remove unnecessary features from all designs |
 | **Explore alternatives** | YOU MUST propose 2-3 approaches before settling |
 | **Incremental validation** | Present design in sections, validate each - never all at once |
-| **Task tracking** | YOU MUST create task todos at start with TaskCreate, update with TaskUpdate as you progress (or TodoWrite in older versions) |
+| **Task tracking** | YOU MUST create task todos at start with `todowrite`, update them as you progress |
 | **Flexible progression** | Go backward when needed - flexibility > rigidity |
 | **Internet research matters** | Use research agents or web tools for external knowledge and current information |
 

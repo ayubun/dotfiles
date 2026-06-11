@@ -3,9 +3,9 @@ name: writing-opencode-directives
 description: Use when writing instructions that guide Claude behavior - skills, AGENTS.md files, agent prompts, system prompts. Covers token efficiency, compliance techniques, and discovery optimization.
 ---
 
-# Writing Claude Directives
+# Writing opencode Directives
 
-**REQUIRED:** Also apply ed3d-extending-opencode:prompt-security-hardening when using this skill. Directives that demonstrate unsafe secrets handling teach agents to leak secrets.
+**REQUIRED:** Also apply the prompt-security-hardening skill when using this skill. Directives that demonstrate unsafe secrets handling teach agents to leak secrets.
 
 ## Core Principles
 
@@ -88,7 +88,7 @@ Use structure to make compliance the path of least resistance:
 | Pattern | Example |
 |---------|---------|
 | Workflow steps | Numbered steps with verification gates |
-| Task tracking (TaskCreate/TaskUpdate) | Checklists without tracking = skipped steps (TodoWrite in older versions) |
+| Task tracking (`todowrite`) | Checklists without tracking = skipped steps |
 | Forced commitment | "Announce: I'm using [skill]" |
 | Explicit blocking | "If X happens, stop and do Y instead" |
 

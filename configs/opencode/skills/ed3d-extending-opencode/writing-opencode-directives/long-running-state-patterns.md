@@ -10,7 +10,7 @@ Long-running agents work in discrete sessions. Each new session starts without m
 
 ### Automatic Tools
 
-**Auto-Compact**: Triggers at ~95% context capacity. opencode summarizes history, preserving architectural decisions and unresolved bugs. Manually trigger with `/compact` at logical breakpoints.
+**Auto-Compact**: Triggers near context capacity. opencode summarizes history, preserving architectural decisions and unresolved bugs. Manually trigger with `/compact` at logical breakpoints.
 
 **Token Budget Awareness**: Claude 4.5+ receives updates on remaining context after tool calls. Enables better task persistence and strategy adjustment.
 
@@ -34,7 +34,7 @@ Long-running agents work in discrete sessions. Each new session starts without m
 Anthropic recommends combining git history with structured progress files:
 
 **Two-Agent Pattern**:
-1. **Initializer Agent** (first session): Sets up environment, creates `init.sh` and `claude-progress.txt`, makes initial commit
+1. **Initializer Agent** (first session): Sets up environment, creates `init.sh` and `agent-progress.txt`, makes initial commit
 2. **Coding Agent** (subsequent): Reads git history + progress files, works incrementally, commits with descriptive messages
 
 **Why This Works**: Fresh agents understand state quickly from git + progress file. Commits enable recovery. Progress tracking prevents premature completion.
@@ -102,7 +102,7 @@ Explicit feature lists prevent premature completion and duplicate work.
 
 ### Context Boundary Crossing
 
-**Manual Compact** (Recommended): At logical breakpoints, `/compact` then `/clear`. Start fresh on next feature.
+**Manual Compact** (Recommended): At logical breakpoints, `/compact` then start fresh on the next feature in a new session.
 
 **Memory Tool Preservation**: Before context limits, save state to memory files. Update AGENTS.md and progress file.
 
@@ -159,19 +159,19 @@ Session 4: Deployment verification
 
 **Session Branches**:
 ```bash
-git checkout -b claude-session/$(date +%s)
+git checkout -b agent-session/$(date +%s)
 # Merge on success, delete on failure
 ```
 
 **Checkpoint Stash**:
 ```bash
-git stash save "claude-checkpoint: $(date)"
+git stash save "agent-checkpoint: $(date)"
 ```
 
 ### opencode Checkpoints
 
-- Esc+Esc or `/rewind` opens checkpoint menu
-- Can restore conversation, code, or both
+- `/undo` reverts the last message and its file changes; repeat to step further back
+- `/redo` re-applies reverted steps
 - Bash commands (`rm`, `mv`) are not tracked
 
 ## Key Insights
@@ -197,7 +197,7 @@ These patterns consistently cause session failures:
 ## References
 
 - [Effective harnesses for long-running agents](https://www.anthropic.com/engineering/effective-harnesses-for-long-running-agents)
-- [opencode Best practices](https://www.anthropic.com/engineering/opencode-best-practices)
+- [Best practices for agentic coding](https://www.anthropic.com/engineering/claude-code-best-practices)
 - [Effective context engineering](https://www.anthropic.com/engineering/effective-context-engineering-for-ai-agents)
 - [claude-flow](https://github.com/ruvnet/claude-flow) - Multi-agent orchestration
 - [continuous-claude](https://github.com/AnandChowdhary/continuous-claude) - CI/CD loop pattern

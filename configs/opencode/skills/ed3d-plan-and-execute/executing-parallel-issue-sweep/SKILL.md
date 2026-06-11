@@ -1,13 +1,13 @@
 ---
 name: executing-parallel-issue-sweep
-description: Use when the user asks to address multiple independent issues (bugs OR feature tickets) in parallel - dispatches one opus implementor per issue in the background, then drives each issue's review/fix/PR loop independently as completions land, so issues iterate at their own pace instead of waiting at phase boundaries. Not for single issues or for issues that should land as one PR.
+description: Use when the user asks to address multiple independent issues (bugs OR feature tickets) in parallel - dispatches one opus implementor per issue in parallel, then drives each issue's review/fix/PR loop independently as completions land, so issues iterate at their own pace instead of waiting at phase boundaries. Not for single issues or for issues that should land as one PR.
 ---
 
 # Executing a Parallel Issue Sweep
 
 Run a coordinated sweep of several independent issues in one session.
 Each issue gets its own worktree, branch, and opus-powered implementor
-subagent. The orchestrator dispatches implementors in the background,
+subagent. The orchestrator dispatches implementors in parallel,
 then drives each issue's review/fix/PR pipeline independently as
 subagent completions arrive.
 
@@ -15,15 +15,16 @@ subagent completions arrive.
 opencode harness cannot dispatch their own subagents — the
 dispatch tool is reserved for the top-level orchestrator. To get
 true per-issue parallelism without nested dispatch, the orchestrator
-uses `run_in_background: true` on every subagent it dispatches and
-reacts to completion notifications, immediately advancing each
-issue's pipeline as its current step finishes.
+batches every `task` dispatch that is ready into a single message so
+they run in parallel, and reacts to completion notifications,
+immediately advancing each issue's pipeline as its current step
+finishes. It never polls or sleeps.
 
 **Why this shape:** A naive wave-based design ("dispatch all
 implementors, wait, dispatch all reviewers, wait, ...") forces issue
 A's cycle 3 to wait for issue B's cycle 1 at every phase boundary.
-Background dispatch + per-issue state tracking lets A and B advance at
-their own paces.
+Parallel non-blocking dispatch + per-issue state tracking lets A and B
+advance at their own paces.
 
 **Required reading before applying this skill:**
 - `using-git-worktrees` — worktree setup conventions
@@ -56,31 +57,32 @@ their own paces.
 ```
 Orchestrator
   │
-  ├── dispatch task-issue-implementor #A   (background)
-  ├── dispatch task-issue-implementor #B   (background)
-  ├── dispatch task-issue-implementor #C   (background)
+  ├── dispatch ed3d-task-issue-implementor #A   ┐
+  ├── dispatch ed3d-task-issue-implementor #B   ├ one message, parallel
+  ├── dispatch ed3d-task-issue-implementor #C   ┘
   │
   │   (completion of #A's implementor arrives)
   │
-  ├── dispatch code-reviewer #A            (background)
+  ├── dispatch ed3d-code-reviewer #A
   │   (completion of #B's implementor arrives)
-  ├── dispatch code-reviewer #B            (background)
+  ├── dispatch ed3d-code-reviewer #B
   │   (completion of #A's reviewer arrives — clean)
   ├── push #A; open draft PR #A
   │   (completion of #B's reviewer arrives — issues found)
-  ├── dispatch task-bug-fixer #B           (background)
+  ├── dispatch ed3d-task-bug-fixer #B
   │   (completion of #C's implementor arrives)
-  ├── dispatch code-reviewer #C            (background)
+  ├── dispatch ed3d-code-reviewer #C
   │   (completion of #B's bug-fixer arrives)
-  ├── dispatch code-reviewer #B (cycle 2)  (background)
+  ├── dispatch ed3d-code-reviewer #B (cycle 2)
   └── ... and so on, until every issue is at "done"
 ```
 
-Every dispatch is `run_in_background: true`. The orchestrator does NOT
-poll or sleep — the harness notifies on completion. The orchestrator's
-job between notifications is: track per-issue state, print the result
-of the just-completed subagent (for operator transparency), and decide
-what to dispatch next for that issue.
+Every dispatch is a `task` call; batch all dispatches that are ready
+into a single message so they run in parallel. The orchestrator does
+NOT poll or sleep — the harness notifies on completion. The
+orchestrator's job between notifications is: track per-issue state,
+print the result of the just-completed subagent (for operator
+transparency), and decide what to dispatch next for that issue.
 
 ## Per-issue state machine
 
@@ -93,9 +95,12 @@ implementing → reviewing → fixing → reviewing → fixing → reviewing →
                                                        escalation
 ```
 
-Track state in `TaskCreate` / `TaskUpdate` per issue. One task per
-issue, status field reflects current phase, metadata holds the latest
-agent ID and BASE_SHA/HEAD_SHA so the next dispatch knows what to do.
+Track state with `todowrite`, one todo per issue. The todo's status
+field tracks the overall lifecycle (`pending → in_progress →
+completed`); the fine-grained phase, cycle count, and BASE_SHA live in
+the todo's **content string** — todos have no metadata field, so
+encode everything the next dispatch needs directly in the content and
+rewrite it on every transition.
 
 **Three-strike rule:** If the same issues persist after three review
 cycles on one issue, STOP that issue's pipeline and escalate to the
@@ -117,7 +122,7 @@ operator. Don't auto-dispatch cycle 4. Other issues continue.
   - Environmental (only reproduces on a setup the operator can't drive).
   - Duplicates of each other.
 
-Use `AskUserQuestion` to lock the final set with the operator before
+Use the `question` tool to lock the final set with the operator before
 fanout.
 
 #### 1b. Look for shared root causes
@@ -157,34 +162,38 @@ One worktree per item. Convention:
 branch: claude/<prefix>-<id>-<short-slug>
 ```
 
-Create all worktrees in parallel (multiple Bash calls in one message).
+Create all worktrees in parallel (multiple bash calls in one message).
 
-### 3. Per-issue task tracking
+### 3. Per-issue todo tracking
 
-Create one task per issue via `TaskCreate`. Metadata schema:
+Create one todo per issue via `todowrite`. Since todos are flat
+`{content, status, priority}` items, encode the per-issue state in the
+content string and rewrite it on every transition:
 
 ```
-subject:   "Issue #N: <short title>"
-status:    pending → in_progress (implementing) → in_progress (reviewing) → ...
-metadata:
-  issue_num: 251
-  worktree:  /abs/path/.worktrees/bug-251-write-outputs
-  branch:    claude/bug-251-write-outputs
-  base_sha:  <sha at branch creation>
-  phase:     implementing | reviewing | fixing | done | escalated
-  cycle:     1..3
-  agent_id:  <id of currently-running subagent for this issue>
-  pending_findings: <reviewer output the bug-fixer needs>
+content:  "Issue #251: <short title> | phase=implementing | cycle=1 |
+           worktree=/abs/path/.worktrees/bug-251-write-outputs |
+           branch=claude/bug-251-write-outputs |
+           base_sha=<sha at branch creation> |
+           pending_findings=<reviewer output the bug-fixer needs, when fixing>"
+status:   pending → in_progress (while any pipeline step runs) → completed
+priority: medium
 ```
 
-Update on every state transition. After compaction, the task list is
+`phase` takes the values `implementing | reviewing | fixing | done |
+escalated`; `cycle` runs 1..3. Additionally, put the issue number and
+phase in every `task` call's `description` (e.g. "Issue #251: code
+review, cycle 2") so each completion notification self-identifies
+which issue and step it belongs to.
+
+Update on every state transition. After compaction, the todo list is
 the orchestrator's only memory of which issue is at which step.
 
-### 4. Initial dispatch: implementors in background
+### 4. Initial dispatch: implementors in parallel
 
-For each issue, dispatch `ed3d-plan-and-execute:task-issue-implementor`
-with `run_in_background: true`. **All dispatches in one message** so
-they start concurrently.
+For each issue, dispatch `ed3d-task-issue-implementor` via the `task` tool.
+**All dispatches in one message** so they start concurrently. Do not
+wait for one before dispatching the next.
 
 Dispatch prompt template (per-issue context only — the agent's own
 system prompt handles workflow defaults):
@@ -214,8 +223,10 @@ Other issues in this sweep also need <resource>. Skip <verification
 step>; the orchestrator will run it serially at the end.
 ```
 
-Mark the task as `in_progress` with `metadata.phase = "implementing"`
-and `metadata.agent_id = <id from dispatch return>`.
+Mark the issue's todo as `in_progress` and set `phase=implementing` in
+its content string. The dispatch `description` ("Issue #<n>:
+implement") is what ties the eventual completion notification back to
+this issue.
 
 ### 5. Drive the pipeline on completion
 
@@ -224,34 +235,37 @@ When a subagent completes, the harness notifies. Per the harness rules:
 
 For each completion notification:
 
-1. Look up which issue/phase the completed agent belongs to (use
-   `TaskList` + metadata).
+1. Look up which issue/phase the completed agent belongs to (the task
+   call's `description` names it; cross-check your todo list).
 2. **Print the agent's full response to the operator.** This is
    non-negotiable — without this the operator loses real-time
    visibility into their codebase.
 3. Decide the next dispatch based on `phase`:
 
 ```
-phase == "implementing"  →  dispatch code-reviewer (background)
-                            update task: phase=reviewing, cycle=1
+phase == "implementing"  →  dispatch ed3d-code-reviewer
+                            update todo: phase=reviewing, cycle=1
 
 phase == "reviewing"  →
     if zero issues:
         push branch
         open draft PR (use smite-pr or repo equivalent)
-        update task: phase=done
+        update todo: phase=done
     elif cycle == 3:
         escalate (do not auto-dispatch cycle 4)
-        update task: phase=escalated, surface to operator
+        update todo: phase=escalated, surface to operator
     else:
-        dispatch task-bug-fixer with findings (background)
-        update task: phase=fixing, pending_findings=<verbatim>
+        dispatch ed3d-task-bug-fixer with findings
+        update todo: phase=fixing, pending_findings=<verbatim>
 
-phase == "fixing"  →  dispatch code-reviewer with PRIOR_ISSUES (background)
-                      update task: phase=reviewing, cycle += 1
+phase == "fixing"  →  dispatch ed3d-code-reviewer with PRIOR_ISSUES
+                      update todo: phase=reviewing, cycle += 1
 ```
 
-Each dispatch is `run_in_background: true`. Return to waiting.
+Issue every next-step dispatch as a `task` call in the message where
+you react to the notification; if several issues are ready at once,
+batch their dispatches into that one message so they run in parallel.
+Then return to waiting for the next completion notification.
 
 ### 6. Push and draft PR
 
@@ -283,9 +297,9 @@ Final summary to the operator:
 ## Why nested dispatch was abandoned
 
 An earlier draft of this skill had each issue-owner subagent dispatch
-its own code-reviewer + bug-fixer subagents. Empirical testing
+its own ed3d-code-reviewer + bug-fixer subagents. Empirical testing
 confirmed that subagents in this opencode harness do NOT have
-access to the `Task` / `Agent` dispatch tool — the tool is reserved
+access to the `task` dispatch tool — the tool is reserved
 for the top-level orchestrator, presumably to keep the context tree
 shallow and bounded.
 
@@ -301,9 +315,9 @@ rather than reconstructed from a final cycle log.
 
 | Rationalization | Reality |
 |---|---|
-| "I'll dispatch all implementors, wait for ALL, then all reviewers" | That's wave-based. Slowest implementor gates the whole sweep. Use background dispatch + completion-driven advancement instead. |
-| "I'll poll the agent IDs every 30 seconds to check status" | No. The harness notifies on completion. Polling burns context and breaks the cache-warm window. |
-| "I'll skip the per-issue task tracking for small sweeps" | After 4+ in-flight issues you will lose track. The task list is the orchestrator's memory. |
+| "I'll dispatch all implementors, wait for ALL, then all reviewers" | That's wave-based. Slowest implementor gates the whole sweep. Use parallel non-blocking dispatch + completion-driven advancement instead. |
+| "I'll poll for subagent status every 30 seconds" | No. The harness notifies on completion. Polling burns context and breaks the cache-warm window. |
+| "I'll skip the per-issue todo tracking for small sweeps" | After 4+ in-flight issues you will lose track. The todo list is the orchestrator's memory. |
 | "I'll fix the issues myself instead of dispatching the bug-fixer" | The bug-fixer is fresh-context. You have orchestrator-context contamination. Dispatch it. |
 | "I'll just print a summary of the agent's output to save context" | Operator transparency requires verbatim. Summarize at the END, not mid-flight. |
 | "Three-strike fired but I think I see the fix — let me try cycle 4" | No. Three-strike is the architecture-question signal. Escalate. |
@@ -312,10 +326,10 @@ rather than reconstructed from a final cycle log.
 
 | Anti-pattern | Why it bites |
 |---|---|
-| Foreground dispatch of implementors (no background) | Loses parallelism; you can only have one implementor running at a time |
+| Serial dispatch of implementors (one per message, waiting on each) | Loses parallelism; you can only have one implementor running at a time |
 | Polling for agent status | Wastes context; harness already notifies on completion |
 | Summarizing subagent output instead of printing verbatim | Operator loses visibility; can't catch missed issues |
-| Skipping per-issue TaskCreate | After 5+ in-flight issues, you forget which is at which phase |
+| Skipping per-issue todos | After 5+ in-flight issues, you forget which is at which phase |
 | Auto-pushing non-draft PRs | Removes the operator's merge gate |
 | Same-resource parallelism without coordination | Container-name collisions break verification |
 | Fixing review issues yourself instead of dispatching bug-fixer | Mixes orchestrator concerns with fix concerns; loses fresh-context advantage |
@@ -324,20 +338,20 @@ rather than reconstructed from a final cycle log.
 
 | Phase | Who does the work | Tool |
 |---|---|---|
-| 1. Pre-flight (scope, conflicts, confirm) | Orchestrator | AskUserQuestion |
-| 2. Worktrees | Orchestrator | Bash (parallel) |
-| 3. Task tracking | Orchestrator | TaskCreate, TaskUpdate |
-| 4. Initial implementor dispatch | Orchestrator (`run_in_background`) | Agent → task-issue-implementor (opus) |
-| 5a. Implementor completion → reviewer | Orchestrator (`run_in_background`) | Agent → code-reviewer |
-| 5b. Reviewer completion → bug-fixer | Orchestrator (`run_in_background`) | Agent → task-bug-fixer |
-| 5c. Reviewer completion (clean) → push + PR | Orchestrator | Bash + smite-pr (or gh pr create) |
+| 1. Pre-flight (scope, conflicts, confirm) | Orchestrator | `question` |
+| 2. Worktrees | Orchestrator | bash (parallel) |
+| 3. Todo tracking | Orchestrator | todowrite |
+| 4. Initial implementor dispatch | Orchestrator (parallel `task` calls, one message) | task → ed3d-task-issue-implementor (opus) |
+| 5a. Implementor completion → reviewer | Orchestrator (`task` call on notification) | task → ed3d-code-reviewer |
+| 5b. Reviewer completion → bug-fixer | Orchestrator (`task` call on notification) | task → ed3d-task-bug-fixer |
+| 5c. Reviewer completion (clean) → push + PR | Orchestrator | bash + smite-pr (or gh pr create) |
 | 6. Synthesis | Orchestrator | (text output) |
 
 ## When this fails
 
 If the orchestrator's context fills before the sweep finishes — typically
 on sweeps larger than ~6 issues with 2+ cycles each — checkpoint with
-the operator. The task list + the PR list (for already-completed issues)
+the operator. The todo list + the PR list (for already-completed issues)
 is enough state to resume in a fresh session.
 
 If specific issues escalate via three-strike, surface them prominently
