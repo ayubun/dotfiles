@@ -9,5 +9,6 @@
   "instructions": [
     "~/dotfiles/configs/agents.md",
     "~/work/AGENTS.md"
-  ]
+  ],
+  "permission": "allow"
 }
