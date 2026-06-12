@@ -10,5 +10,8 @@
     "~/dotfiles/configs/agents.md",
     "~/work/AGENTS.md"
   ],
-  "permission": "allow"
+  "permission": {
+    "*": "allow",
+    "external_directory": "allow"
+  }
 }
