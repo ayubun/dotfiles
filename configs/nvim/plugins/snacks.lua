@@ -11,6 +11,8 @@ return {
         },
       },
       sources = {
+        files = { hidden = true },
+        grep = { hidden = true },
         explorer = {
           diagnostics = false,
           diagnostics_open = false,
