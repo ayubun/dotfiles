@@ -41,21 +41,22 @@ alt-f4 = 'close'
 
 alt-shift-c = 'reload-config'
 
-alt-l = '''exec-and-forget osascript -e '
-tell application "System Events"
-    keystroke "q" using {control down, command down}
-end tell'
-'''
 
 alt-left = 'focus left'
 alt-down = 'focus down'
 alt-up = 'focus up'
 alt-right = 'focus right'
 
-alt-h = 'focus left'
-alt-j = 'focus down'
-alt-k = 'focus up'
-
+# alt-h = 'focus left'
+# alt-j = 'focus down'
+# alt-k = 'focus up'
+#
+# alt-l = '''exec-and-forget osascript -e '
+# tell application "System Events"
+#     keystroke "q" using {control down, command down}
+# end tell'
+# '''
+#
 alt-shift-left = 'move left'
 alt-shift-down = 'move down'
 alt-shift-up = 'move up'
