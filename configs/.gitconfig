@@ -12,6 +12,9 @@
 [init]
   defaultBranch = main
 
+[merge]
+    conflictstyle = diff3
+
 [core]
   editor = vim
   excludesFile = ~/.global-gitignore
