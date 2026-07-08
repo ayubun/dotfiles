@@ -73,9 +73,12 @@ the first successful switch** (it is generated on first run) and after every
 
 - `cargo-subspace` was installed by the old `rust.sh` and is not in nixpkgs;
   install with `cargo install --locked cargo-subspace` if needed.
-- Only one node major (currently 22) is on PATH; the old nvm setup kept
-  18/20/22 installed side by side. Use `nix shell nixpkgs#nodejs_20` per
-  invocation or add more majors to `home.packages`.
+- `node` is LTS 22 (the old nvm default); other supported majors are
+  installed side by side with suffixed binaries (`node24`, `npm24`,
+  `npx24`) -- see `extraNodeMajors` in `nix/home.nix`. Unlike nvm, nixpkgs
+  does not carry EOL node majors (18 is removed, 20 is insecure-flagged),
+  so those are deliberately not installed; borrow one on demand with
+  `nix shell github:NixOS/nixpkgs/nixos-24.11#nodejs_20`.
 - The work devbox provides its own rust toolchain; per-project `nix develop`
   / direnv environments take PATH precedence over the home profile, so the
   toolchains coexist.

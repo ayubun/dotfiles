@@ -7,6 +7,22 @@ let
   link = path: config.lib.file.mkOutOfStoreSymlink "${dotfiles}/${path}";
 
   inherit (pkgs.stdenv) isDarwin isLinux;
+
+  # Side-by-side node majors, like nvm used to provide. `node` itself is the
+  # default LTS in home.packages below; each major listed here additionally
+  # gets suffixed binaries (node24, npm24, npx24). Entries are skipped (not
+  # fatal) once nixpkgs drops or insecure-marks an EOL major -- unlike nvm,
+  # nixpkgs doesn't carry end-of-life node: 18 is gone and 20 is flagged
+  # insecure already.
+  extraNodeMajors = [
+    { pkg = pkgs.nodejs_24 or null; suffix = "24"; }
+  ];
+  nodeAliases = lib.concatMap
+    ({ pkg, suffix }:
+      map
+        (bin: pkgs.writeShellScriptBin "${bin}${suffix}" ''exec "${pkg}/bin/${bin}" "$@"'')
+        [ "node" "npm" "npx" ])
+    (lib.filter (o: o.pkg != null && (builtins.tryEval o.pkg.outPath).success) extraNodeMajors);
 in
 {
   # Never change this after the first switch (it gates state migrations, not
@@ -57,8 +73,12 @@ in
     # prompt
     starship
 
-    # node -- replaces nvm + default-packages. Older LTS versions are a
-    # `nix shell nixpkgs#nodejs_20` away when needed.
+    # node -- replaces nvm + default-packages. `node` is LTS 22 (the old nvm
+    # default); other supported majors get suffixed binaries via nodeAliases
+    # above. EOL majors that nvm kept around (18, 20) are deliberately not
+    # installed; when a legacy project needs one, borrow it from an older
+    # nixpkgs release on demand:
+    #   nix shell github:NixOS/nixpkgs/nixos-24.11#nodejs_20
     nodejs_22
     yarn
 
@@ -80,11 +100,16 @@ in
     # misc toolchains
     bun
     uv
-  ] ++ lib.optionals isLinux [
+  ] ++ nodeAliases ++ lib.optionals isLinux [
     # X11 clipboard integration for nvim on remote boxes
     xsel
     xclip
   ];
+
+  # npm i -g needs a writable prefix now that node lives in the read-only
+  # nix store (nvm previously pointed npm at per-version directories)
+  home.sessionVariables.NPM_CONFIG_PREFIX = "${config.home.homeDirectory}/.npm-global";
+  home.sessionPath = [ "${config.home.homeDirectory}/.npm-global/bin" ];
 
   # Dotfile symlinks -- replaces the `configs/` symlink loop in install.sh.
   home.file = {
