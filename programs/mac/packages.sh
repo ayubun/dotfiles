@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Brew packages for macOS. Brew handles its own download parallelism and
-# dependency resolution, so we just iterate and let it do its thing.
+# Brew handles macOS GUI apps (casks) and the odd source-built formula only.
+# All CLI formulae (bat, ripgrep, lazygit, neovim, etc.) are managed by
+# home-manager -- see nix/home.nix.
 
 casks=(
   docker
@@ -17,34 +18,6 @@ casks=(
   batfi
   steam
   nikitabobko/tap/aerospace
-)
-
-formulae=(
-  kubectl
-  nano
-  neofetch # TODO: switch off neofetch
-  onefetch
-  fastfetch
-  htop
-  btop
-  gcc
-  grpcurl # https://github.com/fullstorydev/grpcurl
-  bat
-  difftastic
-  neovim
-  httpie
-  ripgrep
-  python@3.12
-  jesseduffield/lazygit/lazygit
-  fd
-  wireguard-tools
-  lsd # https://github.com/lsd-rs/lsd
-  python
-  pipx
-  tlrc # https://github.com/tldr-pages/tlrc
-  ncdu
-  dive # https://github.com/wagoodman/dive
-  cloudflared
 )
 
 # Formulae that must be compiled from source (no bottles available)
@@ -74,32 +47,13 @@ eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null
 echo "Fetching casks..."
 brew fetch --force --cask "${casks[@]}"
 
-echo "Fetching formulae..."
-for pkg in "${formulae[@]}"; do
-  brew fetch --force "$pkg"
-done
-
 echo "Installing casks..."
 brew install --cask --force "${casks[@]}"
-
-echo "Installing formulae..."
-for pkg in "${formulae[@]}"; do
-  brew install --force-bottle "$pkg"
-done
 
 echo "Installing source formulae..."
 for pkg in "${source_formulae[@]}"; do
   brew install "$pkg"
 done
 
-# AeroSpace tiling window manager config
-rm -f ~/.aerospace.toml
-ln -s ~/dotfiles/configs/.aerospace.toml ~/.aerospace.toml
-
 echo ""
 echo "All done~ (* ・ｖ・)"
-
-# https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#user-config
-mkdir -p ~/Library/Application\ Support/lazygit
-rm -f ~/Library/Application\ Support/lazygit/config.yml
-ln -s ~/dotfiles/configs/lazygit/config.yml ~/Library/Application\ Support/lazygit/config.yml

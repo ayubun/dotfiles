@@ -359,21 +359,10 @@ fi
 
 echo ""
 
-find $DOTFILES_FOLDER/configs -maxdepth 1 -mindepth 1 -type f \( -name ".*" -o -name "personalize" \) -print |
-  while read file; do
-    file=$(basename ${file})
-    echo "${RESET}${YELLOW_TEXT}[${BOLD}Dotfiles${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Symlinking ${UNDERLINE}${file}${RESET}"
-    rm -rf $HOME/$file
-    ln -s $DOTFILES_FOLDER/configs/$file $HOME/$file
-  done
-
-# Symlink ghostty config for mac
-if [[ "$OSTYPE" == "darwin"* ]]; then
-  echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Ghostty${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring default Ghostty config${RESET}"
-  rm -rf ${HOME}/.config/ghostty/config
-  mkdir -p ${HOME}/.config/ghostty
-  ln -s $DOTFILES_FOLDER/configs/ghostty/config ${HOME}/.config/ghostty/config
-fi
+# Dotfile symlinks (~/.zshrc, ~/.tmux.conf, ghostty, starship, lsd, lazygit,
+# etc.) are managed declaratively by home-manager -- see nix/home.nix. The
+# dependencies phase above (dependencies/nix-and-home-manager.sh) has already
+# applied them by this point.
 
 # applying keuboard settings for for mac
 if [[ "$OSTYPE" == "darwin"* ]]; then

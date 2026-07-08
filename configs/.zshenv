@@ -24,6 +24,19 @@ if [ -f "$DOTFILES_FOLDER/configs/dependencies/functions.sh" ]; then
   source "$DOTFILES_FOLDER/configs/dependencies/functions.sh"
 fi
 
+# Nix -- most CLI tools come from the home-manager profile (see nix/home.nix).
+# Sourced before the PATH section below so local bins still take precedence.
+if [ -e "$HOME/.nix-profile/etc/profile.d/nix.sh" ]; then
+  # single-user layout
+  . "$HOME/.nix-profile/etc/profile.d/nix.sh"
+elif [ -e /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh ]; then
+  # multi-user (daemon) layout
+  . /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh
+fi
+if [ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ]; then
+  . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+fi
+
 # PATHs
 
 # opencode
