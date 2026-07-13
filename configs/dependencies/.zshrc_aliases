@@ -5,11 +5,12 @@ unalias cat &>/dev/null
 alias truecat=$(which cat)
 which bat &> /dev/null
 if [ $? -eq 0 ]; then
-  alias cat="bat"
+  alias cat="bat -p"
 else
   which batcat &> /dev/null
   if [ $? -eq 0 ]; then
-    alias cat="batcat"
+    alias bat="batcat"
+    alias cat="batcat -p"
   else
     echo 'bat could not be found on this system (cat will remain unaliased)'
   fi
