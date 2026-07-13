@@ -121,6 +121,71 @@ get_arch() {
     esac
 }
 
+# resolve a github token from env or the gh cli, empty if none available
+# never echoed to logs; only captured into curl auth headers by callers
+gh_token() {
+    if [[ -n "${GITHUB_TOKEN:-}" ]]; then printf '%s' "${GITHUB_TOKEN}"; return 0; fi
+    if [[ -n "${GH_TOKEN:-}" ]]; then printf '%s' "${GH_TOKEN}"; return 0; fi
+    # when install.sh runs as root, gh's config lives under the original user
+    if [[ "$(id -u)" -eq 0 && -n "${ORIGINAL_USER:-}" && "${ORIGINAL_USER}" != "root" ]]; then
+        sudo -u "${ORIGINAL_USER}" -H gh auth token 2>/dev/null || true
+    elif command -v gh >/dev/null 2>&1; then
+        gh auth token 2>/dev/null || true
+    fi
+}
+
+# echo the latest release version (no leading v) for owner/repo, or fail loudly
+# dodges the 60/hr unauth api limit: prefers authenticated gh, else the
+# github.com tag redirect, which is a plain redirect and not the metered api
+gh_latest_version() {
+    local repo="$1" ver=""
+    if [[ -z "$repo" ]]; then
+        echo "gh_latest_version: usage: gh_latest_version <owner/repo>" >&2
+        return 2
+    fi
+    # gh api prints its error body to stdout and exits nonzero on 404/ratelimit,
+    # so reset ver on failure or we'd treat the error json as a version
+    if command -v gh >/dev/null 2>&1; then
+        ver=$(gh api "repos/${repo}/releases/latest" --jq '.tag_name' 2>/dev/null) || ver=""
+    fi
+    if [[ -z "$ver" || "$ver" == "null" ]]; then
+        local token; token="$(gh_token)"
+        local -a auth=()
+        [[ -n "$token" ]] && auth=(-H "Authorization: Bearer ${token}")
+        ver=$(curl -fsSI "${auth[@]}" "https://github.com/${repo}/releases/latest" 2>/dev/null \
+                | grep -i '^location:' | sed -E 's#.*/tag/v?([^[:space:]]+).*#\1#' | tr -d '\r')
+    fi
+    ver="${ver#v}"
+    if [[ -z "$ver" ]]; then
+        echo "gh_latest_version: could not resolve latest release for ${repo}" >&2
+        return 1
+    fi
+    printf '%s\n' "$ver"
+}
+
+# download a url to a file with auth, retries, and hard failure on any error
+# usage: gh_download <url> <dest>
+gh_download() {
+    local url="$1" dest="$2"
+    if [[ -z "$url" || -z "$dest" ]]; then
+        echo "gh_download: usage: gh_download <url> <dest>" >&2
+        return 2
+    fi
+    local token; token="$(gh_token)"
+    local -a auth=()
+    # curl strips this header on cross-host redirects (the release cdn), so it
+    # only ever reaches api/github.com where it lifts the rate limit
+    [[ -n "$token" ]] && auth=(-H "Authorization: Bearer ${token}")
+    if ! curl -fsSL --retry 3 --retry-delay 2 "${auth[@]}" -o "$dest" "$url"; then
+        echo "gh_download: failed to download ${url}" >&2
+        return 1
+    fi
+    if [[ ! -s "$dest" ]]; then
+        echo "gh_download: downloaded empty file from ${url}" >&2
+        return 1
+    fi
+}
+
 # Export all functions for use in child scripts
 export -f run_script_parallel
 export -f unlock-apt
@@ -130,6 +195,9 @@ export -f safer-apt-fast
 export -f safer-add-apt-repository
 export -f safe_tput
 export -f get_arch
+export -f gh_token
+export -f gh_latest_version
+export -f gh_download
 
 # Set up environment variables if not already set
 if [[ -z "$DOTFILES_FOLDER" ]]; then

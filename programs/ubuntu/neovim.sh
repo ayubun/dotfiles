@@ -14,10 +14,11 @@ cd "$TMP_DIR"
 ARCH=$(get_arch)
 rm -rf ./nvim-linux-${ARCH}.tar.gz
 
-curl -L "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCH}.tar.gz" | tar -xz
-sudo mv -f ./nvim-linux-${ARCH}/bin/nvim /usr/local/bin
-sudo mv -f ./nvim-linux-${ARCH}/lib/nvim /usr/local/lib
-sudo mv -f ./nvim-linux-${ARCH}/share/nvim /usr/local/share
+gh_download "https://github.com/neovim/neovim/releases/latest/download/nvim-linux-${ARCH}.tar.gz" "nvim-linux-${ARCH}.tar.gz" || exit 1
+tar -xzf "nvim-linux-${ARCH}.tar.gz" || exit 1
+sudo mv -f ./nvim-linux-${ARCH}/bin/nvim /usr/local/bin || exit 1
+sudo mv -f ./nvim-linux-${ARCH}/lib/nvim /usr/local/lib || exit 1
+sudo mv -f ./nvim-linux-${ARCH}/share/nvim /usr/local/share || exit 1
 
 # Ensure all users can read and execute
 sudo chmod 755 /usr/local/bin/nvim

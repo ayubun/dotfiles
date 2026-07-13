@@ -12,11 +12,11 @@ fi
 
 cd "$TMP_DIR"
 
-LAZYGIT_VERSION=$(curl -s "https://api.github.com/repos/jesseduffield/lazygit/releases/latest" | grep -Po '"tag_name": "v\K[^"]*')
+LAZYGIT_VERSION=$(gh_latest_version jesseduffield/lazygit) || exit 1
 ARCH=$(get_arch)
-curl -Lo lazygit.tar.gz "https://github.com/jesseduffield/lazygit/releases/latest/download/lazygit_${LAZYGIT_VERSION}_Linux_${ARCH}.tar.gz"
-tar xf lazygit.tar.gz lazygit
-sudo install lazygit /usr/local/bin
+gh_download "https://github.com/jesseduffield/lazygit/releases/download/v${LAZYGIT_VERSION}/lazygit_${LAZYGIT_VERSION}_Linux_${ARCH}.tar.gz" lazygit.tar.gz || exit 1
+tar xf lazygit.tar.gz lazygit || exit 1
+sudo install lazygit /usr/local/bin || exit 1
 
 # https://github.com/jesseduffield/lazygit/blob/master/docs/Config.md#user-config
 rm -f ~/.config/lazygit/config.yml &>/dev/null

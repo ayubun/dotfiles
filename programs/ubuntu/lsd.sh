@@ -13,8 +13,9 @@ cd "$TMP_DIR"
 # https://github.com/lsd-rs/lsd/releases
 VERSION=1.2.0
 ARCH=$(get_arch)
-curl -L "https://github.com/lsd-rs/lsd/releases/download/v${VERSION}/lsd-v${VERSION}-${ARCH}-unknown-linux-gnu.tar.gz" | tar xz
-sudo mv -f "lsd-v${VERSION}-${ARCH}-unknown-linux-gnu/lsd" /usr/bin/
+gh_download "https://github.com/lsd-rs/lsd/releases/download/v${VERSION}/lsd-v${VERSION}-${ARCH}-unknown-linux-gnu.tar.gz" lsd.tar.gz || exit 1
+tar -xzf lsd.tar.gz || exit 1
+sudo mv -f "lsd-v${VERSION}-${ARCH}-unknown-linux-gnu/lsd" /usr/bin/ || exit 1
 
 cd ../
 # Clean up if we used system tmp

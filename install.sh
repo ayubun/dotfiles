@@ -162,6 +162,20 @@ touch "$FAILURE_LOG"
 # Load shared dependencies
 source "$DOTFILES_FOLDER/dependencies/shared-functions.sh"
 
+# authenticate github calls for every installer (60/hr unauth -> 5000/hr) so
+# release lookups/downloads don't silently rate-limit. child scripts inherit
+# this via the environment; falls back to unauth + tag-redirects if absent
+if [[ -z "${GH_TOKEN:-}" && -z "${GITHUB_TOKEN:-}" ]]; then
+  _gh_tok="$(gh_token)"
+  if [[ -n "$_gh_tok" ]]; then
+    export GH_TOKEN="$_gh_tok"
+    echo -e "${RESET}${YELLOW_TEXT}[${BOLD}GitHub${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${GREEN_TEXT} authenticated api calls (5000/hr)${RESET}"
+  else
+    echo -e "${RESET}${YELLOW_TEXT}[${BOLD}GitHub${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} no gh token found; api calls stay unauthenticated (60/hr)${RESET}"
+  fi
+  unset _gh_tok
+fi
+
 # Function to run a script with proper error tracking and persistent logging
 # this will consume status codes and always return 0
 run_script() {

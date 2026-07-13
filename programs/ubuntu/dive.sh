@@ -25,9 +25,16 @@ fi
 
 fix-apt
 
-DIVE_VERSION=$(curl -sL "https://api.github.com/repos/wagoodman/dive/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v([^"]+)".*/\1/') || true
-curl -fOL "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/dive_${DIVE_VERSION}_linux_amd64.deb" || true
-safer-apt-fast install ./dive_${DIVE_VERSION}_linux_amd64.deb || true
+# rc-guarded so a failure still falls through to the apt-lock release below
+# (a bare exit would leave the lock held and deadlock later apt scripts)
+rc=0
+DIVE_VERSION=$(gh_latest_version wagoodman/dive) || rc=1
+if [[ $rc -eq 0 ]]; then
+  ARCH=$(get_arch deb)
+  DIVE_DEB="dive_${DIVE_VERSION}_linux_${ARCH}.deb"
+  gh_download "https://github.com/wagoodman/dive/releases/download/v${DIVE_VERSION}/${DIVE_DEB}" "$DIVE_DEB" \
+    && safer-apt-fast install "./${DIVE_DEB}" || rc=1
+fi
 
 
 cd "$CURRENT_DIR"
@@ -41,4 +48,6 @@ fi
 if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
     rm -rf "$TMP_DIR"
 fi
+
+exit $rc
 

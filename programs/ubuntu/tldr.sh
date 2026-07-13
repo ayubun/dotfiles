@@ -15,8 +15,9 @@ VERSION=1.11.1
 ARCH=$(get_arch)
 mkdir -p tldr/
 cd tldr/
-curl -L "https://github.com/tldr-pages/tlrc/releases/download/v${VERSION}/tlrc-v${VERSION}-${ARCH}-unknown-linux-musl.tar.gz" | tar xz
-sudo mv -f ./tldr /usr/bin/
+gh_download "https://github.com/tldr-pages/tlrc/releases/download/v${VERSION}/tlrc-v${VERSION}-${ARCH}-unknown-linux-musl.tar.gz" tlrc.tar.gz || exit 1
+tar -xzf tlrc.tar.gz || exit 1
+sudo mv -f ./tldr /usr/bin/ || exit 1
 cd ../../
 
 # Clean up if we used system tmp

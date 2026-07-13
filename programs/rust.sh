@@ -26,7 +26,8 @@ install_rust_analyzer() {
         RA_TARGET="x86_64-unknown-linux-gnu"
     fi
     mkdir -p "$HOME/.cargo/bin"
-    curl -L "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-${RA_TARGET}.gz" | gunzip -c - > "$HOME/.cargo/bin/rust-analyzer"
+    gh_download "https://github.com/rust-lang/rust-analyzer/releases/latest/download/rust-analyzer-${RA_TARGET}.gz" "$HOME/.cargo/bin/rust-analyzer.gz" || return 1
+    gunzip -f "$HOME/.cargo/bin/rust-analyzer.gz" || return 1
     chmod +x "$HOME/.cargo/bin/rust-analyzer"
 }
 
