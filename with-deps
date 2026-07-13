@@ -93,6 +93,10 @@ fi
 # Set up basic environment variables for better compatibility
 export DOTFILES_FOLDER="$SCRIPT_DIR"
 
+# skip re-running an already-done dep bootstrap when running a single script
+# the os dep scripts honor this; install.sh never sets it so fresh installs still bootstrap
+export DOTFILES_SKIP_SATISFIED_DEPS=1
+
 # Set up tracking for script execution
 SCRIPT_FAILURE_LOG="$SCRIPT_DIR/tmp/with-deps-failed-scripts.log"
 SCRIPT_SUCCESS_LOG="$SCRIPT_DIR/tmp/with-deps-success-scripts.log"
