@@ -4,6 +4,13 @@
 mkdir $HOME/.local/bin &>/dev/null
 mkdir $HOME/.local/man &>/dev/null
 
+# skip the slow brew reinstall + update/upgrade when brew is already set up
+# a fresh machine (no brew yet) still falls through to the full bootstrap below
+if [[ -n "${DOTFILES_SKIP_SATISFIED_DEPS:-}" ]] && command -v brew >/dev/null 2>&1; then
+    echo "homebrew already set up; skipping bootstrap"
+    exit 0
+fi
+
 # This install script works on both MacOS and Linux, but I moved it to a mac-specific
 # installation path in order to move away from multiple package managers on a single OS.
 
