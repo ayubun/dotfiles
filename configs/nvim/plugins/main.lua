@@ -16,9 +16,32 @@ return {
     --   end, 100)
     -- end,
     config = function()
+      local notified_missing_tooling = false
+
+      local function rust_analyzer_command()
+        local missing = vim.tbl_filter(function(command)
+          return vim.fn.executable(command) ~= 1
+        end, { "cargo", "rustc", "cargo-subspace", "rust-analyzer" })
+
+        if #missing > 0 then
+          if not notified_missing_tooling then
+            vim.schedule(function()
+              vim.notify("rust tooling unavailable: missing " .. table.concat(missing, ", "), vim.log.levels.ERROR)
+            end)
+            notified_missing_tooling = true
+          end
+          return { "rust-tooling-unavailable" }
+        end
+
+        notified_missing_tooling = false
+        local rustaceanvim = require("rustaceanvim.config.internal")
+        return { vim.fn.exepath("rust-analyzer"), "--log-file", rustaceanvim.server.logfile }
+      end
+
       vim.g.rustaceanvim = {
         tools = {},
         server = {
+          cmd = rust_analyzer_command,
           -- on_attach = function(client, bufnr)
           --   setup_keybindings()
           -- end,
