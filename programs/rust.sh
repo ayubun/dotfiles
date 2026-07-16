@@ -40,7 +40,7 @@ install_cargo_extensions() {
         cargo install --locked tree-sitter-cli || true
         # https://github.com/ethowitz/cargo-subspace
         # helps keep large cargo projects lazy-loading with rust-analyzer
-        cargo install --locked cargo-subspace --force || true
+        cargo install --locked --git https://github.com/ethowitz/cargo-subspace --rev e2716a014835d23a9036f647da294e587a4a6f4a cargo-subspace --force || true
     else
         echo "WARNING: cargo not found in PATH, skipping cargo extensions"
     fi
