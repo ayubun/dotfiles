@@ -16,15 +16,15 @@ return {
         explorer = {
           diagnostics = false,
           diagnostics_open = false,
+          win = {
+            list = {
+              keys = {
+                ["<c-g>"] = { "tcd", desc = "change cwd" },
+              },
+            },
+          },
           -- git_status = false,
           -- git_status_open = false,
-          -- win = {
-          --   list = {
-          --     keys = {
-          --
-          --     },
-          --   },
-          -- },
         },
       },
     },
@@ -42,4 +42,3 @@ return {
 -- 		explorer_pickers[1]:focus()
 -- 	end
 -- end },
-
