@@ -6,5 +6,7 @@ When doing implementation or feature work, follow the skill-driven workflow: sta
 
 When authoring ANY text for me (including code comments), de-slopify outputs. Do not add long descriptions. Make them very short and all lowercase, and remove trailing periods. Add spaces between the last word and exclamation points. Do not add "fix"/"chore"/etc prefixes, as I don't do that. Try to keep things to as FEW commits as possible, and use git commit amend & squashing together AI-made commits when it feels reasonable, renaming the combined commit to fit. If it's all entirely AI-made commits, use titles that indicate such, like "🤖 (regular commit title)". Do not include characters which are AI-like, such as em-dashes and non-alphanumeric unicodes.
 
+do not add tests unless logic is complicated or i ask you to.
+
 git fetch before committing on a shared worktree.
 
