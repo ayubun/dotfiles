@@ -63,21 +63,21 @@ SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 # Validate and resolve all script paths
 RESOLVED_SCRIPTS=()
 for script_path in "${SCRIPT_PATHS[@]}"; do
-    if [[ ! -f "$script_path" ]]; then
-        # Try relative to dotfiles directory
-        if [[ -f "$SCRIPT_DIR/$script_path" ]]; then
-            RESOLVED_SCRIPTS+=("$SCRIPT_DIR/$script_path")
-        else
-            echo "Error: Script not found: $script_path"
-            exit 1
-        fi
+    if [[ -f "$script_path" ]]; then
+        resolved="$script_path"
+    elif [[ -f "$SCRIPT_DIR/$script_path" ]]; then
+        # fall back to a path relative to the dotfiles directory
+        resolved="$SCRIPT_DIR/$script_path"
     else
-        RESOLVED_SCRIPTS+=("$script_path")
+        echo "Error: Script not found: $script_path"
+        exit 1
     fi
+    RESOLVED_SCRIPTS+=("$resolved")
     
-    # Make script executable if it isn't
-    if [[ ! -x "${RESOLVED_SCRIPTS[-1]}" ]]; then
-        chmod +x "${RESOLVED_SCRIPTS[-1]}" 2>/dev/null || true
+    # make it executable if needed. avoid ${arr[-1]}: stock macos bash 3.2
+    # rejects negative subscripts ("bad array subscript")
+    if [[ ! -x "$resolved" ]]; then
+        chmod +x "$resolved" 2>/dev/null || true
     fi
 done
 
