@@ -333,42 +333,17 @@ fi
 
 echo ""
 
-# for non-mac, we want all the remote servers to auto update
-if ! [[ "$OSTYPE" == "darwin"* ]]; then
-  echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring dotfiles auto-updater${RESET}"
-  RELATIVE_SCRIPT_PATH=updaters/dotfiles.sh
-  SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
+echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring repository auto-updater${RESET}"
+RELATIVE_SCRIPT_PATH=updaters/all.sh
+SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
+CRON_LOG=${HOME}/dotfiles/logs/repo-updater/cron.log
+CRON_LINE="* * * * * PATH=/usr/bin:/bin:/usr/sbin:/sbin HOME=${HOME} /bin/bash ${SCRIPT_PATH} >>${CRON_LOG} 2>&1"
+mkdir -p "$(dirname "$CRON_LOG")"
 
-  if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-      # Run as original user using sudo -u
-      sudo -u "$ORIGINAL_USER" -H bash -c "crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null"
-      sudo -u "$ORIGINAL_USER" -H bash -c "(crontab -l 2>/dev/null; echo \"0 4 * * * ${SCRIPT_PATH}\") | crontab -"
-      # maybe could replace with this oneline?: (crontab -l ; echo "0 * * * * your_command") | sort - | uniq - | crontab -
-  else
-      echo "${RESET}${RED_TEXT}${BOLD}⚠️WARNING: Because install.sh was run as a root user (no original user), the auto-updater cron will be added to the root crontab${RESET}"
-      # Remove any existing entry in the crontab
-      sudo crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | sudo crontab - &>/dev/null
-      # Add updater to crontab
-      (sudo crontab -l 2>/dev/null; echo "0 4 * * * ${SCRIPT_PATH}") | sudo crontab -
-  fi
-  if [ -f $HOME/work/.zshrc_aliases ]; then
-    echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring ~/work auto-updater${RESET}"
-    RELATIVE_SCRIPT_PATH=updaters/work.sh
-    SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
-
-    if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
-        # Run as original user using sudo -u
-        sudo -u "$ORIGINAL_USER" -H bash -c "crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | crontab - &>/dev/null"
-        sudo -u "$ORIGINAL_USER" -H bash -c "(crontab -l 2>/dev/null; echo \"0 4 * * * ${SCRIPT_PATH}\") | crontab -"
-        # maybe could replace with this oneline?: (crontab -l ; echo "0 * * * * your_command") | sort - | uniq - | crontab -
-    else
-        echo "${RESET}${RED_TEXT}${BOLD}⚠️WARNING: Because install.sh was run as a root user (no original user), the auto-updater cron will be added to the root crontab${RESET}"
-        # Remove any existing entry in the crontab
-        sudo crontab -l | grep -v $RELATIVE_SCRIPT_PATH  | sudo crontab - &>/dev/null
-        # Add updater to crontab
-        (sudo crontab -l 2>/dev/null; echo "0 4 * * * ${SCRIPT_PATH}") | sudo crontab -
-    fi
-  fi
+if [[ -n "$ORIGINAL_USER" && "$ORIGINAL_USER" != "root" ]]; then
+  sudo -u "$ORIGINAL_USER" -H bash -c "(crontab -l 2>/dev/null | grep -v '/updaters/'; printf '%s\\n' '$CRON_LINE') | crontab -"
+else
+  (sudo crontab -l 2>/dev/null | grep -v '/updaters/'; printf '%s\n' "$CRON_LINE") | sudo crontab -
 fi
 
 echo ""
@@ -511,4 +486,3 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
     echo ""
   fi
 fi
-

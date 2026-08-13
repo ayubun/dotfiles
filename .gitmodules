@@ -1,3 +1,0 @@
-[submodule "configs/opencode/sources/ed3d-plugins-hailz"]
-	path = configs/dependencies/skills-sources
-	url = git@github.com:haileyok/ed3d-plugins-hailz.git
