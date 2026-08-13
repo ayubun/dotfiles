@@ -30,7 +30,10 @@ ensure_repo() {
 }
 
 ensure_repo "ai-brain" "$HOME/ai-brain" true || exit 1
-ensure_repo "ai-brain-discord" "$HOME/ai-brain-discord" false
+personal_only_marker="${AI_BRAIN_PERSONAL_ONLY_MARKER:-$HOME/.config/ai-brain/personal-only}"
+if [[ ! -e "$personal_only_marker" ]]; then
+  ensure_repo "ai-brain-discord" "$HOME/ai-brain-discord" false
+fi
 
 work_link="$HOME/ai-brain/work"
 work_target="../ai-brain-discord"

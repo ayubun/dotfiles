@@ -237,7 +237,11 @@ update_repo() {
   exit 1
 }
 
-while IFS='|' read -r name repo; do
+while IFS='|' read -r name repo mode; do
   [[ -n "$name" && "${name:0:1}" != "#" ]] || continue
+  expanded_repo="${repo/#\~/$HOME}"
+  if [[ "$mode" == "optional" && ! -d "$expanded_repo" ]]; then
+    continue
+  fi
   update_repo "$name" "$repo"
 done <"$CONFIG"

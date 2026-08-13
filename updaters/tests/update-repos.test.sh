@@ -180,6 +180,16 @@ test_stale_lock_recovers() {
   [[ ! -e "$root/state/.lock" ]] || fail "stale lock was not removed"
 }
 
+test_optional_missing_repo_is_ignored() {
+  local root="$TEST_ROOT/optional"
+  mkdir -p "$root/state" "$root/logs"
+  printf 'optional|%s|optional\n' "$root/missing" >"$root/repos.conf"
+
+  run_updater "$root" 100
+
+  [[ ! -e "$root/state/optional.transition" ]] || fail "optional missing repo was recorded as blocked"
+}
+
 test_clean_fast_forward
 test_activity_and_recovery
 test_ahead_branch_blocks
@@ -187,5 +197,6 @@ test_diverged_branch_blocks
 test_detached_head_blocks
 test_conflicted_merge_blocks
 test_stale_lock_recovers
+test_optional_missing_repo_is_ignored
 
 printf 'ok\n'
