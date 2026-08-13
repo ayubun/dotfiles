@@ -241,6 +241,8 @@ while IFS='|' read -r name repo mode; do
   [[ -n "$name" && "${name:0:1}" != "#" ]] || continue
   expanded_repo="${repo/#\~/$HOME}"
   if [[ "$mode" == "optional" ]] && ! git -C "$expanded_repo" rev-parse --git-dir >/dev/null 2>&1; then
+    optional_state_prefix="$STATE_ROOT/$(safe_name "$name")"
+    rm -f "$optional_state_prefix.state" "$optional_state_prefix.transition"
     continue
   fi
   update_repo "$name" "$repo"

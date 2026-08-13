@@ -187,10 +187,14 @@ test_optional_missing_repo_is_ignored() {
     printf 'missing|%s|optional\n' "$root/missing"
     printf 'directory|%s|optional\n' "$root/not-a-repo"
   } >"$root/repos.conf"
+  touch "$root/state/missing.state" "$root/state/missing.transition"
+  touch "$root/state/directory.state" "$root/state/directory.transition"
 
   run_updater "$root" 100
 
+  [[ ! -e "$root/state/missing.state" ]] || fail "optional missing repo retained stale state"
   [[ ! -e "$root/state/missing.transition" ]] || fail "optional missing repo was recorded as blocked"
+  [[ ! -e "$root/state/directory.state" ]] || fail "optional non-repository retained stale state"
   [[ ! -e "$root/state/directory.transition" ]] || fail "optional non-repository was recorded as blocked"
 }
 
