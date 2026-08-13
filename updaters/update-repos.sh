@@ -240,7 +240,7 @@ update_repo() {
 while IFS='|' read -r name repo mode; do
   [[ -n "$name" && "${name:0:1}" != "#" ]] || continue
   expanded_repo="${repo/#\~/$HOME}"
-  if [[ "$mode" == "optional" && ! -d "$expanded_repo" ]]; then
+  if [[ "$mode" == "optional" ]] && ! git -C "$expanded_repo" rev-parse --git-dir >/dev/null 2>&1; then
     continue
   fi
   update_repo "$name" "$repo"

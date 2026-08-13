@@ -182,12 +182,16 @@ test_stale_lock_recovers() {
 
 test_optional_missing_repo_is_ignored() {
   local root="$TEST_ROOT/optional"
-  mkdir -p "$root/state" "$root/logs"
-  printf 'optional|%s|optional\n' "$root/missing" >"$root/repos.conf"
+  mkdir -p "$root/state" "$root/logs" "$root/not-a-repo"
+  {
+    printf 'missing|%s|optional\n' "$root/missing"
+    printf 'directory|%s|optional\n' "$root/not-a-repo"
+  } >"$root/repos.conf"
 
   run_updater "$root" 100
 
-  [[ ! -e "$root/state/optional.transition" ]] || fail "optional missing repo was recorded as blocked"
+  [[ ! -e "$root/state/missing.transition" ]] || fail "optional missing repo was recorded as blocked"
+  [[ ! -e "$root/state/directory.transition" ]] || fail "optional non-repository was recorded as blocked"
 }
 
 test_clean_fast_forward
