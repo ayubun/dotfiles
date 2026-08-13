@@ -333,7 +333,7 @@ fi
 
 echo ""
 
-echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Configuring repository auto-updater${RESET}"
+echo -e "\n${RESET}${YELLOW_TEXT}[${BOLD}Crontab${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} configuring repository auto-updater${RESET}"
 RELATIVE_SCRIPT_PATH=updaters/all.sh
 SCRIPT_PATH=${HOME}/dotfiles/$RELATIVE_SCRIPT_PATH
 CRON_LOG=${HOME}/dotfiles/logs/repo-updater/cron.log
