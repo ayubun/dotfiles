@@ -59,7 +59,7 @@ function opencode() {
     if [ "$tmux_automatic_rename" = "on" ] || [ "$tmux_automatic_rename" = "off" ]; then
       tmux set-window-option -t "$TMUX_PANE" automatic-rename "$tmux_automatic_rename" 2>/dev/null
     else
-      # Restore inherited/unset automatic-rename to its original state
+      # restore inherited automatic-rename behavior
       tmux set-window-option -u -t "$TMUX_PANE" automatic-rename 2>/dev/null
     fi
   fi
