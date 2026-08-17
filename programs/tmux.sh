@@ -6,8 +6,57 @@
 
 set -e
 
-TMUX_VERSION="3.5a"
+TMUX_VERSION="${TMUX_VERSION:-3.7b}"
 CONFIGURE_FLAGS=()
+
+validate_tmux_version() {
+  [[ "$1" =~ ^[0-9]+\.[0-9]+[a-z]?$ ]]
+}
+
+install_tmux_binary() {
+  local build_path="$1"
+  local install_path="$2"
+  local version="$3"
+  local current_binary="${4:-}"
+  local entry_point="$install_path/tmux"
+  local versioned_binary="$install_path/tmux-$version"
+
+  validate_tmux_version "$version" || {
+    echo "invalid tmux version: $version" >&2
+    return 1
+  }
+
+  if [[ -e "$entry_point" && ! -L "$entry_point" ]]; then
+    local installed_version
+    installed_version="$("$entry_point" -V 2>/dev/null)"
+    installed_version="${installed_version#tmux }"
+    validate_tmux_version "$installed_version" || {
+      echo "cannot preserve unknown tmux binary: $entry_point" >&2
+      return 1
+    }
+    mv -f "$entry_point" "$install_path/tmux-$installed_version"
+  elif [[ ! -e "$entry_point" && -x "$current_binary" ]]; then
+    local installed_version
+    installed_version="$("$current_binary" -V 2>/dev/null)"
+    installed_version="${installed_version#tmux }"
+    validate_tmux_version "$installed_version" || {
+      echo "cannot preserve unknown tmux binary: $current_binary" >&2
+      return 1
+    }
+    if [[ "$current_binary" != "$install_path/tmux-$installed_version" ]]; then
+      install -m 755 "$current_binary" "$install_path/tmux-$installed_version"
+    fi
+  fi
+
+  install -m 755 "$build_path" "$versioned_binary"
+  ln -sfn "tmux-$version" "$entry_point"
+}
+
+main() {
+  validate_tmux_version "$TMUX_VERSION" || {
+    echo "invalid tmux version: $TMUX_VERSION" >&2
+    exit 1
+  }
 
 # ---------- OS-specific build deps & install path ----------
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -16,7 +65,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
   sudo apt autoremove -y automake 2>/dev/null
   sudo apt install -y automake pkg-config autoconf bison 2>/dev/null
 
-  INSTALL_PATH="/usr/bin"
+  INSTALL_PATH="${TMUX_INSTALL_PATH:-$HOME/.local/bin}"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
   # Make sure brew is on PATH (install.sh exports it, but allow standalone runs)
   eval "$(/opt/homebrew/bin/brew shellenv)" 2>/dev/null
@@ -40,8 +89,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
   fi
 
   CONFIGURE_FLAGS+=(--enable-utf8proc)
-  INSTALL_PATH="/usr/local/bin"
-  sudo mkdir -p "$INSTALL_PATH"
+  INSTALL_PATH="${TMUX_INSTALL_PATH:-$HOME/.local/bin}"
 else
   echo "Unsupported OS for tmux install: $OSTYPE"
   exit 1
@@ -68,7 +116,9 @@ sh autogen.sh
 ./configure "${CONFIGURE_FLAGS[@]}"
 make
 
-sudo mv -f ./tmux "$INSTALL_PATH/"
+mkdir -p "$INSTALL_PATH"
+CURRENT_TMUX_BINARY="$(command -v tmux 2>/dev/null || true)"
+install_tmux_binary ./tmux "$INSTALL_PATH" "$TMUX_VERSION" "$CURRENT_TMUX_BINARY"
 
 echo "tmux $TMUX_VERSION installed to $INSTALL_PATH/tmux"
 
@@ -77,4 +127,9 @@ cd /
 # Clean up if we used system tmp
 if [[ "$TMP_DIR" != "$HOME/dotfiles/tmp" ]]; then
   sudo rm -rf "$TMP_DIR"
+fi
+}
+
+if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
+  main "$@"
 fi

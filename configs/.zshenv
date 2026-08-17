@@ -29,7 +29,8 @@ fi
 # opencode
 add_to_path "$HOME/.opencode/bin"
 # local bin
-add_to_path "$HOME/.local/bin"
+path=("$HOME/.local/bin" ${path:#"$HOME/.local/bin"})
+export PATH
 if $WORK; then
   # discord bin
   add_to_path "$HOME/discord/.local/bin"
@@ -66,4 +67,3 @@ export TERM=xterm-256color
 if [ -f $HOME/work/.zshenv ]; then
   source ~/work/.zshenv
 fi
-
