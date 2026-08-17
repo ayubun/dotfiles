@@ -1,4 +1,5 @@
 .DS_Store
+/.opencode-edit.lock
 tmp/
 logs/
 SYSTEM-SETTINGS-INSTALLED
