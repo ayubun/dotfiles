@@ -35,7 +35,6 @@ done
 shopt -u nullglob
 
 "$HOME/.local/bin/ocx" init --global --quiet
-"$HOME/.local/bin/ocx" add kdco/worktree --from https://registry.kdco.dev --global --quiet
 
 dest="$HOME/.config/opencode/plugins"
 [[ -L "$dest" ]] && rm "$dest"
