@@ -5,6 +5,7 @@
 sudo chown -R "${ORIGINAL_USER:-$USER}" "$HOME/.config/opencode" 2>/dev/null || true
 
 curl -fsSL https://opencode.ai/install | bash
+curl -fsSL https://ocx.kdco.dev/install.sh | sh
 
 mkdir -p "$HOME/.config/opencode"
 
@@ -32,6 +33,9 @@ for src in "$HOME/ai-brain/adapters/opencode/agents" "$HOME/ai-brain-discord/age
   done
 done
 shopt -u nullglob
+
+"$HOME/.local/bin/ocx" init --global --quiet
+"$HOME/.local/bin/ocx" add kdco/worktree --from https://registry.kdco.dev --global --quiet
 
 dest="$HOME/.config/opencode/plugins"
 [[ -L "$dest" ]] && rm "$dest"
