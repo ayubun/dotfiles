@@ -7,6 +7,12 @@ sudo chown -R "${ORIGINAL_USER:-$USER}" "$HOME/.config/opencode" 2>/dev/null || 
 curl -fsSL https://opencode.ai/install | bash
 curl -fsSL https://ocx.kdco.dev/install.sh | sh
 
+if [[ $UID -eq 0 && -n "${ORIGINAL_USER:-}" && "$ORIGINAL_USER" != "root" ]]; then
+  sudo -u "$ORIGINAL_USER" -H zsh -lc 'zsh "$HOME/dotfiles/dependencies/sync-opencode-auth.zsh"'
+else
+  zsh -lc 'zsh "$HOME/dotfiles/dependencies/sync-opencode-auth.zsh"'
+fi
+
 mkdir -p "$HOME/.config/opencode"
 
 # ai-brain owns the active config, instructions, and skill paths
