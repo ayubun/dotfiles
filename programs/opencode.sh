@@ -36,6 +36,12 @@ shopt -u nullglob
 
 "$HOME/.local/bin/ocx" init --global --quiet
 
+# canonical plugins resolve dependencies from their real source path
+adapter_node_modules="$HOME/ai-brain/adapters/opencode/node_modules"
+if [[ -L "$adapter_node_modules" || ! -e "$adapter_node_modules" ]]; then
+  ln -sfn "$HOME/.config/opencode/node_modules" "$adapter_node_modules"
+fi
+
 dest="$HOME/.config/opencode/plugins"
 [[ -L "$dest" ]] && rm "$dest"
 mkdir -p "$dest"
