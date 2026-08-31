@@ -144,17 +144,33 @@ run = [
 ]
 
 [[on-window-detected]]
+if.app-id = 'com.hnc.DiscordPTB'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 4'
+]
+
+[[on-window-detected]]
 if.app-id = 'com.hnc.DiscordCanary'
 run = [
   'layout tiling',
   'move-node-to-workspace 3'
 ]
+
+[[on-window-detected]]
+if.app-id = 'com.t3tools.t3code'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 5'
+]
+
 [[on-window-detected]]
 if.app-id = 'org.whispersystems.signal-desktop'
 run = [
   'layout tiling',
   'move-node-to-workspace 5'
 ]
+
 [[on-window-detected]]
 if.app-id = 'com.apple.MobileSMS'
 run = [
