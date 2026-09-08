@@ -15,6 +15,11 @@ fi
 
 mkdir -p "$HOME/.config/opencode"
 
+# ai-brain no longer symlinks these; remove dangling links left by earlier installs
+for stale in "$HOME/.config/opencode/AGENTS.md" "$HOME/.config/opencode/skills"; do
+  [[ -L "$stale" && ! -e "$stale" ]] && rm -f "$stale"
+done
+
 # ai-brain owns the active config, instructions, and skill paths
 rm -f "$HOME/.config/opencode/opencode.json"
 ln -s "$HOME/ai-brain/adapters/opencode/opencode.json" "$HOME/.config/opencode/opencode.json"

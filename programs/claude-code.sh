@@ -14,9 +14,7 @@ for kind in skills agents; do
 done
 
 rm -f ~/.claude/CLAUDE.md
-ln -s ~/ai-brain/AGENTS.md ~/.claude/CLAUDE.md
+ln -s ~/ai-brain/adapters/claude/CLAUDE.md ~/.claude/CLAUDE.md
 
+# nothing reads ~/.claude/AGENTS.md; remove any stale copy
 rm -f ~/.claude/AGENTS.md
-if [ -f ~/ai-brain-discord/AGENTS.md ]; then
-  ln -s ~/ai-brain-discord/AGENTS.md ~/.claude/AGENTS.md
-fi
