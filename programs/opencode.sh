@@ -58,8 +58,14 @@ dest="$HOME/.config/opencode/plugins"
 mkdir -p "$dest"
 find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
 shopt -s nullglob
+# plugins already registered through the opencode.json plugin array must not
+# also auto-load from this directory
+json_registered="$(grep -o 'adapters/opencode/plugins/[^"]*' "$HOME/ai-brain/adapters/opencode/opencode.json" | sed 's#.*/##' || true)"
 for f in "$HOME/ai-brain/adapters/opencode/plugins"/*.{js,ts}; do
   name="$(basename "$f")"
+  if grep -Fqx -- "$name" <<<"$json_registered"; then
+    continue
+  fi
   if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
     continue
   fi
