@@ -26,63 +26,8 @@ ln -s "$HOME/ai-brain/adapters/opencode/opencode.json" "$HOME/.config/opencode/o
 
 # standard global paths remain available for per-machine additions
 
-# aggregate ai-brain agents while preserving real per-machine files
-dest="$HOME/.config/opencode/agents"
-[[ -L "$dest" ]] && rm "$dest"
-mkdir -p "$dest"
-find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
-shopt -s nullglob
-for src in "$HOME/ai-brain/adapters/opencode/agents" "$HOME/ai-brain-discord/agents"; do
-  [[ -d "$src" ]] || continue
-  for f in "$src"/*.md; do
-    name="$(basename "$f")"
-    [[ "$name" == "index.md" ]] && continue
-    if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-      continue
-    fi
-    ln -sfn "$f" "$dest/$name"
-  done
-done
-shopt -u nullglob
-
 "$HOME/.local/bin/ocx" init --global --quiet
 
-# canonical plugins resolve dependencies from their real source path
-adapter_node_modules="$HOME/ai-brain/adapters/opencode/node_modules"
-if [[ -L "$adapter_node_modules" || ! -e "$adapter_node_modules" ]]; then
-  ln -sfn "$HOME/.config/opencode/node_modules" "$adapter_node_modules"
-fi
-
-dest="$HOME/.config/opencode/plugins"
-[[ -L "$dest" ]] && rm "$dest"
-mkdir -p "$dest"
-find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
-shopt -s nullglob
-# plugins already registered through the opencode.json plugin array must not
-# also auto-load from this directory
-json_registered="$(grep -o 'adapters/opencode/plugins/[^"]*' "$HOME/ai-brain/adapters/opencode/opencode.json" | sed 's#.*/##' || true)"
-for f in "$HOME/ai-brain/adapters/opencode/plugins"/*.{js,ts}; do
-  name="$(basename "$f")"
-  if grep -Fqx -- "$name" <<<"$json_registered"; then
-    continue
-  fi
-  if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-    continue
-  fi
-  ln -sfn "$f" "$dest/$name"
-done
-shopt -u nullglob
-
-dest="$HOME/.config/opencode/lib"
-[[ -L "$dest" ]] && rm "$dest"
-mkdir -p "$dest"
-find "$dest" -mindepth 1 -maxdepth 1 -type l -delete
-shopt -s nullglob
-for f in "$HOME/ai-brain/adapters/opencode/lib"/*.{js,ts}; do
-  name="$(basename "$f")"
-  if [[ -e "$dest/$name" && ! -L "$dest/$name" ]]; then
-    continue
-  fi
-  ln -sfn "$f" "$dest/$name"
-done
-shopt -u nullglob
+# agents, plugins, and lib symlinks are owned by the reconciler so the repo
+# updater can rerun it after every fast-forward
+bash "$HOME/dotfiles/dependencies/reconcile-opencode-links.bash"

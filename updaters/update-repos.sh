@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG="${REPO_UPDATER_CONFIG:-$SCRIPT_DIR/repos.conf}"
 STATE_ROOT="${REPO_UPDATER_STATE_ROOT:-$HOME/dotfiles/logs/updater-state}"
 LOG_ROOT="${REPO_UPDATER_LOG_ROOT:-$HOME/dotfiles/logs}"
+POST_UPDATE_HOOK="${REPO_UPDATER_POST_UPDATE_HOOK:-$SCRIPT_DIR/../dependencies/reconcile-opencode-links.bash}"
 IDLE_SECONDS="${REPO_UPDATER_IDLE_SECONDS:-172800}"
 NOW="${REPO_UPDATER_NOW:-$(date +%s)}"
 LOCK_DIR="$STATE_ROOT/.lock"
@@ -232,6 +233,36 @@ update_repo() {
   recover_dirty_tree "$name" "$repo" "$state_file" "$upstream" "$behind"
 }
 
+# The hook runs whenever the set of checked-out heads differs from the last
+# successful run, so a missed or killed run is retried on the next tick.
+run_post_update_hook() {
+  local heads="" name repo mode expanded_repo head state_file output previous=""
+
+  [[ -n "$POST_UPDATE_HOOK" && -f "$POST_UPDATE_HOOK" ]] || return 0
+  state_file="$STATE_ROOT/post-update.state"
+
+  while IFS='|' read -r name repo mode; do
+    [[ -n "$name" && "${name:0:1}" != "#" ]] || continue
+    expanded_repo="${repo/#\~/$HOME}"
+    head="$(git -C "$expanded_repo" rev-parse HEAD 2>/dev/null)" || continue
+    heads+="$name=$head"$'\n'
+  done <"$CONFIG"
+  heads="$(printf '%s' "$heads" | git hash-object --stdin)"
+
+  [[ -f "$state_file" ]] && IFS= read -r previous <"$state_file"
+  [[ "$previous" == "$heads" ]] && return 0
+
+  if output="$(bash "$POST_UPDATE_HOOK" 2>&1)"; then
+    printf '%s\n' "$heads" >"$state_file"
+    record_transition "post-update" "ran" "${heads:0:12}"
+  else
+    # The hook is retried every tick, so its output is printed once per failure streak.
+    blocked "post-update" "hook failed"
+    $TRANSITION_CHANGED && [[ -n "$output" ]] && printf '%s\n' "$output" >&2
+  fi
+  return 0
+}
+
 [[ -f "$CONFIG" ]] || {
   printf 'repo updater config not found: %s\n' "$CONFIG" >&2
   exit 1
@@ -247,3 +278,5 @@ while IFS='|' read -r name repo mode; do
   fi
   update_repo "$name" "$repo"
 done <"$CONFIG"
+
+run_post_update_hook

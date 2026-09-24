@@ -43,6 +43,7 @@ new_fixture() {
 
   printf 'test|%s\n' "$root/worker" >"$root/repos.conf"
   mkdir -p "$root/state" "$root/logs"
+  printf '#!/bin/bash\nprintf run >>"%s/hook.log"\n' "$root" >"$root/hook.sh"
   printf '%s\n' "$root"
 }
 
@@ -55,6 +56,7 @@ run_updater() {
     REPO_UPDATER_LOG_ROOT="$root/logs" \
     REPO_UPDATER_NOW="$now" \
     REPO_UPDATER_IDLE_SECONDS=10 \
+    REPO_UPDATER_POST_UPDATE_HOOK="$root/hook.sh" \
     bash "$UPDATER"
 }
 
@@ -104,6 +106,37 @@ test_activity_and_recovery() {
   if grep -R -q "sensitive-body" "$root/logs"; then
     fail "recovery logs contain file contents"
   fi
+}
+
+test_post_update_hook_runs_once_per_head_change() {
+  local root
+  root="$(new_fixture hook)"
+
+  run_updater "$root" 100
+  run_updater "$root" 101
+  assert_equal "$(cat "$root/hook.log")" "run"
+
+  printf 'remote\n' >>"$root/seed/file.txt"
+  git -C "$root/seed" commit -qam "remote"
+  git -C "$root/seed" push -q
+  run_updater "$root" 102
+  assert_equal "$(cat "$root/hook.log")" "runrun"
+  assert_contains "$root/logs/repo-updater/events/events.log" "post-update ran"
+
+  printf 'exit 1\n' >>"$root/hook.sh"
+  printf 'remote\n' >>"$root/seed/file.txt"
+  git -C "$root/seed" commit -qam "remote again"
+  git -C "$root/seed" push -q
+  run_updater "$root" 103
+  run_updater "$root" 104
+  assert_equal "$(cat "$root/hook.log")" "runrunrunrun"
+  assert_contains "$root/logs/repo-updater/events/events.log" "post-update blocked hook failed"
+
+  sed -i.bak '/^exit 1$/d' "$root/hook.sh"
+  run_updater "$root" 105
+  run_updater "$root" 106
+  assert_equal "$(cat "$root/hook.log")" "runrunrunrunrun"
+  assert_equal "$(grep -c 'post-update ran' "$root/logs/repo-updater/events/events.log")" "3"
 }
 
 test_ahead_branch_blocks() {
@@ -200,6 +233,7 @@ test_optional_missing_repo_is_ignored() {
 
 test_clean_fast_forward
 test_activity_and_recovery
+test_post_update_hook_runs_once_per_head_change
 test_ahead_branch_blocks
 test_diverged_branch_blocks
 test_detached_head_blocks
