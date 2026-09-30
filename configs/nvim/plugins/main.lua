@@ -212,7 +212,17 @@ return {
   {
     "linrongbin16/gitlinker.nvim",
     cmd = "GitLink",
-    opts = {},
+    opts = {
+      clipboard_override = function(url)
+        if vim.env.SSH_CONNECTION and vim.env.TMUX then
+          vim.fn.system({ "tmux", "set-buffer", "-w", url })
+          if vim.v.shell_error == 0 then
+            return
+          end
+        end
+        vim.fn.setreg("+", url)
+      end,
+    },
     keys = {
       { "<leader>gy", "<cmd>GitLink<cr>", mode = { "n", "v" }, desc = "Yank git link" },
       { "<leader>gY", "<cmd>GitLink!<cr>", mode = { "n", "v" }, desc = "Open git link" },
