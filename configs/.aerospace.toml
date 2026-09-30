@@ -112,6 +112,9 @@ alt-tab = 'workspace-back-and-forth'
 
 alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
 
+alt-shift-period = 'focus-monitor --wrap-around next'
+alt-shift-comma = 'focus-monitor --wrap-around prev'
+
 [mode.resize.binding]
 left = 'resize smart -50'
 down = 'resize smart +50'
