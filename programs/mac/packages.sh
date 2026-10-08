@@ -45,6 +45,7 @@ formulae=(
   ncdu
   dive # https://github.com/wagoodman/dive
   cloudflared
+  gh # https://cli.github.com
 )
 
 # Formulae that must be compiled from source (no bottles available)
