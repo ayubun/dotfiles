@@ -31,23 +31,38 @@ run_script_parallel() {
     fi
 }
 
-# APT lock management functions
-# Never remove $HOME/dotfiles/tmp/apt.lock here: it is the cross-installer mutex and its owner deletes it.
-unlock-apt() {
-    sudo rm -f /tmp/apt-fast.lock &>/dev/null
-    sudo rm -f /var/lib/apt/lists/lock &>/dev/null
-    sudo rm -f /var/cache/apt/archives/lock &>/dev/null
-    sudo rm -f /var/lib/dpkg/lock* &>/dev/null
+# APT recovery functions
+# Seconds apt waits for the dpkg frontend lock. apt-fast drives apt-get, which defaults to 0.
+export APT_LOCK_WAIT=300
+
+# apt-fast exits when its lock file merely exists, so clear it only when no process holds the flock.
+unlock-apt-fast() {
+    local lock=/tmp/apt-fast.lock
+    [[ -e $lock ]] || return 0
+    sudo flock -n "$lock" true 2>/dev/null && sudo rm -f "$lock"
 }
 
-fix-apt() {
-    sudo apt --fix-broken install -y &>/dev/null
-    sudo apt --fix-missing install -y &>/dev/null
-    sudo apt install -f -y &>/dev/null
+# Repair an interrupted dpkg run. dpkg and apt locks are fcntl locks; never delete them.
+recover-apt() {
+    unlock-apt-fast
+    sudo dpkg --configure -a &>/dev/null
+    sudo DEBIAN_FRONTEND=noninteractive apt-get -o DPkg::Lock::Timeout=$APT_LOCK_WAIT install -f -y &>/dev/null
+}
+
+# Keep stderr only when an installer is capturing logs (CAPTURE_OUTPUT set).
+run-apt-command() {
+    if [[ -n "${CAPTURE_OUTPUT:-}" ]]; then "$@"; else "$@" 2>/dev/null; fi
+}
+
+# Run an apt front end once, recover, then retry once. The 30s SIGTERM grace lets dpkg finish a package.
+apt-with-recovery() {
+    local manager=$1; shift
+    local cmd=("$HOME/dotfiles/timeout" -t 900 -d 30 sudo DEBIAN_FRONTEND=noninteractive "$manager" -o DPkg::Lock::Timeout=$APT_LOCK_WAIT "$@" -y)
+    run-apt-command "${cmd[@]}" || { recover-apt && run-apt-command "${cmd[@]}"; }
 }
 
 safer-apt() {
-    "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null; } || { unlock-apt; return 1; }
+    apt-with-recovery apt "$@"
 }
 
 safer-apt-fast() {
@@ -57,12 +72,7 @@ safer-apt-fast() {
         safer-apt "$@"
         return $?
     fi
-    # If we're capturing logs (CAPTURE_OUTPUT is set), don't redirect to /dev/null
-    if [[ -n "$CAPTURE_OUTPUT" ]]; then
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || { unlock-apt; return 1; }
-    else
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null; } || { unlock-apt; return 1; }
-    fi
+    apt-with-recovery apt-fast "$@"
 }
 
 # Retry add-apt-repository on transient failures (e.g., launchpad PPA 504 / connection-refused).
@@ -188,8 +198,10 @@ gh_download() {
 
 # Export all functions for use in child scripts
 export -f run_script_parallel
-export -f unlock-apt
-export -f fix-apt
+export -f unlock-apt-fast
+export -f recover-apt
+export -f run-apt-command
+export -f apt-with-recovery
 export -f safer-apt
 export -f safer-apt-fast
 export -f safer-add-apt-repository

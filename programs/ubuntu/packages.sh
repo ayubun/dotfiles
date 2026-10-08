@@ -53,7 +53,7 @@ if [[ -d "$HOME/dotfiles/tmp" ]]; then
   done
 fi
 
-fix-apt
+recover-apt
 
 batch_size=10
 total_packages=${#packages[@]}

@@ -23,7 +23,7 @@ if [[ -d "$HOME/dotfiles/tmp" ]]; then
   done
 fi
 
-fix-apt
+recover-apt
 
 # rc-guarded so a failure still falls through to the apt-lock release below
 # (a bare exit would leave the lock held and deadlock later apt scripts)

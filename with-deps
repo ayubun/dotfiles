@@ -24,7 +24,7 @@ while [[ $# -gt 0 ]]; do
             echo "  $0 dependencies/create-dirs.sh programs/ubuntu/packages.sh"
             echo ""
             echo "This wrapper automatically runs dependency scripts first, then provides"
-            echo "shared functions like safer-apt, fix-apt, etc. to the target scripts."
+            echo "shared functions like safer-apt, recover-apt, etc. to the target scripts."
             echo "Multiple scripts are run sequentially after dependencies are set up once."
             exit 0
             ;;
@@ -50,7 +50,7 @@ if [[ ${#SCRIPT_PATHS[@]} -eq 0 ]]; then
     echo "  $0 dependencies/create-dirs.sh programs/ubuntu/packages.sh"
     echo ""
     echo "This wrapper automatically runs dependency scripts first, then provides"
-    echo "shared functions like safer-apt, fix-apt, etc. to the target scripts."
+    echo "shared functions like safer-apt, recover-apt, etc. to the target scripts."
     echo "Multiple scripts are run sequentially after dependencies are set up once."
     echo ""
     echo "Use -h or --help for more information."

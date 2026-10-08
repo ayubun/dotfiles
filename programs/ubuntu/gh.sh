@@ -25,7 +25,7 @@ if [[ -d "$HOME/dotfiles/tmp" ]]; then
   done
 fi
 
-fix-apt
+recover-apt
 
 # True when the installed gh came from the official repo and is still its current version.
 installed_current_from_repo() {

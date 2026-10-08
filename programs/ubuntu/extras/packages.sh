@@ -17,7 +17,7 @@ apt_repositories=(
   'ppa:deadsnakes/ppa'  # python3.8
 )
 
-fix-apt
+recover-apt
 
 # Clean
 # safer-apt-fast remove "${packages[@]}"
