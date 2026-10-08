@@ -74,7 +74,7 @@ if [[ $changed -eq 1 ]] || ! apt-cache policy gh 2>/dev/null | grep -q "$REPO_UR
 fi
 installed_current_from_repo || safer-apt-fast install gh
 
-# safer-apt-fast always returns 0, so check the result directly.
+# Check the installed state directly instead of trusting the apt exit code.
 if ! installed_current_from_repo; then
   echo "gh is not installed from ${REPO_URL}"
   exit 1

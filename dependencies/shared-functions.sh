@@ -32,9 +32,9 @@ run_script_parallel() {
 }
 
 # APT lock management functions
+# Never remove $HOME/dotfiles/tmp/apt.lock here: it is the cross-installer mutex and its owner deletes it.
 unlock-apt() {
     sudo rm -f /tmp/apt-fast.lock &>/dev/null
-    sudo rm -f $HOME/dotfiles/tmp/apt.lock &>/dev/null
     sudo rm -f /var/lib/apt/lists/lock &>/dev/null
     sudo rm -f /var/cache/apt/archives/lock &>/dev/null
     sudo rm -f /var/lib/dpkg/lock* &>/dev/null
@@ -47,7 +47,7 @@ fix-apt() {
 }
 
 safer-apt() {
-    "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || unlock-apt
+    "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt "$@" -y 2>/dev/null; } || { unlock-apt; return 1; }
 }
 
 safer-apt-fast() {
@@ -59,9 +59,9 @@ safer-apt-fast() {
     fi
     # If we're capturing logs (CAPTURE_OUTPUT is set), don't redirect to /dev/null
     if [[ -n "$CAPTURE_OUTPUT" ]]; then
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || unlock-apt
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y; } || { unlock-apt; return 1; }
     else
-        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || unlock-apt
+        "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null || { unlock-apt && fix-apt && "$HOME/dotfiles/timeout" -t 900 sudo DEBIAN_FRONTEND=noninteractive apt-fast "$@" -y 2>/dev/null; } || { unlock-apt; return 1; }
     fi
 }
 
