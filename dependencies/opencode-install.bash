@@ -14,6 +14,10 @@
 OPENCODE_V1_DEFAULT_VERSION="${OPENCODE_V1_DEFAULT_VERSION:-1.19.3}"
 OPENCODE_V2_DEFAULT_VERSION="${OPENCODE_V2_DEFAULT_VERSION:-2.0.31}"
 
+# main's last OpenCode 1 commits before the OpenCode 2 merge; scripts/opencode-rollback.sh pins to them.
+OPENCODE_V1_AI_BRAIN_COMMIT=3752e0220586aa8d53e248d9186e1950a4d28cdb
+OPENCODE_V1_AI_BRAIN_DISCORD_COMMIT=a2b40cbddec2e0ab692d4ee60356538238713125
+
 opencode_major_for_adapter() {
   local adapter_root="$1"
   if [[ -f "$adapter_root/opencode.jsonc" ]]; then

@@ -7,8 +7,7 @@
 # Steps:
 #   1. refuse while an OpenCode 1 process runs (sandbox processes are ignored)
 #   2. archive ~/.config/opencode, ~/.local/share/opencode, ~/.local/state/opencode
-#      and record the OpenCode 1 version plus the pre-2 commits of ai-brain and
-#      ai-brain-discord under ~/.local/share/opencode-backups/<stamp>/
+#      and record the OpenCode 1 version under ~/.local/share/opencode-backups/<stamp>/
 #   3. keep the OpenCode 1 binary as ~/.opencode/bin/opencode-<version>
 #   4. install OpenCode 2 to ~/.opencode/bin/opencode
 #   5. move the OpenCode 1-only files out of ~/.config/opencode and relink the
@@ -59,16 +58,6 @@ if [[ "$current_version" == 2.* ]]; then
   exit 1
 fi
 
-# The commit before the adapter switched shape is what a rollback checks out.
-pre_v2_commit() {
-  local repo="$1"
-  local path="$2"
-  local switch
-  switch="$(git -C "$repo" log -1 --format=%H -- "$path" 2>/dev/null || true)"
-  [[ -n "$switch" ]] || return 0
-  git -C "$repo" rev-parse --verify --quiet "$switch^" || true
-}
-
 stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 backup_root="$HOME/.local/share/opencode-backups/$stamp"
 mkdir -p "$backup_root"
@@ -86,8 +75,6 @@ tar -cf "$backup_root/opencode-v1-state.tar" -C "$HOME" \
   "${archive_members[@]}"
 {
   printf 'opencode_v1_version=%s\n' "${current_version:-unknown}"
-  printf 'ai_brain_pre_v2_commit=%s\n' "$(pre_v2_commit "$HOME/ai-brain" adapters/opencode/opencode.json)"
-  printf 'ai_brain_discord_pre_v2_commit=%s\n' "$(pre_v2_commit "$HOME/ai-brain-discord" agents)"
   printf 'cutover_at=%s\n' "$stamp"
 } >"$backup_root/manifest"
 cat "$backup_root/manifest"

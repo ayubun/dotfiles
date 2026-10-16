@@ -20,8 +20,8 @@
 #
 #   OPENCODE_V2_BRANCH   branch to track (default opencode-v2)
 #
-# Undo: bash ~/dotfiles/scripts/opencode-rollback.sh, then `git checkout main`
-# in the three repositories.
+# Undo: bash ~/dotfiles/scripts/opencode-rollback.sh (it pins ai-brain and
+# ai-brain-discord to their last OpenCode 1 commits; dotfiles main handles both).
 
 set -euo pipefail
 

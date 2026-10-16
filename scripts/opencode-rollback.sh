@@ -8,7 +8,8 @@
 #     stamp     backup under ~/.local/share/opencode-backups (default: newest)
 #     --force   proceed although opencode processes are running
 #
-# ai-brain and ai-brain-discord are pinned to their pre-2 commits on a local
+# ai-brain and ai-brain-discord are pinned to main's last OpenCode 1 commits
+# (OPENCODE_V1_*_COMMIT in dependencies/opencode-install.bash) on a local
 # branch without upstream, which the repo updater leaves alone. Delete those
 # branches and check out main again when the machine returns to OpenCode 2.
 
@@ -72,8 +73,9 @@ pin_repo() {
   git -C "$repo" checkout --quiet -B opencode-v1-rollback "$commit"
   printf 'pinned %s to %s on branch opencode-v1-rollback\n' "$repo" "$commit"
 }
-pin_repo "$HOME/ai-brain" "${ai_brain_pre_v2_commit:-}"
-pin_repo "$HOME/ai-brain-discord" "${ai_brain_discord_pre_v2_commit:-}"
+# Older manifests record ai_brain_pre_v2_commit values that predate main's last OpenCode 1 work; ignore them.
+pin_repo "$HOME/ai-brain" "$OPENCODE_V1_AI_BRAIN_COMMIT"
+pin_repo "$HOME/ai-brain-discord" "$OPENCODE_V1_AI_BRAIN_DISCORD_COMMIT"
 
 aside_stamp="$(date -u +%Y%m%dT%H%M%SZ)"
 for dir in "$config_root" "$data_root" "$state_root"; do
