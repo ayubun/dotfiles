@@ -24,6 +24,7 @@ packages=(
   'httpie'  # https://github.com/httpie/cli?tab=readme-ov-file
   'ripgrep' # https://github.com/BurntSushi/ripgrep
   'jq'
+  'age' # https://github.com/FiloSottile/age
   'fd-find' # https://github.com/sharkdp/fd?tab=readme-ov-file#installation
   # 'tmux'
   # for remote clipboard integration on lvim

@@ -8,6 +8,10 @@ add_to_path() {
   fi
 }
 
+ai-brain-secrets() {
+  bash "$DOTFILES_FOLDER/dependencies/ai-brain-secrets.bash" "$@"
+}
+
 add_discord_bin_to_usr_local_bin() {
   # If $1 (arg 1) is not non-zero
   if [ ! -n "$1" ]; then
