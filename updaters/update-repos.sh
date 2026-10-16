@@ -154,6 +154,23 @@ recover_dirty_tree() {
   record_transition "$name" "shelved" "$ref_name"
 }
 
+# scripts/opencode-cutover-here.sh leaves hosts on opencode-v2-<host>; return them to main once main contains that work.
+retire_opencode_v2_branch() {
+  local repo="$1"
+  local branch="$2"
+
+  [[ "$branch" == opencode-v2-* ]] || return 1
+  [[ "$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)" == origin/opencode-v2 ]] || return 1
+  [[ -z "$(git -C "$repo" status --porcelain)" ]] || return 1
+  git -C "$repo" fetch --quiet origin || return 1
+  git -C "$repo" merge-base --is-ancestor HEAD origin/main || return 1
+  if git -C "$repo" show-ref --verify --quiet refs/heads/main; then
+    git -C "$repo" merge-base --is-ancestor main origin/main || return 1
+  fi
+  git -C "$repo" checkout --quiet -B main --track origin/main || return 1
+  git -C "$repo" branch --quiet -d "$branch" || true
+}
+
 update_repo() {
   local name="$1"
   local repo="$2"
@@ -183,6 +200,10 @@ update_repo() {
     blocked "$name" "head is detached"
     return
   }
+  if retire_opencode_v2_branch "$repo" "$branch"; then
+    record_transition "$name" "switched" "$branch -> main"
+    branch=main
+  fi
   upstream="$(git -C "$repo" rev-parse --abbrev-ref --symbolic-full-name '@{u}' 2>/dev/null)" || {
     blocked "$name" "branch has no upstream"
     return
