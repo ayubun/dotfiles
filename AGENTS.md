@@ -22,6 +22,7 @@ this repository owns machine bootstrap, shell setup, harness installation, and u
 - after any run in which the set of repository heads differs from the last successful run, the cron runs `dependencies/post-update.bash`, which runs `dependencies/reconcile-opencode-links.bash` and `dependencies/ai-brain-secrets.bash sync`
 - anything the updater must apply after a pull belongs in `dependencies/post-update.bash`; keep it idempotent, sudo-free, and offline
 - `dependencies/ai-brain-secrets.bash` syncs the age-encrypted API keys from ai-brain `secrets/`; `~/ai-brain/environment/secrets.md` says what agents may run
+- on OpenCode 2, `dependencies/sync-opencode-auth.zsh` stores the keys through `opencode auth import` and `auth switch` (stdin only) and logs out older key credentials, because OpenCode 2 reads its legacy auth file only once and a stored credential wins over the environment. it uses the running service when there is one, else `--standalone`
 
 ## opencode major
 
