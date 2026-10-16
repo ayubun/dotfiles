@@ -8,6 +8,8 @@
 #   OPENCODE_V2_VERSION      binary version (default from dependencies/opencode-install.bash)
 #   AI_BRAIN_ADAPTER_ROOT    adapter to link (default: the sandbox's ai-brain
 #                            worktree when present, else ~/ai-brain)
+#   OPENCODE_V2_SANDBOX_PORT managed service port (default 49375; the primary
+#                            install uses 49374)
 #
 # Afterwards `opencode-v2` on PATH runs the sandboxed install.
 
@@ -82,5 +84,11 @@ if [[ -f "$HOME/.local/share/opencode/auth.json" && ! -e "$sandbox/data/opencode
 fi
 
 OPENCODE_CONFIG_ROOT="$sandbox/config/opencode" bash "$script_dir/../dependencies/reconcile-opencode-links.bash"
+
+# Every OpenCode 2 install defaults its managed service to port 49374, so the
+# sandbox service takes another port to coexist with a primary OpenCode 2.
+if [[ ! -f "$sandbox/config/opencode/service.json" ]]; then
+  "$sandbox/bin/opencode-v2" service set port "${OPENCODE_V2_SANDBOX_PORT:-49375}" >/dev/null
+fi
 
 printf 'opencode-v2 -> %s (%s), adapter %s\n' "$sandbox/bin/opencode" "$("$sandbox/bin/opencode" --version)" "$AI_BRAIN_ADAPTER_ROOT"

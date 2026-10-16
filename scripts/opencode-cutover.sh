@@ -12,7 +12,8 @@
 #   3. keep the OpenCode 1 binary as ~/.opencode/bin/opencode-<version>
 #   4. install OpenCode 2 to ~/.opencode/bin/opencode
 #   5. move the OpenCode 1-only files out of ~/.config/opencode and relink the
-#      adapter; the first OpenCode 2 start migrates the database in place
+#      adapter; the first OpenCode 2 server start migrates the database in
+#      place (additive and resumable; the OpenCode 1 tables stay intact)
 #
 #   OPENCODE_V2_VERSION   binary version (default from dependencies/opencode-install.bash)
 #   --force               proceed although opencode processes are running
@@ -25,6 +26,13 @@ source "$script_dir/../dependencies/opencode-install.bash"
 
 force=false
 [[ "${1:-}" == "--force" ]] && force=true
+
+# This shell is an opencode child when OPENCODE_PID is set; quitting opencode
+# would then kill the cutover halfway.
+if [[ -n "${OPENCODE_PID:-}" && "$force" != true ]]; then
+  printf 'run this from a plain shell, not from inside an opencode session\n' >&2
+  exit 1
+fi
 
 adapter_root="$HOME/ai-brain/adapters/opencode"
 config_root="$HOME/.config/opencode"
@@ -71,7 +79,8 @@ archive_members=()
 [[ -d "$config_root" ]] && archive_members+=(.config/opencode)
 [[ -d "$data_root" ]] && archive_members+=(.local/share/opencode)
 [[ -d "$state_root" ]] && archive_members+=(.local/state/opencode)
-tar -czf "$backup_root/opencode-v1-state.tar.gz" -C "$HOME" \
+# Uncompressed: the session database is many gigabytes and compresses slowly.
+tar -cf "$backup_root/opencode-v1-state.tar" -C "$HOME" \
   --exclude='.config/opencode/worktrees' \
   --exclude='.config/opencode/node_modules' \
   "${archive_members[@]}"

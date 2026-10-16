@@ -26,6 +26,10 @@ for arg in "$@"; do
     *) stamp="$arg" ;;
   esac
 done
+if [[ -n "${OPENCODE_PID:-}" && "$force" != true ]]; then
+  printf 'run this from a plain shell, not from inside an opencode session\n' >&2
+  exit 1
+fi
 
 backups_root="$HOME/.local/share/opencode-backups"
 if [[ -z "$stamp" ]]; then
@@ -35,7 +39,9 @@ if [[ -z "$stamp" ]]; then
   done
 fi
 backup_root="$backups_root/$stamp"
-if [[ -z "$stamp" || ! -f "$backup_root/manifest" || ! -f "$backup_root/opencode-v1-state.tar.gz" ]]; then
+archive="$backup_root/opencode-v1-state.tar"
+[[ -f "$archive" ]] || archive="$archive.gz"
+if [[ -z "$stamp" || ! -f "$backup_root/manifest" || ! -f "$archive" ]]; then
   printf 'no usable backup under %s\n' "$backups_root" >&2
   exit 1
 fi
@@ -85,7 +91,7 @@ for dir in "$config_root" "$data_root" "$state_root"; do
   fi
 done
 mkdir -p "$config_root" "$data_root" "$state_root"
-tar -xzf "$backup_root/opencode-v1-state.tar.gz" -C "$HOME"
+tar -xf "$archive" -C "$HOME"
 for name in "$backup_root"/config-v1-only/*; do
   [[ -e "$name" || -L "$name" ]] || continue
   cp -a "$name" "$config_root/$(basename "$name")"
