@@ -47,6 +47,7 @@ formulae=(
   cloudflared
   gh # https://cli.github.com
   jq
+  age # https://github.com/FiloSottile/age
 )
 
 # Formulae that must be compiled from source (no bottles available)

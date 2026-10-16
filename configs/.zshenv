@@ -67,3 +67,8 @@ export TERM=xterm-256color
 if [ -f $HOME/work/.zshenv ]; then
   source ~/work/.zshenv
 fi
+
+# API keys decrypted from ai-brain secrets; loaded last so they override older copies
+if [ -r "$XDG_CONFIG_HOME/ai-brain-keys/api-keys.env" ]; then
+  source "$XDG_CONFIG_HOME/ai-brain-keys/api-keys.env"
+fi

@@ -44,3 +44,9 @@ elif [[ ! -e "$work_link" ]]; then
 else
   printf 'warning: refusing to replace non-symlink path %s\n' "$work_link" >&2
 fi
+
+secrets_sync=(bash "$HOME/dotfiles/dependencies/ai-brain-secrets.bash" sync)
+if [[ $UID -eq 0 && -n "${ORIGINAL_USER:-}" && "$ORIGINAL_USER" != "root" ]]; then
+  secrets_sync=(sudo -u "$ORIGINAL_USER" -H "${secrets_sync[@]}")
+fi
+"${secrets_sync[@]}" || printf 'warning: failed to sync ai-brain secrets\n' >&2
