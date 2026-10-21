@@ -237,6 +237,8 @@ export NVM_DIR="$HOME/.nvm"
 
 # bun completions
 [ -s "$HOME/.bun/_bun" ] && source "$HOME/.bun/_bun"
+# bun's vendored CA bundle still trusts the compromised emSign ECC Root CA - G3 (oven-sh/bun#46300); use the OS store until a fixed release ships
+export BUN_OPTIONS="--use-system-ca"
 
 # Load any pre-configured functions
 if [ -f "$DOTFILES_FOLDER/configs/dependencies/functions.sh" ]; then

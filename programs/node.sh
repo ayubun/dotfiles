@@ -48,12 +48,8 @@ export NVM_DIR="$HOME/.nvm"
 
 cd $CURRENT_DIR
 
-# v22
+# v22. v18 and v20 are EOL and still trust the compromised emSign ECC Root CA - G3, so do not install them.
 nvm install 'lts/jod' --reinstall-packages-from=current
-# v20
-nvm install 'lts/iron' --reinstall-packages-from=current
-# v18
-nvm install 'lts/hydrogen' --reinstall-packages-from=current
 # ensure we use v22 as default
 nvm alias default 'lts/jod'
 nvm use 'lts/jod'
