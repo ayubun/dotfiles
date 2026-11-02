@@ -154,6 +154,13 @@ run = [
 ]
 
 [[on-window-detected]]
+if.app-id = 'com.discord.DesktopGpui'
+run = [
+  'layout tiling',
+  'move-node-to-workspace 5'
+]
+
+[[on-window-detected]]
 if.app-id = 'com.hnc.DiscordCanary'
 run = [
   'layout tiling',
