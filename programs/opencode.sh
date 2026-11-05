@@ -10,8 +10,14 @@ sudo chown -R "${ORIGINAL_USER:-$USER}" "$HOME/.config/opencode" 2>/dev/null || 
 source "$HOME/dotfiles/dependencies/opencode-install.bash"
 major="$(opencode_major_for_adapter "$HOME/ai-brain/adapters/opencode")"
 if [[ "$major" == 2 ]]; then
-  if [[ "$("$HOME/.opencode/bin/opencode" --version 2>/dev/null || true)" != *"$OPENCODE_V2_DEFAULT_VERSION"* ]]; then
-    opencode_install 2 "$HOME/.opencode/bin"
+  # Follow latest, never go below the floor, and never downgrade a newer install (for example a T3 upgrade).
+  target="$(opencode_latest_v2_version || true)"
+  if [[ -z "$target" ]] || opencode_version_lt "$target" "$OPENCODE_V2_DEFAULT_VERSION"; then
+    target="$OPENCODE_V2_DEFAULT_VERSION"
+  fi
+  installed="$(opencode_installed_version "$HOME/.opencode/bin/opencode" || true)"
+  if [[ -z "$installed" ]] || opencode_version_lt "$installed" "$target"; then
+    opencode_install 2 "$HOME/.opencode/bin" "$target"
   fi
 else
   curl -fsSL https://opencode.ai/install | bash

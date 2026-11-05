@@ -12,7 +12,8 @@
 #   the given sandbox prefix (Linux and macOS).
 
 OPENCODE_V1_DEFAULT_VERSION="${OPENCODE_V1_DEFAULT_VERSION:-1.19.3}"
-OPENCODE_V2_DEFAULT_VERSION="${OPENCODE_V2_DEFAULT_VERSION:-2.0.31}"
+# Also the floor programs/opencode.sh never installs below, since older releases cannot read newer session data.
+OPENCODE_V2_DEFAULT_VERSION="${OPENCODE_V2_DEFAULT_VERSION:-2.2.5}"
 
 # main's last OpenCode 1 commits before the OpenCode 2 merge; scripts/opencode-rollback.sh pins to them.
 OPENCODE_V1_AI_BRAIN_COMMIT=3752e0220586aa8d53e248d9186e1950a4d28cdb
@@ -25,6 +26,22 @@ opencode_major_for_adapter() {
   else
     printf '1\n'
   fi
+}
+
+opencode_version_lt() {
+  [[ "$1" != "$2" && "$(printf '%s\n%s\n' "$1" "$2" | sort -V | head -n 1)" == "$1" ]]
+}
+
+opencode_installed_version() {
+  local out
+  out="$("$1" --version 2>/dev/null)" || return 1
+  out="${out##* }"
+  printf '%s\n' "${out#v}"
+}
+
+opencode_latest_v2_version() {
+  curl -fsSL --max-time 20 https://opencode.ai/update/api/latest/cli/npm 2>/dev/null |
+    sed -n 's/.*"version":"\([^"]*\)".*/\1/p'
 }
 
 # The upstream installers hardcode $HOME/.opencode/bin, so run them with a

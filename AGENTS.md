@@ -1,6 +1,6 @@
 # dotfiles
 
-last verified: 2026-10-16
+last verified: 2026-11-05
 
 ## purpose
 
@@ -28,6 +28,7 @@ this repository owns machine bootstrap, shell setup, harness installation, and u
 
 - `~/ai-brain/adapters/opencode` decides the OpenCode major: `opencode.jsonc` means OpenCode 2, `opencode.json` means OpenCode 1. `programs/opencode.sh` and `dependencies/reconcile-opencode-links.bash` read that shape and never choose on their own
 - `dependencies/opencode-install.bash` is the shared helper (pinned installs into any bin dir, running-process check); it is sourced, never run
+- on OpenCode 2, `programs/opencode.sh` installs the latest release from `opencode.ai/update/api/latest/cli/npm`, never below `OPENCODE_V2_DEFAULT_VERSION` (the floor, used when the lookup fails), and never downgrades a newer binary such as one from a T3 one-click update. a downgrade breaks sessions, because older releases cannot decode messages that newer releases wrote. raise the floor after an upgrade that changes the session format
 - `scripts/opencode-v2-sandbox.sh` installs OpenCode 2 beside OpenCode 1 under `~/opencode-v2-sandbox` with its own XDG roots and an `opencode-v2` wrapper; it changes nothing in the primary install
 - every OpenCode 2 install defaults its managed service to port 49374; the sandbox sets 49375 so both can run
 - `scripts/opencode-cutover.sh` archives the OpenCode 1 config, data, and state under `~/.local/share/opencode-backups/<stamp>/`, keeps the old binary as `~/.opencode/bin/opencode-<version>`, installs OpenCode 2 to the primary path, and relinks. it refuses while OpenCode 1 processes run and requires the OpenCode 2 adapter on ai-brain main
