@@ -1,6 +1,6 @@
 # dotfiles
 
-last verified: 2026-11-05
+last verified: 2026-11-11
 
 ## purpose
 
@@ -17,6 +17,7 @@ this repository owns machine bootstrap, shell setup, harness installation, and u
 - files under `programs/` are executable installer inventory, not a general script library
 - helpers invoked or sourced by installers belong under `dependencies/`
 - use a non-`.sh` extension for dependency helpers that must never match installer globs
+- on ubuntu, `programs/ubuntu/memwatch.sh` installs a root `memwatch.service` each boot (coder root disks reset on restart). it runs `configs/memwatch/memwatch.bash`, which writes per-boot memory samples, low-memory snapshots, and kernel, systemd, and coder agent journal lines to `~/.local/state/memwatch/` (older boots gzipped, 30 days, 300 MB cap)
 - `scripts/` holds operator scripts that a human runs by hand; `install.sh` never runs them
 - the per-minute cron `updaters/update-repos.sh` fast-forwards the managed repositories
 - after any run in which the set of repository heads differs from the last successful run, the cron runs `dependencies/post-update.bash`, which runs `dependencies/reconcile-opencode-links.bash` and `dependencies/ai-brain-secrets.bash sync`
