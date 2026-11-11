@@ -40,7 +40,11 @@ for repository in ${apt_repositories[@]}; do
 done
 
 safer-apt-fast update
-safer-apt-fast upgrade
+if hold-image-pinned-packages; then
+    safer-apt-fast upgrade
+else
+    echo "Skipping apt upgrade: could not hold image-pinned packages" >&2
+fi
 safer-apt-fast install "${packages[@]}"
 safer-apt-fast autoremove
 

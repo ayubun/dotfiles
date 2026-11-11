@@ -61,6 +61,16 @@ apt-with-recovery() {
     run-apt-command "${cmd[@]}" || { recover-apt && run-apt-command "${cmd[@]}"; }
 }
 
+# The Coder image pins Redis 7.2; Redis 8 rewrites ~/var/redis/dump.rdb in a format 7.2 cannot load after the next restart.
+hold-image-pinned-packages() {
+    local package status
+    for package in redis-server redis-tools; do
+        status=$(dpkg-query -W -f='${db:Status-Status}' "$package" 2>/dev/null) || continue
+        [[ "$status" == installed ]] || continue
+        sudo apt-mark -o DPkg::Lock::Timeout=$APT_LOCK_WAIT hold "$package" >/dev/null || return 1
+    done
+}
+
 safer-apt() {
     apt-with-recovery apt "$@"
 }
@@ -202,6 +212,7 @@ export -f unlock-apt-fast
 export -f recover-apt
 export -f run-apt-command
 export -f apt-with-recovery
+export -f hold-image-pinned-packages
 export -f safer-apt
 export -f safer-apt-fast
 export -f safer-add-apt-repository
