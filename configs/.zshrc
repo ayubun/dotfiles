@@ -289,7 +289,8 @@ if [ -f $HOME/work/.zshrc ]; then
 fi
 
 # Run neofetch on terminal login! (just looks kinda cool :3)
-if ! [[ "$TMUX" ]]; then
+# the -t 1 check skips it for captured shells such as the t3 code PATH probe, which times out after 5s
+if ! [[ "$TMUX" ]] && [[ -t 1 ]]; then
   # it's kind of annoying to run this when panes are smaller so ill only run it if it's not a tmux session :o
   neofetch
 fi
