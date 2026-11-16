@@ -22,7 +22,6 @@ casks=(
 formulae=(
   kubectl
   nano
-  neofetch # TODO: switch off neofetch
   onefetch
   fastfetch
   htop

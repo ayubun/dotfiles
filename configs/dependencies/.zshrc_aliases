@@ -26,7 +26,6 @@ else
 fi
 
 unalias neofetch &>/dev/null
-alias trueneofetch=$(which neofetch)
 which fastfetch &> /dev/null
 if [ $? -eq 0 ]; then
   alias neofetch="fastfetch"

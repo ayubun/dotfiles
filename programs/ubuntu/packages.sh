@@ -12,7 +12,6 @@ packages=(
   'unzip'
   'manpages-dev'
   'dnsutils'
-  # neofetch installed separately below (deprecated upstream, may be unavailable on Ubuntu 24.10+)
   'fastfetch'
   'onefetch'
   'net-tools'
@@ -88,10 +87,6 @@ for ((i = 0; i < total_packages; i += batch_size)); do
   safer-apt-fast install "${batch[@]}"
   echo "${RESET}${YELLOW_TEXT}[${BOLD}Install Batch ${i}${RESET}${YELLOW_TEXT}]${RESET}${BOLD}${BLUE_TEXT} Done${RESET}"
 done
-
-# neofetch is deprecated upstream and may not be in repos on Ubuntu 24.10+
-# Install separately so a missing package doesn't break the batch
-safer-apt-fast install neofetch 2>/dev/null || true
 
 safer-apt-fast autoremove
 

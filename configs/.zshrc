@@ -288,11 +288,11 @@ if [ -f $HOME/work/.zshrc ]; then
   . $HOME/work/.zshrc
 fi
 
-# Run neofetch on terminal login! (just looks kinda cool :3)
+# Run fastfetch on terminal login! (just looks kinda cool :3)
 # the -t 1 check skips it for captured shells such as the t3 code PATH probe, which times out after 5s
-if ! [[ "$TMUX" ]] && [[ -t 1 ]]; then
+if ! [[ "$TMUX" ]] && [[ -t 1 ]] && (( $+commands[fastfetch] )); then
   # it's kind of annoying to run this when panes are smaller so ill only run it if it's not a tmux session :o
-  neofetch
+  fastfetch
 fi
 
 # optional, greet also when opening shell directly in repository directory
