@@ -150,14 +150,14 @@ run = [
 if.app-id = 'com.hnc.DiscordPTB'
 run = [
   'layout tiling',
-  'move-node-to-workspace 5'
+  'move-node-to-workspace 8'
 ]
 
 [[on-window-detected]]
 if.app-id = 'com.discord.DesktopGpui'
 run = [
   'layout tiling',
-  'move-node-to-workspace 5'
+  'move-node-to-workspace 7'
 ]
 
 [[on-window-detected]]
@@ -205,7 +205,21 @@ run= [
 ]
 
 [[on-window-detected]]
-if.app-id="company.thebrowser.Browser"
+if.app-id="app.zen-browser.zen"
+run=[
+  "layout tiling",
+  "move-node-to-workspace 1"
+]
+
+[[on-window-detected]]
+if.app-id="com.apple.Safari"
+run=[
+  "layout tiling",
+  "move-node-to-workspace 1"
+]
+
+[[on-window-detected]]
+if.app-id="com.google.Chrome"
 run=[
   "layout tiling",
   "move-node-to-workspace 1"
