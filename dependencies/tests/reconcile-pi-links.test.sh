@@ -26,7 +26,8 @@ run_reconciler() {
 }
 
 snapshot() {
-  find "$PI_CODING_AGENT_DIR" -printf '%p %l %i\n' | sort
+  find "$PI_CODING_AGENT_DIR" -exec ls -di {} \; | sort
+  find "$PI_CODING_AGENT_DIR" -type l -exec readlink {} \; | sort
 }
 
 test_first_run_links_adapter_files() {
