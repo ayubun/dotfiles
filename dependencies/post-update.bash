@@ -21,6 +21,7 @@ if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
     fi
   fi
   "$HOME/.local/bin/ai-brain" secrets sync || status=1
+  bash "$dir/reconcile-claude-api-key-helper.bash" || status=1
 else
   status=1
 fi

@@ -9,7 +9,6 @@ status=0
 export PATH="$PATH:/opt/homebrew/bin:/usr/local/bin"
 settings="$HOME/.claude/settings.json"
 dotfiles_settings="$HOME/dotfiles/configs/claude/settings.json"
-api_key_helper='zsh ${HOME}/dotfiles/dependencies/claude-api-key.zsh'
 
 as_user() {
   if [[ $UID -eq 0 && -n "${ORIGINAL_USER:-}" && "$ORIGINAL_USER" != "root" ]]; then
@@ -19,19 +18,11 @@ as_user() {
   fi
 }
 
-has_key=false
-as_user zsh -lc '[[ -n "${ANTHROPIC_API_KEY:-}" ]]' && has_key=true
-
 # claude code writes settings.json itself, so keep a merged regular file instead of a symlink into this repo
 if ! command -v jq >/dev/null; then
   echo "jq is required to merge $dotfiles_settings into $settings" >&2
   status=1
-elif ! merged="$(jq -s --argjson has_key "$has_key" --arg helper "$api_key_helper" '
-    (.[0] // {}) * .[1] |
-    if $has_key and (.apiKeyHelper == null or .apiKeyHelper == $helper) then .apiKeyHelper = $helper
-    elif .apiKeyHelper == $helper then del(.apiKeyHelper)
-    else . end
-  ' <(if [[ -s "$settings" ]]; then cat "$settings"; else echo '{}'; fi) "$dotfiles_settings")"; then
+elif ! merged="$(jq -s '(.[0] // {}) * .[1]' <(if [[ -s "$settings" ]]; then cat "$settings"; else echo '{}'; fi) "$dotfiles_settings")"; then
   echo "failed to merge $dotfiles_settings into $settings" >&2
   status=1
 elif ! tmp="$(mktemp "${settings}.XXXXXX")"; then
@@ -48,6 +39,8 @@ else
     status=1
   fi
 fi
+# the apiKeyHelper follows the T3 claudeAgent mode; the post-update hook reruns this after every pull
+as_user bash "$HOME/dotfiles/dependencies/reconcile-claude-api-key-helper.bash" || status=1
 
 # claude code is not active, so remove stale skill and agent symlinks
 for kind in skills agents; do

@@ -18,6 +18,8 @@ setup_case() {
   : >"$log"
   printf '#!/bin/bash\nprintf "build\\n" >>"$CALLS"\n' >"$home/dotfiles/dependencies/ai-brain-cli.bash"
   printf '#!/bin/bash\nprintf "reconcile\\n" >>"$CALLS"\n' >"$home/dotfiles/dependencies/reconcile-opencode-links.bash"
+  printf '#!/bin/bash\nexit 0\n' >"$home/dotfiles/dependencies/reconcile-pi-links.bash"
+  printf '#!/bin/bash\nprintf "claude helper\\n" >>"$CALLS"\n' >"$home/dotfiles/dependencies/reconcile-claude-api-key-helper.bash"
   cp "$repo/dependencies/opencode-install.bash" "$home/dotfiles/dependencies/opencode-install.bash"
   mkdir -p "$home/ai-brain/adapters/opencode"
   printf '{"skills":["~/ai-brain/adapters/opencode/generated/skills"]}\n' >"$home/ai-brain/adapters/opencode/opencode.jsonc"
@@ -94,7 +96,7 @@ test_post_update_keeps_generation_before_secrets() {
   install_cli_stub
   cp "$repo/dependencies/post-update.bash" "$home/dotfiles/dependencies/post-update.bash"
   env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash "$home/dotfiles/dependencies/post-update.bash"
-  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] || fail "post-update changed step order"
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync\nclaude helper')" ]] || fail "post-update changed step order"
 }
 
 test_post_update_rejects_missing_generated_skills() {
@@ -108,7 +110,7 @@ test_post_update_rejects_missing_generated_skills() {
   fi
   [[ "$(<"$home/output")" == "post-update: generated skills are missing; opencode has no skills until ai-brain generate succeeds" ]] ||
     fail "post-update did not explain the missing skills"
-  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] ||
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync\nclaude helper')" ]] ||
     fail "post-update stopped before the secrets sync"
 }
 
@@ -125,7 +127,7 @@ test_post_update_allows_agents_only_generation_with_legacy_skill_roots() {
     fail "post-update rejected agents-only generation with legacy skill roots"
   [[ ! -s "$home/output" ]] || fail "post-update warned about unused generated skills"
   [[ ! -d "$home/ai-brain/adapters/opencode/generated/skills" ]] || fail "fixture generated skills"
-  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] ||
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync\nclaude helper')" ]] ||
     fail "post-update changed steps with legacy skill roots"
 }
 
@@ -160,7 +162,7 @@ test_post_update_skips_generation_for_opencode_one() {
   env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash \
     "$home/dotfiles/dependencies/post-update.bash" >"$home/output" 2>&1
   [[ ! -s "$home/output" ]] || fail "opencode 1 post-update did not skip silently"
-  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect secrets sync')" ]] || fail "post-update generated opencode 1 agents"
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect secrets sync\nclaude helper')" ]] || fail "post-update generated opencode 1 agents"
 }
 
 prepare_migration_script() {
