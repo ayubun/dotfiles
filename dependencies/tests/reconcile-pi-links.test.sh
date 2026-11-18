@@ -17,6 +17,7 @@ setup() {
   mkdir -p "$AI_BRAIN_PI_ADAPTER_ROOT/extensions"
   printf '{}\n' >"$AI_BRAIN_PI_ADAPTER_ROOT/settings.json"
   printf '{}\n' >"$AI_BRAIN_PI_ADAPTER_ROOT/models.json"
+  printf '{}\n' >"$AI_BRAIN_PI_ADAPTER_ROOT/subagent-config.json"
   printf 'export default () => {}\n' >"$AI_BRAIN_PI_ADAPTER_ROOT/extensions/old.ts"
   printf 'export default () => {}\n' >"$AI_BRAIN_PI_ADAPTER_ROOT/extensions/keep.ts"
 }
@@ -38,6 +39,8 @@ test_first_run_links_adapter_files() {
     assert_equal "$(readlink "$PI_CODING_AGENT_DIR/$name")" "$AI_BRAIN_PI_ADAPTER_ROOT/$name"
   done
   [[ -d "$PI_CODING_AGENT_DIR/extensions" && ! -L "$PI_CODING_AGENT_DIR/extensions" ]] || fail "extensions is not a real directory"
+  assert_equal "$(readlink "$PI_CODING_AGENT_DIR/extensions/subagent/config.json")" "$AI_BRAIN_PI_ADAPTER_ROOT/subagent-config.json"
+  [[ -d "$PI_CODING_AGENT_DIR/extensions/subagent" && ! -L "$PI_CODING_AGENT_DIR/extensions/subagent" ]] || fail "subagent is not a real directory"
   assert_equal "$(find "$PI_CODING_AGENT_DIR" -mindepth 1 -maxdepth 1 | wc -l | tr -d ' ')" "3"
 }
 
@@ -52,7 +55,8 @@ test_second_run_keeps_inodes_and_targets() {
 
 test_machine_overrides_and_foreign_extensions_stay() {
   setup overrides
-  mkdir -p "$PI_CODING_AGENT_DIR/extensions"
+  mkdir -p "$PI_CODING_AGENT_DIR/extensions/subagent"
+  printf 'local subagent config\n' >"$PI_CODING_AGENT_DIR/extensions/subagent/config.json"
   printf 'local settings\n' >"$PI_CODING_AGENT_DIR/settings.json"
   printf 'local extension\n' >"$PI_CODING_AGENT_DIR/extensions/local.ts"
   ln -s "$TEST_ROOT/foreign.ts" "$PI_CODING_AGENT_DIR/extensions/foreign.ts"
@@ -61,6 +65,8 @@ test_machine_overrides_and_foreign_extensions_stay() {
   assert_equal "$(<"$PI_CODING_AGENT_DIR/settings.json")" "local settings"
   assert_equal "$(<"$PI_CODING_AGENT_DIR/extensions/local.ts")" "local extension"
   assert_equal "$(<"$PI_CODING_AGENT_DIR/extensions/keep.ts")" "local keep override"
+  assert_equal "$(<"$PI_CODING_AGENT_DIR/extensions/subagent/config.json")" "local subagent config"
+  [[ ! -L "$PI_CODING_AGENT_DIR/extensions/subagent/config.json" ]] || fail "local subagent config became a link"
   assert_equal "$(readlink "$PI_CODING_AGENT_DIR/extensions/foreign.ts")" "$TEST_ROOT/foreign.ts"
 }
 
@@ -68,6 +74,7 @@ test_removed_extension_is_pruned_without_touching_other_resources() {
   setup pruning
   run_reconciler
   mkdir -p "$PI_CODING_AGENT_DIR/extensions/subagent"
+  rm -f "$PI_CODING_AGENT_DIR/extensions/subagent/config.json"
   printf '{}\n' >"$PI_CODING_AGENT_DIR/extensions/subagent/config.json"
   ln -s "$HOME/ai-brain/old.json" "$PI_CODING_AGENT_DIR/extensions/old.json"
   local name

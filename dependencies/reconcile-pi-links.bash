@@ -25,6 +25,8 @@ reconcile_sources() {
     link_file "$src" "$PI_AGENT_DIR/extensions/$name"
   done
   prune_stale "$PI_AGENT_DIR/extensions" "$wanted"
+  prepare_dest "$PI_AGENT_DIR/extensions/subagent"
+  link_file "$AI_BRAIN_PI_ADAPTER_ROOT/subagent-config.json" "$PI_AGENT_DIR/extensions/subagent/config.json"
 }
 
 prepare_dest() {
