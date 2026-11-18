@@ -1,5 +1,10 @@
 #!/bin/bash
 
+as_user=()
+if [[ $UID -eq 0 && -n "${ORIGINAL_USER:-}" && "$ORIGINAL_USER" != "root" ]]; then
+  as_user=(sudo -u "$ORIGINAL_USER" -H)
+fi
+
 # opencode reads config from ~/.config/opencode/ (XDG), not ~/.opencode/.
 # Fix ownership in case a previous root-based install left these root-owned.
 sudo chown -R "${ORIGINAL_USER:-$USER}" "$HOME/.config/opencode" 2>/dev/null || true
@@ -43,4 +48,4 @@ done
 
 # the reconciler owns the config, plugins, and lib symlinks; ai-brain generate owns the agent links
 bash "$HOME/dotfiles/dependencies/reconcile-opencode-links.bash"
-[[ -x "$HOME/.local/bin/ai-brain" ]] && "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
+[[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
