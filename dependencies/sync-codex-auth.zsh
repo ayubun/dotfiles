@@ -4,6 +4,19 @@ set -euo pipefail
 
 [[ -n "${OPENAI_API_KEY:-}" ]] || exit 0
 
+# Subscription mode keeps the `codex login` (ChatGPT) in auth.json; exit 3 means ai-brain does not manage codex.
+cli="$HOME/.local/bin/ai-brain"
+if [[ -x "$cli" ]]; then
+  mode_status=0
+  mode="$("$cli" secrets provider-mode codex 2>/dev/null)" || mode_status=$?
+  if (( mode_status == 0 )); then
+    [[ "$mode" == subscription ]] && exit 0
+  elif (( mode_status != 3 )); then
+    print -u2 "cannot read the codex mode from ai-brain (exit $mode_status); codex auth is unchanged"
+    exit 1
+  fi
+fi
+
 codex="$HOME/.local/bin/codex"
 auth="${CODEX_HOME:-$HOME/.codex}/auth.json"
 if [[ ! -x "$codex" ]]; then

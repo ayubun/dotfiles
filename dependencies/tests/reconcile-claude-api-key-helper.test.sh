@@ -96,22 +96,24 @@ test_api_key_mode_without_a_key_removes_the_helper() {
 }
 
 test_an_unreadable_mode_leaves_the_file_unchanged() {
-  setup_case
-  jq -n --arg helper "$helper" '{apiKeyHelper:$helper}' >"$settings"
-  local before
-  before="$(<"$settings")"
-  if run_reconcile subscription 1; then
-    fail "reconcile accepted a failed provider-mode"
-  fi
-  [[ "$(<"$settings")" == "$before" ]] || fail "a failed provider-mode changed the settings"
-  grep -q 'unchanged' "$home/output" || fail "a failed provider-mode was not reported"
+  local status before
+  for status in 1 2; do
+    setup_case
+    jq -n --arg helper "$helper" '{apiKeyHelper:$helper}' >"$settings"
+    before="$(<"$settings")"
+    if run_reconcile subscription "$status"; then
+      fail "reconcile accepted provider-mode exit $status"
+    fi
+    [[ "$(<"$settings")" == "$before" ]] || fail "provider-mode exit $status changed the settings"
+    grep -q 'unchanged' "$home/output" || fail "provider-mode exit $status was not reported"
+  done
   pass
 }
 
 test_an_unmanaged_instance_keeps_the_api_key_behavior() {
   setup_case
   printf '{}\n' >"$settings"
-  run_reconcile '' 2 || fail "reconcile for an unmanaged instance failed"
+  run_reconcile '' 3 || fail "reconcile for an unmanaged instance failed"
   [[ "$(helper_value)" == "$helper" ]] || fail "an unmanaged claudeAgent did not keep the helper"
   pass
 }

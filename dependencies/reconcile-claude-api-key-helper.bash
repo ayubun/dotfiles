@@ -16,8 +16,8 @@ if [[ -x "$cli" ]]; then
   mode="$("$cli" secrets provider-mode claudeAgent)"
   case $? in
     0) ;;
-    # The config does not manage claudeAgent, so the helper keeps its behavior from before T3.
-    2) mode=api-key ;;
+    # Exit 3 means the config does not manage claudeAgent, so the helper keeps its behavior from before T3.
+    3) mode=api-key ;;
     *)
       printf 'reconcile-claude-api-key-helper: cannot read the claudeAgent mode; %s is unchanged\n' "$settings" >&2
       exit 1
