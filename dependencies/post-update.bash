@@ -10,6 +10,7 @@ status=0
 
 bash "$dir/ai-brain-cli.bash" build || status=1
 bash "$dir/reconcile-opencode-links.bash" || status=1
+bash "$dir/reconcile-pi-links.bash" || status=1
 if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
   if [[ "$(opencode_major_for_adapter "$HOME/ai-brain/adapters/opencode")" == 2 ]]; then
     "$HOME/.local/bin/ai-brain" generate || status=1
