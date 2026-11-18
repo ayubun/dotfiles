@@ -53,5 +53,5 @@ if [[ ${#as_user[@]} -gt 0 ]]; then
   sudo chown -R "$ORIGINAL_USER" "$HOME/.config/opencode" 2>/dev/null || true
 fi
 if [[ "$major" == 2 ]]; then
-  [[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
+  [[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents and skills are generated on the next update\n' >&2
 fi

@@ -24,7 +24,7 @@ setup_case() {
 }
 
 install_cli_stub() {
-  printf '#!/bin/bash\nprintf "%%s %%s\\n" "${RUN_AS:-direct}" "$*" >>"$CALLS"\n' >"$home/.local/bin/ai-brain"
+  printf '#!/bin/bash\nprintf "%%s %%s\\n" "${RUN_AS:-direct}" "$*" >>"$CALLS"\nif [[ "$1" == generate ]]; then mkdir -p "$HOME/ai-brain/adapters/opencode/generated/skills"; fi\n' >"$home/.local/bin/ai-brain"
   chmod +x "$home/.local/bin/ai-brain"
 }
 
@@ -95,6 +95,21 @@ test_post_update_keeps_generation_before_secrets() {
   cp "$repo/dependencies/post-update.bash" "$home/dotfiles/dependencies/post-update.bash"
   env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash "$home/dotfiles/dependencies/post-update.bash"
   [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] || fail "post-update changed step order"
+}
+
+test_post_update_rejects_missing_generated_skills() {
+  setup_case
+  printf '#!/bin/bash\nprintf "%%s %%s\\n" "${RUN_AS:-direct}" "$*" >>"$CALLS"\n' >"$home/.local/bin/ai-brain"
+  chmod +x "$home/.local/bin/ai-brain"
+  cp "$repo/dependencies/post-update.bash" "$home/dotfiles/dependencies/post-update.bash"
+  if env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash \
+    "$home/dotfiles/dependencies/post-update.bash" >"$home/output" 2>&1; then
+    fail "post-update accepted missing generated skills"
+  fi
+  [[ "$(<"$home/output")" == "post-update: generated skills are missing; opencode has no skills until ai-brain generate succeeds" ]] ||
+    fail "post-update did not explain the missing skills"
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] ||
+    fail "post-update stopped before the secrets sync"
 }
 
 use_opencode_one_adapter() {
@@ -203,6 +218,7 @@ test_opencode_repairs_config_ownership_after_reconciling_and_before_generating
 test_install_skips_generation_without_a_binary
 test_post_update_skips_a_missing_binary
 test_post_update_keeps_generation_before_secrets
+test_post_update_rejects_missing_generated_skills
 test_opencode_one_install_skips_generation
 test_ai_brain_install_skips_generation_for_opencode_one
 test_post_update_skips_generation_for_opencode_one
@@ -210,4 +226,4 @@ test_cutover_generates_agents_after_reconciling
 test_sandbox_generates_agents_from_its_adapter_into_its_config
 test_cutover_finishes_with_a_warning_when_generate_fails
 test_sandbox_finishes_with_a_warning_when_generate_fails
-printf 'ok: 12 tests passed\n'
+printf 'ok: 13 tests passed\n'
