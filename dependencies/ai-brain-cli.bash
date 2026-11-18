@@ -49,13 +49,14 @@ source_hash() {
 }
 
 build_if_stale() {
+  local skip_failed="$1"
   [[ -f "$workspace/Cargo.toml" ]] || { warn "missing $workspace/Cargo.toml"; return 1; }
   local hash previous="" failed=""
   hash="$(source_hash)" || return 1
   [[ -f "$stamp" ]] && IFS= read -r previous <"$stamp"
   [[ "$previous" == "$hash" && -x "$bin_dir/ai-brain" ]] && return 0
   [[ -f "$failed_stamp" ]] && IFS= read -r failed <"$failed_stamp"
-  if [[ "$failed" == "$hash" ]]; then
+  if [[ "$skip_failed" == true && "$failed" == "$hash" ]]; then
     warn "source unchanged since failed build; skipping"
     return 1
   fi
@@ -75,7 +76,8 @@ build_if_stale() {
 }
 
 case "${1:-}" in
-  ensure) ensure_cargo && build_if_stale ;;
-  build) build_if_stale ;;
+  # only the cron path skips a failed source, so a manual ensure always retries
+  ensure) ensure_cargo && build_if_stale false ;;
+  build) build_if_stale true ;;
   *) echo "usage: ai-brain-cli.bash ensure|build" >&2; exit 2 ;;
 esac

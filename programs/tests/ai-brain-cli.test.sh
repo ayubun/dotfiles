@@ -192,6 +192,19 @@ test_source_change_after_failure_rebuilds() {
   [[ -x "$home/.local/bin/ai-brain" ]] || fail "changed source did not install the binary"
 }
 
+test_ensure_retries_an_unchanged_failed_source() {
+  setup_case
+  cargo_behavior=fail
+  if run_helper build >"$case_dir/output" 2>&1; then
+    fail "failed cargo build reported success"
+  fi
+  cargo_behavior=success
+  run_helper ensure
+  assert_equal "$(cargo_calls)" 3
+  [[ -x "$home/.local/bin/ai-brain" ]] || fail "ensure did not install the binary after a failed build"
+  [[ ! -e "$failed_stamp" ]] || fail "ensure kept the failed source stamp"
+}
+
 test_success_removes_failed_stamp() {
   setup_case
   mkdir -p "${failed_stamp%/*}"
@@ -235,8 +248,9 @@ test_offline_failure_falls_back_to_online_build
 test_failed_build_keeps_stamp
 test_unchanged_failed_source_skips_build
 test_source_change_after_failure_rebuilds
+test_ensure_retries_an_unchanged_failed_source
 test_success_removes_failed_stamp
 test_work_devbox_without_cargo_does_not_install_rustup
 test_non_work_machine_without_cargo_installs_rustup
 
-printf 'ok: 12 tests passed\n'
+printf 'ok: 13 tests passed\n'
