@@ -35,7 +35,7 @@ else
   zsh -lc 'zsh "$HOME/dotfiles/dependencies/sync-opencode-auth.zsh"'
 fi
 
-mkdir -p "$HOME/.config/opencode"
+${as_user[@]+"${as_user[@]}"} mkdir -p "$HOME/.config/opencode"
 
 # ai-brain no longer symlinks these; remove dangling links left by earlier installs
 for stale in "$HOME/.config/opencode/AGENTS.md" "$HOME/.config/opencode/skills"; do
@@ -48,6 +48,10 @@ done
 
 # the reconciler owns the config, plugins, and lib symlinks; ai-brain generate owns the agent links
 bash "$HOME/dotfiles/dependencies/reconcile-opencode-links.bash"
+# a root install creates the reconciled links as root, and generate runs as the original user
+if [[ ${#as_user[@]} -gt 0 ]]; then
+  sudo chown -R "$ORIGINAL_USER" "$HOME/.config/opencode" 2>/dev/null || true
+fi
 if [[ "$major" == 2 ]]; then
   [[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
 fi

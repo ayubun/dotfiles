@@ -38,7 +38,7 @@ prepare_opencode_program() {
   install_cli_stub
   printf 'opencode_latest_v2_version() { echo 2.3.0; }\nopencode_version_lt() { return 1; }\nopencode_installed_version() { echo 2.3.0; }\n' \
     >>"$home/dotfiles/dependencies/opencode-install.bash"
-  printf '#!/bin/bash\nif [[ "$1" == chown ]]; then exit 0; fi\n[[ "$1" == -u && "$2" == fixture && "$3" == -H ]] || exit 99\nshift 3\nRUN_AS=fixture "$@"\n' >"$home/stubs/sudo"
+  printf '#!/bin/bash\nif [[ "$1" == chown ]]; then printf "chown %%s\\n" "${@: -1}" >>"$CALLS"; exit 0; fi\n[[ "$1" == -u && "$2" == fixture && "$3" == -H ]] || exit 99\nshift 3\nRUN_AS=fixture "$@"\n' >"$home/stubs/sudo"
   for command in curl zsh; do
     printf '#!/bin/bash\nexit 0\n' >"$home/stubs/$command"
     chmod +x "$home/stubs/$command"
@@ -52,7 +52,14 @@ prepare_opencode_program() {
 test_opencode_generates_as_the_original_user() {
   prepare_opencode_program
   run_program
-  [[ "$(<"$log")" == "$(printf 'reconcile\nfixture generate')" ]] || fail "opencode did not generate as the original user"
+  grep -q '^fixture generate$' "$log" || fail "opencode did not generate as the original user"
+}
+
+test_opencode_repairs_config_ownership_after_reconciling_and_before_generating() {
+  prepare_opencode_program
+  run_program
+  [[ "$(sed -n '/^reconcile$/,$p' "$log")" == "$(printf 'reconcile\nchown %s/.config/opencode\nfixture generate' "$home")" ]] ||
+    fail "opencode did not repair config ownership between reconcile and generate"
 }
 
 prepare_ai_brain_program() {
@@ -100,7 +107,8 @@ test_opencode_one_install_skips_generation() {
   use_opencode_one_adapter
   run_program >"$home/output" 2>&1
   [[ ! -s "$home/output" ]] || fail "opencode 1 install did not skip silently"
-  [[ "$(<"$log")" == reconcile ]] || fail "opencode 1 install generated agents"
+  grep -qx reconcile "$log" || fail "opencode 1 install did not reconcile"
+  ! grep -q generate "$log" || fail "opencode 1 install generated agents"
 }
 
 test_ai_brain_install_skips_generation_for_opencode_one() {
@@ -191,6 +199,7 @@ if [[ $# -gt 0 ]]; then
 fi
 
 test_opencode_generates_as_the_original_user
+test_opencode_repairs_config_ownership_after_reconciling_and_before_generating
 test_install_skips_generation_without_a_binary
 test_post_update_skips_a_missing_binary
 test_post_update_keeps_generation_before_secrets
@@ -201,4 +210,4 @@ test_cutover_generates_agents_after_reconciling
 test_sandbox_generates_agents_from_its_adapter_into_its_config
 test_cutover_finishes_with_a_warning_when_generate_fails
 test_sandbox_finishes_with_a_warning_when_generate_fails
-printf 'ok: 11 tests passed\n'
+printf 'ok: 12 tests passed\n'
