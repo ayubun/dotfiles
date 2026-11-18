@@ -56,7 +56,8 @@ build_if_stale() {
   [[ -f "$stamp" ]] && IFS= read -r previous <"$stamp"
   [[ "$previous" == "$hash" && -x "$bin_dir/ai-brain" ]] && return 0
   [[ -f "$failed_stamp" ]] && IFS= read -r failed <"$failed_stamp"
-  if [[ "$skip_failed" == true && "$failed" == "$hash" ]]; then
+  if [[ "$skip_failed" == true && "$failed" == "$hash" ]] &&
+      find "$failed_stamp" -mmin -360 | grep -q .; then
     warn "source unchanged since failed build; skipping"
     return 1
   fi
