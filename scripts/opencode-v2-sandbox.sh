@@ -41,8 +41,7 @@ if [[ "$("$sandbox/bin/opencode" --version 2>/dev/null || true)" != *"$version"*
   opencode_install 2 "$sandbox/bin" "$version"
 fi
 
-# The wrapper owns the XDG roots and restores the tmux window name on exit,
-# matching the opencode() shell function for the primary install.
+# The wrapper owns the XDG roots of the sandbox install.
 cat >"$sandbox/bin/opencode-v2.new" <<'EOF'
 #!/usr/bin/env bash
 set -uo pipefail
@@ -53,25 +52,7 @@ export XDG_DATA_HOME="$sandbox/data"
 export XDG_STATE_HOME="$sandbox/state"
 export XDG_CACHE_HOME="$sandbox/cache"
 
-window_name=""
-automatic_rename=""
-if [[ -n "${TMUX:-}" && -n "${TMUX_PANE:-}" ]]; then
-  window_name="$(tmux display-message -t "$TMUX_PANE" -p '#{window_name}' 2>/dev/null || true)"
-  automatic_rename="$(tmux show-window-options -t "$TMUX_PANE" -v automatic-rename 2>/dev/null || true)"
-fi
-
-"$sandbox/bin/opencode" "$@"
-exit_code=$?
-
-if [[ -n "$window_name" && -n "${TMUX_PANE:-}" ]]; then
-  tmux rename-window -t "$TMUX_PANE" -- "$window_name" 2>/dev/null
-  if [[ "$automatic_rename" == "on" || "$automatic_rename" == "off" ]]; then
-    tmux set-window-option -t "$TMUX_PANE" automatic-rename "$automatic_rename" 2>/dev/null
-  else
-    tmux set-window-option -u -t "$TMUX_PANE" automatic-rename 2>/dev/null
-  fi
-fi
-exit "$exit_code"
+exec "$sandbox/bin/opencode" "$@"
 EOF
 chmod 755 "$sandbox/bin/opencode-v2.new"
 mv -f "$sandbox/bin/opencode-v2.new" "$sandbox/bin/opencode-v2"
