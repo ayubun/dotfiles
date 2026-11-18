@@ -5,12 +5,15 @@
 set -uo pipefail
 
 dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+source "$dir/opencode-install.bash"
 status=0
 
 bash "$dir/ai-brain-cli.bash" build || status=1
 bash "$dir/reconcile-opencode-links.bash" || status=1
 if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
-  "$HOME/.local/bin/ai-brain" generate || status=1
+  if [[ "$(opencode_major_for_adapter "$HOME/ai-brain/adapters/opencode")" == 2 ]]; then
+    "$HOME/.local/bin/ai-brain" generate || status=1
+  fi
   "$HOME/.local/bin/ai-brain" secrets sync || status=1
 else
   status=1

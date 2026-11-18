@@ -48,4 +48,6 @@ done
 
 # the reconciler owns the config, plugins, and lib symlinks; ai-brain generate owns the agent links
 bash "$HOME/dotfiles/dependencies/reconcile-opencode-links.bash"
-[[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
+if [[ "$major" == 2 ]]; then
+  [[ -x "$HOME/.local/bin/ai-brain" ]] && ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2
+fi

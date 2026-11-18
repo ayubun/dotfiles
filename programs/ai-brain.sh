@@ -52,9 +52,12 @@ fi
 
 # runs before programs/rust.sh, so the helper installs a toolchain when the machine has none
 ${as_user[@]+"${as_user[@]}"} bash "$HOME/dotfiles/dependencies/ai-brain-cli.bash" ensure || printf 'warning: failed to build the ai-brain cli\n' >&2
+source "$HOME/dotfiles/dependencies/opencode-install.bash"
 if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
   ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" secrets sync || printf 'warning: failed to sync ai-brain secrets\n' >&2
-  ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: failed to run ai-brain generate\n' >&2
+  if [[ "$(opencode_major_for_adapter "$HOME/ai-brain/adapters/opencode")" == 2 ]]; then
+    ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: failed to run ai-brain generate\n' >&2
+  fi
 else
-  printf 'warning: the ai-brain cli is not installed; skipping the secrets sync\n' >&2
+  printf 'warning: the ai-brain cli is not installed; skipping the secrets sync and agent generation\n' >&2
 fi

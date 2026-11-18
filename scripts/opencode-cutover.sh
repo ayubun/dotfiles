@@ -94,6 +94,7 @@ for name in opencode.json package.json package-lock.json bun.lock node_modules; 
 done
 
 bash "$script_dir/../dependencies/reconcile-opencode-links.bash"
+[[ -x "$HOME/.local/bin/ai-brain" ]] && "$HOME/.local/bin/ai-brain" generate
 
 cat <<EOF
 
