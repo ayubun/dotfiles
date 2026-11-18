@@ -20,7 +20,7 @@ setup_case() {
   printf '#!/bin/bash\nprintf "reconcile\\n" >>"$CALLS"\n' >"$home/dotfiles/dependencies/reconcile-opencode-links.bash"
   cp "$repo/dependencies/opencode-install.bash" "$home/dotfiles/dependencies/opencode-install.bash"
   mkdir -p "$home/ai-brain/adapters/opencode"
-  printf '{}\n' >"$home/ai-brain/adapters/opencode/opencode.jsonc"
+  printf '{"skills":["~/ai-brain/adapters/opencode/generated/skills"]}\n' >"$home/ai-brain/adapters/opencode/opencode.jsonc"
 }
 
 install_cli_stub() {
@@ -110,6 +110,23 @@ test_post_update_rejects_missing_generated_skills() {
     fail "post-update did not explain the missing skills"
   [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] ||
     fail "post-update stopped before the secrets sync"
+}
+
+test_post_update_allows_agents_only_generation_with_legacy_skill_roots() {
+  setup_case
+  printf '{"skills":["~/ai-brain/skills","~/ai-brain/adapters/opencode/skills","~/ai-brain-discord/skills"]}\n' \
+    >"$home/ai-brain/adapters/opencode/opencode.jsonc"
+  printf '#!/bin/bash\nprintf "%%s %%s\\n" "${RUN_AS:-direct}" "$*" >>"$CALLS"\nif [[ "$1" == generate ]]; then mkdir -p "$HOME/ai-brain/adapters/opencode/generated/agents"; fi\n' \
+    >"$home/.local/bin/ai-brain"
+  chmod +x "$home/.local/bin/ai-brain"
+  cp "$repo/dependencies/post-update.bash" "$home/dotfiles/dependencies/post-update.bash"
+  env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash \
+    "$home/dotfiles/dependencies/post-update.bash" >"$home/output" 2>&1 ||
+    fail "post-update rejected agents-only generation with legacy skill roots"
+  [[ ! -s "$home/output" ]] || fail "post-update warned about unused generated skills"
+  [[ ! -d "$home/ai-brain/adapters/opencode/generated/skills" ]] || fail "fixture generated skills"
+  [[ "$(<"$log")" == "$(printf 'build\nreconcile\ndirect generate\ndirect secrets sync')" ]] ||
+    fail "post-update changed steps with legacy skill roots"
 }
 
 use_opencode_one_adapter() {
@@ -219,6 +236,7 @@ test_install_skips_generation_without_a_binary
 test_post_update_skips_a_missing_binary
 test_post_update_keeps_generation_before_secrets
 test_post_update_rejects_missing_generated_skills
+test_post_update_allows_agents_only_generation_with_legacy_skill_roots
 test_opencode_one_install_skips_generation
 test_ai_brain_install_skips_generation_for_opencode_one
 test_post_update_skips_generation_for_opencode_one
@@ -226,4 +244,4 @@ test_cutover_generates_agents_after_reconciling
 test_sandbox_generates_agents_from_its_adapter_into_its_config
 test_cutover_finishes_with_a_warning_when_generate_fails
 test_sandbox_finishes_with_a_warning_when_generate_fails
-printf 'ok: 13 tests passed\n'
+printf 'ok: 14 tests passed\n'

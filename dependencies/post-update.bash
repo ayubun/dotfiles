@@ -13,7 +13,8 @@ bash "$dir/reconcile-opencode-links.bash" || status=1
 if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
   if [[ "$(opencode_major_for_adapter "$HOME/ai-brain/adapters/opencode")" == 2 ]]; then
     "$HOME/.local/bin/ai-brain" generate || status=1
-    if [[ ! -d "$HOME/ai-brain/adapters/opencode/generated/skills" ]]; then
+    if grep -q 'adapters/opencode/generated/skills' "$HOME/ai-brain/adapters/opencode/opencode.jsonc" &&
+      [[ ! -d "$HOME/ai-brain/adapters/opencode/generated/skills" ]]; then
       printf 'post-update: generated skills are missing; opencode has no skills until ai-brain generate succeeds\n' >&2
       status=1
     fi
