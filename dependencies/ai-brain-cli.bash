@@ -7,6 +7,7 @@ workspace="$repo/tools/cli"
 bin_dir="$HOME/.local/bin"
 state_dir="$HOME/.local/state/ai-brain"
 stamp="$state_dir/cli-source.hash"
+failed_stamp="$state_dir/cli-source.failed"
 os_type="${AI_BRAIN_CLI_OSTYPE:-$OSTYPE}"
 
 warn() { printf 'ai-brain-cli: %s\n' "$*" >&2; }
@@ -49,17 +50,28 @@ source_hash() {
 
 build_if_stale() {
   [[ -f "$workspace/Cargo.toml" ]] || { warn "missing $workspace/Cargo.toml"; return 1; }
-  local hash previous=""
+  local hash previous="" failed=""
   hash="$(source_hash)" || return 1
   [[ -f "$stamp" ]] && IFS= read -r previous <"$stamp"
   [[ "$previous" == "$hash" && -x "$bin_dir/ai-brain" ]] && return 0
+  [[ -f "$failed_stamp" ]] && IFS= read -r failed <"$failed_stamp"
+  if [[ "$failed" == "$hash" ]]; then
+    warn "source unchanged since failed build; skipping"
+    return 1
+  fi
   load_cargo || { warn "cargo not found"; return 1; }
-  # Stay offline unless Cargo.lock names a crate that is not cached yet.
+  mkdir -p "$state_dir" || return 1
+  # Try offline first, then retry online after any offline build failure.
   cargo build --release --locked --offline --manifest-path "$workspace/Cargo.toml" ||
-    cargo build --release --locked --manifest-path "$workspace/Cargo.toml" || { warn "build failed"; return 1; }
+    cargo build --release --locked --manifest-path "$workspace/Cargo.toml" || {
+      printf '%s\n' "$hash" >"$failed_stamp"
+      warn "build failed"
+      return 1
+    }
   mkdir -p "$bin_dir" "$state_dir"
   cp "$workspace/target/release/ai-brain" "$bin_dir/.ai-brain.tmp" && mv -f "$bin_dir/.ai-brain.tmp" "$bin_dir/ai-brain" || return 1
-  printf '%s\n' "$hash" >"$stamp"
+  printf '%s\n' "$hash" >"$stamp" || return 1
+  rm -f "$failed_stamp"
 }
 
 case "${1:-}" in

@@ -25,6 +25,7 @@ setup_case() {
   cargo_log="$case_dir/cargo.log"
   curl_log="$case_dir/curl.log"
   stamp="$home/.local/state/ai-brain/cli-source.hash"
+  failed_stamp="$home/.local/state/ai-brain/cli-source.failed"
   mkdir -p "$home" "$repo/tools/cli/src" "$stubs"
   printf '[workspace]\n' >"$repo/tools/cli/Cargo.toml"
   printf 'fn main() {}\n' >"$repo/tools/cli/src/main.rs"
@@ -163,6 +164,43 @@ test_failed_build_keeps_stamp() {
   assert_equal "$("$home/.local/bin/ai-brain")" "fixture ai-brain"
 }
 
+test_unchanged_failed_source_skips_build() {
+  setup_case
+  cargo_behavior=fail
+  if run_helper build >"$case_dir/output" 2>&1; then
+    fail "failed cargo build reported success"
+  fi
+  assert_equal "$(cargo_calls)" 2
+  if run_helper build >"$case_dir/output" 2>&1; then
+    fail "unchanged failed source reported success"
+  fi
+  assert_equal "$(cargo_calls)" 2
+  [[ -s "$failed_stamp" ]] || fail "failed source stamp was not written"
+}
+
+test_source_change_after_failure_rebuilds() {
+  setup_case
+  cargo_behavior=fail
+  if run_helper build >"$case_dir/output" 2>&1; then
+    fail "failed cargo build reported success"
+  fi
+  [[ -s "$failed_stamp" ]] || fail "failed source stamp was not written"
+  printf 'changed\n' >>"$repo/tools/cli/src/main.rs"
+  cargo_behavior=success
+  run_helper build
+  assert_equal "$(cargo_calls)" 3
+  [[ -x "$home/.local/bin/ai-brain" ]] || fail "changed source did not install the binary"
+}
+
+test_success_removes_failed_stamp() {
+  setup_case
+  mkdir -p "${failed_stamp%/*}"
+  printf 'older failed source\n' >"$failed_stamp"
+  run_helper build
+  [[ ! -e "$failed_stamp" ]] || fail "successful build kept the failed source stamp"
+  [[ -s "$stamp" ]] || fail "successful build did not write the source stamp"
+}
+
 test_work_devbox_without_cargo_does_not_install_rustup() {
   setup_case
   mkdir -p "$home/work"
@@ -195,7 +233,10 @@ test_target_dir_changes_do_not_rebuild
 test_missing_binary_rebuilds
 test_offline_failure_falls_back_to_online_build
 test_failed_build_keeps_stamp
+test_unchanged_failed_source_skips_build
+test_source_change_after_failure_rebuilds
+test_success_removes_failed_stamp
 test_work_devbox_without_cargo_does_not_install_rustup
 test_non_work_machine_without_cargo_installs_rustup
 
-printf 'ok: 9 tests passed\n'
+printf 'ok: 12 tests passed\n'
