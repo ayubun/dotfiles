@@ -57,3 +57,4 @@ if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
 else
   printf 'warning: the ai-brain cli is not installed; skipping the secrets sync\n' >&2
 fi
+${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" generate || printf 'warning: failed to run ai-brain generate\n' >&2

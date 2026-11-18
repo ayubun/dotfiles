@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Aggregates the ai-brain opencode config, agents, plugins, and lib files into
+# Aggregates the ai-brain opencode config, plugins, and lib files into
 # ~/.config/opencode as symlinks. Handles both adapter shapes: OpenCode 1
 # (opencode.json, plugin files, a plugin array) and OpenCode 2 (opencode.jsonc,
 # plugin files and directories, no plugin array). OPENCODE_CONFIG_ROOT and
@@ -10,6 +10,7 @@
 # wanted name is a per-machine override and wins. Links at other names that
 # point outside the ai-brain repositories are per-machine additions and stay.
 # Safe unattended: no sudo, no network.
+# Agents are linked by `ai-brain generate`.
 
 set -euo pipefail
 
@@ -78,17 +79,6 @@ reconcile() {
   done
   prune_stale "$dest" "$wanted"
 }
-
-# First source wins for a duplicate agent name, so discord overrides ai-brain.
-agent_sources=()
-for src in "$HOME/ai-brain-discord/agents" "$adapter_root/agents"; do
-  [[ -d "$src" ]] || continue
-  agent_sources+=("$src"/*.md)
-done
-# A cloned discord repo whose agents/ is transiently missing must not prune its agents.
-if [[ -d "$adapter_root/agents" ]] && ! [[ -d "$HOME/ai-brain-discord" && ! -d "$HOME/ai-brain-discord/agents" ]]; then
-  reconcile "$config_root/agents" ${agent_sources[@]+"${agent_sources[@]}"}
-fi
 
 # Exactly one global config link: the adapter's opencode.jsonc (OpenCode 2) or
 # opencode.json (OpenCode 1). The other name is pruned when it points into ai-brain.

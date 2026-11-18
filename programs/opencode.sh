@@ -41,6 +41,6 @@ done
 
 "$HOME/.local/bin/ocx" init --global --quiet
 
-# the reconciler owns the config, agents, plugins, and lib symlinks so the
-# repo updater can rerun it after every fast-forward
+# the reconciler owns the config, plugins, and lib symlinks; ai-brain generate owns the agent links
 bash "$HOME/dotfiles/dependencies/reconcile-opencode-links.bash"
+[[ -x "$HOME/.local/bin/ai-brain" ]] && "$HOME/.local/bin/ai-brain" generate || printf 'warning: ai-brain generate did not run; agents are linked on the next update\n' >&2

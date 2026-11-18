@@ -9,6 +9,7 @@ status=0
 
 bash "$dir/ai-brain-cli.bash" build || status=1
 bash "$dir/reconcile-opencode-links.bash" || status=1
+"$HOME/.local/bin/ai-brain" generate || status=1
 if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
   "$HOME/.local/bin/ai-brain" secrets sync || status=1
 else
