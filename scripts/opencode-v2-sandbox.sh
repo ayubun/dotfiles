@@ -65,8 +65,9 @@ if [[ -f "$HOME/.local/share/opencode/auth.json" && ! -e "$sandbox/data/opencode
 fi
 
 OPENCODE_CONFIG_ROOT="$sandbox/config/opencode" bash "$script_dir/../dependencies/reconcile-opencode-links.bash"
-[[ -x "$HOME/.local/bin/ai-brain" ]] && \
-  AI_BRAIN_ROOT="${AI_BRAIN_ADAPTER_ROOT%/adapters/opencode}" OPENCODE_CONFIG_ROOT="$sandbox/config/opencode" "$HOME/.local/bin/ai-brain" generate
+{ [[ -x "$HOME/.local/bin/ai-brain" ]] &&
+  AI_BRAIN_ROOT="${AI_BRAIN_ADAPTER_ROOT%/adapters/opencode}" OPENCODE_CONFIG_ROOT="$sandbox/config/opencode" "$HOME/.local/bin/ai-brain" generate; } ||
+  printf 'warning: ai-brain generate did not run; run it before using opencode-v2\n' >&2
 
 # Every OpenCode 2 install defaults its managed service to port 49374, so the
 # sandbox service takes another port to coexist with a primary OpenCode 2.

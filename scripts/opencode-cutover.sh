@@ -94,7 +94,8 @@ for name in opencode.json package.json package-lock.json bun.lock node_modules; 
 done
 
 bash "$script_dir/../dependencies/reconcile-opencode-links.bash"
-[[ -x "$HOME/.local/bin/ai-brain" ]] && "$HOME/.local/bin/ai-brain" generate
+{ [[ -x "$HOME/.local/bin/ai-brain" ]] && "$HOME/.local/bin/ai-brain" generate; } ||
+  printf 'warning: ai-brain generate did not run; run it before using OpenCode 2\n' >&2
 
 cat <<EOF
 

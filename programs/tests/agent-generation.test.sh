@@ -158,6 +158,33 @@ test_sandbox_generates_agents_from_its_adapter_into_its_config() {
   [[ "$(<"$log")" == "$(printf 'reconcile\ngenerate:%s/opencode-v2-sandbox/ai-brain:%s/opencode-v2-sandbox/config/opencode' "$home" "$home")" ]] || fail "sandbox did not generate agents with isolated roots"
 }
 
+make_generate_fail() {
+  printf '#!/bin/bash\nprintf "%%s\\n" "$*" >>"$CALLS"\nexit 1\n' >"$home/.local/bin/ai-brain"
+  chmod +x "$home/.local/bin/ai-brain"
+}
+
+test_cutover_finishes_with_a_warning_when_generate_fails() {
+  prepare_migration_script opencode-cutover.sh
+  make_generate_fail
+  printf '#!/bin/bash\nprintf "opencode v1.19.3\\n"\n' >"$home/.opencode/bin/opencode"
+  chmod +x "$home/.opencode/bin/opencode"
+  env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash \
+    "$home/dotfiles/scripts/opencode-cutover.sh" >"$home/output" 2>&1 || fail "cutover exited after a failed generate"
+  grep -q 'warning: ai-brain generate did not run' "$home/output" || fail "cutover did not warn about generate"
+  grep -q '^rollback: ' "$home/output" || fail "cutover did not print the rollback line"
+}
+
+test_sandbox_finishes_with_a_warning_when_generate_fails() {
+  prepare_migration_script opencode-v2-sandbox.sh
+  make_generate_fail
+  mkdir -p "$home/opencode-v2-sandbox/ai-brain/adapters/opencode"
+  printf '{}\n' >"$home/opencode-v2-sandbox/ai-brain/adapters/opencode/opencode.jsonc"
+  env -i HOME="$home" CALLS="$log" PATH=/usr/bin:/bin /bin/bash \
+    "$home/dotfiles/scripts/opencode-v2-sandbox.sh" >"$home/output" 2>&1 || fail "sandbox exited after a failed generate"
+  grep -q 'warning: ai-brain generate did not run' "$home/output" || fail "sandbox did not warn about generate"
+  grep -q '^opencode-v2 -> ' "$home/output" || fail "sandbox did not print its summary"
+}
+
 if [[ $# -gt 0 ]]; then
   "$1"
   exit
@@ -172,4 +199,6 @@ test_ai_brain_install_skips_generation_for_opencode_one
 test_post_update_skips_generation_for_opencode_one
 test_cutover_generates_agents_after_reconciling
 test_sandbox_generates_agents_from_its_adapter_into_its_config
-printf 'ok: 9 tests passed\n'
+test_cutover_finishes_with_a_warning_when_generate_fails
+test_sandbox_finishes_with_a_warning_when_generate_fails
+printf 'ok: 11 tests passed\n'
