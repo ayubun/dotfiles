@@ -45,8 +45,14 @@ else
   printf 'warning: refusing to replace non-symlink path %s\n' "$work_link" >&2
 fi
 
-secrets_sync=(bash "$HOME/dotfiles/dependencies/ai-brain-secrets.bash" sync)
+as_user=()
 if [[ $UID -eq 0 && -n "${ORIGINAL_USER:-}" && "$ORIGINAL_USER" != "root" ]]; then
-  secrets_sync=(sudo -u "$ORIGINAL_USER" -H "${secrets_sync[@]}")
+  as_user=(sudo -u "$ORIGINAL_USER" -H)
 fi
-"${secrets_sync[@]}" || printf 'warning: failed to sync ai-brain secrets\n' >&2
+# runs before programs/rust.sh, so the helper installs a toolchain when the machine has none
+${as_user[@]+"${as_user[@]}"} bash "$HOME/dotfiles/dependencies/ai-brain-cli.bash" ensure || printf 'warning: failed to build the ai-brain cli\n' >&2
+if [[ -x "$HOME/.local/bin/ai-brain" ]]; then
+  ${as_user[@]+"${as_user[@]}"} "$HOME/.local/bin/ai-brain" secrets sync || printf 'warning: failed to sync ai-brain secrets\n' >&2
+else
+  printf 'warning: the ai-brain cli is not installed; skipping the secrets sync\n' >&2
+fi

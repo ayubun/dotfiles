@@ -1,6 +1,6 @@
 # dotfiles
 
-last verified: 2026-11-16
+last verified: 2026-11-18
 
 ## purpose
 
@@ -21,9 +21,9 @@ this repository owns machine bootstrap, shell setup, harness installation, and u
 - on mac, `programs/mac/gui-path.sh` installs the `dev.ayu.gui-path` login agent, which runs `configs/gui-path/publish.bash` at login to publish the login shell `PATH` to launchd for gui apps such as t3 code
 - `scripts/` holds operator scripts that a human runs by hand; `install.sh` never runs them
 - the per-minute cron `updaters/update-repos.sh` fast-forwards the managed repositories
-- after any run in which the set of repository heads differs from the last successful run, the cron runs `dependencies/post-update.bash`, which runs `dependencies/reconcile-opencode-links.bash` and `dependencies/ai-brain-secrets.bash sync`
-- anything the updater must apply after a pull belongs in `dependencies/post-update.bash`; keep it idempotent, sudo-free, and offline
-- `dependencies/ai-brain-secrets.bash` syncs the age-encrypted API keys from ai-brain `secrets/`; `~/ai-brain/environment/secrets.md` says what agents may run
+- after any run in which the set of repository heads differs from the last successful run, the cron runs `dependencies/post-update.bash`. the hook runs `dependencies/ai-brain-cli.bash build` to rebuild `~/.local/bin/ai-brain` when `~/ai-brain/tools/cli` changed, then `dependencies/reconcile-opencode-links.bash` and `ai-brain secrets sync`
+- anything the updater must apply after a pull belongs in `dependencies/post-update.bash`; keep it idempotent, sudo-free, and offline. the one exception is the cli rebuild, which tries an offline build first and fetches crates only when Cargo.lock names one that is not cached
+- `ai-brain secrets sync` (the rust cli in `~/ai-brain/tools/cli`) syncs the age-encrypted API keys from ai-brain `secrets/`. `programs/ai-brain.sh` builds the cli through `dependencies/ai-brain-cli.bash ensure`. the helper installs rustup when a non-work machine has no cargo, because the installer runs before `programs/rust.sh`. `~/ai-brain/environment/secrets.md` says what agents may run
 - `programs/claude-artifact.sh` installs a private npm claude code under `~/.claude-artifacts` with its own claude.ai login (one manual `auth login`, printed when missing) and links `dependencies/claude-artifact.bash` to `~/.local/bin/claude-artifact`; the ai-brain `claude-artifact.ts` opencode plugin calls it
 - on OpenCode 2, `dependencies/sync-opencode-auth.zsh` stores the keys through `opencode auth import` and `auth switch` (stdin only) and logs out older key credentials, because OpenCode 2 reads its legacy auth file only once and a stored credential wins over the environment. it uses the running service when there is one, else `--standalone`
 
