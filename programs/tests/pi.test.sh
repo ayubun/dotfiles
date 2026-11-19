@@ -199,6 +199,50 @@ test_refresh_skips_an_absent_pi_installation() (
   [[ ! -e "$HOME/.local/bin/pi" ]] || fail "refresh installed pi"
 )
 
+test_refresh_keeps_pinned_node_despite_a_different_nvm_default() (
+  local minimal="$TEST_ROOT/refresh-bin" tool
+  mkdir -p "$minimal" "$HOME/.nvm/bin"
+  for tool in dirname readlink cmp chmod mv ln; do
+    ln -s "$(command -v "$tool")" "$minimal/$tool"
+  done
+  printf '#!/bin/bash\nprintf "node B\\n"\n' >"$HOME/.nvm/bin/node"
+  chmod +x "$HOME/.nvm/bin/node"
+  printf '%s\n' 'nvm() { export PATH="$NVM_DIR/bin:$PATH"; }' >"$HOME/.nvm/nvm.sh"
+  PATH="$minimal" /bin/bash "$INSTALLER" --refresh-launcher
+  assert_equal "$(PATH="$minimal" "$HOME/.local/bin/pi" --version)" "1.5.3"
+  assert_equal "$(<"$PI_PREFIX_ROOT/1.5.3/bin/.pi-node")" "$TEST_ROOT/bin/node"
+  rm -rf "$HOME/.nvm"
+)
+
+test_refresh_without_any_node_warns_and_keeps_the_launcher() (
+  local minimal="$TEST_ROOT/no-node-bin" tool before
+  mkdir -p "$minimal"
+  for tool in dirname readlink; do
+    ln -s "$(command -v "$tool")" "$minimal/$tool"
+  done
+  rm -f "$PI_PREFIX_ROOT/1.5.3/bin/.pi-node"
+  before="$(<"$PI_PREFIX_ROOT/1.5.3/bin/pi-launcher")"
+  if ! PATH="$minimal" /bin/bash "$INSTALLER" --refresh-launcher 2>"$TEST_ROOT/refresh-warning"; then
+    fail "refresh without node failed"
+  fi
+  [[ "$(<"$TEST_ROOT/refresh-warning")" == *"warning: pi launcher refresh skipped"* ]] || fail "refresh warning is missing"
+  [[ "$(<"$TEST_ROOT/refresh-warning")" != *"install pi"* ]] || fail "refresh printed an install diagnostic"
+  assert_equal "$(<"$PI_PREFIX_ROOT/1.5.3/bin/pi-launcher")" "$before"
+)
+
+test_refresh_recovers_missing_or_stale_node_sidecar() (
+  local pinned
+  for pinned in "" "$TEST_ROOT/missing-node"; do
+    rm -f "$PI_PREFIX_ROOT/1.5.3/bin/.pi-node"
+    if [[ -n "$pinned" ]]; then
+      printf '%s\n' "$pinned" >"$PI_PREFIX_ROOT/1.5.3/bin/.pi-node"
+    fi
+    /bin/bash "$INSTALLER" --refresh-launcher
+    assert_equal "$(<"$PI_PREFIX_ROOT/1.5.3/bin/.pi-node")" "$TEST_ROOT/bin/node"
+    assert_equal "$("$HOME/.local/bin/pi" --version)" "1.5.3"
+  done
+)
+
 test_existing_node_does_not_source_nvm() (
   source() { fail "nvm was sourced despite node and npm being on PATH"; }
   install_pi 1.5.3 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
@@ -256,7 +300,10 @@ test_launcher_falls_back_when_pinned_node_is_removed
 test_existing_install_does_not_require_npm
 test_refresh_repairs_an_existing_launcher_without_installing
 test_refresh_skips_an_absent_pi_installation
+test_refresh_keeps_pinned_node_despite_a_different_nvm_default
+test_refresh_without_any_node_warns_and_keeps_the_launcher
+test_refresh_recovers_missing_or_stale_node_sidecar
 test_existing_node_does_not_source_nvm
 test_missing_node_has_clear_error
 test_install_loads_nvm_when_node_is_not_on_path
-printf '22 tests passed\n'
+printf '25 tests passed\n'

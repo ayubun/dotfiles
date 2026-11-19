@@ -25,12 +25,14 @@ load_pi_nvm() {
 }
 
 ensure_pi_node() {
+  local message="${1:-pi.sh: node is required to install pi; install Node or configure the nvm default}"
   command -v node >/dev/null 2>&1 || load_pi_nvm
-  command -v node >/dev/null 2>&1 || { printf 'pi.sh: node is required to install pi; install Node or configure the nvm default\n' >&2; return 1; }
+  command -v node >/dev/null 2>&1 || { printf '%s\n' "$message" >&2; return 1; }
 }
 
 write_pi_launcher() {
   local launcher="$1" binary="$2" node="$3" content
+  local node_file="$(dirname "$launcher")/.pi-node"
   printf -v content '#!/bin/bash\nnode=%q\nif [[ ! -x "$node" ]]; then\n  node="$(command -v node)" || {\n    printf "%%s\\n" %q >&2\n    exit 127\n  }\nfi\nexport PATH="${PATH:+$PATH:}"%q\nexec "$node" %q "$@"\n' \
     "$node" "pi: pinned node $node is missing; rerun ~/dotfiles/programs/pi.sh" "$(dirname "$node")" "$binary"
   if ! cmp -s "$launcher" <(printf '%s' "$content"); then
@@ -38,10 +40,14 @@ write_pi_launcher() {
     chmod +x "$launcher.tmp" || return 1
     mv "$launcher.tmp" "$launcher" || return 1
   fi
+  if ! cmp -s "$node_file" <(printf '%s\n' "$node"); then
+    printf '%s\n' "$node" >"$node_file.tmp" || return 1
+    mv "$node_file.tmp" "$node_file" || return 1
+  fi
 }
 
 refresh_pi_launcher() {
-  local link="$HOME/.local/bin/pi" binary launcher
+  local link="$HOME/.local/bin/pi" binary launcher node_file node=""
   [[ -L "$link" ]] || return 0
   binary="$(readlink "$link")"
   case "$binary" in
@@ -50,9 +56,14 @@ refresh_pi_launcher() {
   esac
   binary="$(dirname "$binary")/pi"
   [[ -x "$binary" ]] || return 0
-  ensure_pi_node || return 1
+  node_file="$(dirname "$binary")/.pi-node"
+  [[ ! -r "$node_file" ]] || node="$(<"$node_file")"
+  if [[ ! -x "$node" ]]; then
+    ensure_pi_node "warning: pi launcher refresh skipped; no node found; keeping the existing launcher" || return 0
+    node="$(command -v node)"
+  fi
   launcher="${binary}-launcher"
-  write_pi_launcher "$launcher" "$binary" "$(command -v node)" || return 1
+  write_pi_launcher "$launcher" "$binary" "$node" || return 1
   [[ "$(readlink "$link")" == "$launcher" ]] || ln -sfn "$launcher" "$link"
 }
 
