@@ -11,6 +11,7 @@ fail() { printf 'fail: %s\n' "$1" >&2; exit 1; }
 assert_equal() { [[ "$1" == "$2" ]] || fail "expected '$2', got '$1'"; }
 
 mkdir -p "$TEST_ROOT/home" "$TEST_ROOT/bin"
+ln -s "$(node -p 'process.execPath')" "$TEST_ROOT/bin/node"
 export HOME="$TEST_ROOT/home"
 export PI_PREFIX_ROOT="$TEST_ROOT/prefix"
 export NPM_LOG="$TEST_ROOT/npm.log"
@@ -107,6 +108,7 @@ test_replacement_keeps_old_prefix_until_promotion() {
   mv() {
     if [[ "$1" == "$prefix.tmp" ]]; then
       [[ -f "$prefix.old/old-marker" ]] || fail "old prefix was deleted before promotion"
+      [[ -x "$prefix.tmp/bin/pi-launcher" ]] || fail "launcher was not staged before promotion"
     fi
     command mv "$@"
   }
@@ -131,7 +133,6 @@ test_missing_npm_has_clear_error() {
 test_launcher_uses_node_without_shell_initialization() {
   local minimal="$TEST_ROOT/minimal-bin"
   mkdir -p "$minimal"
-  ln -sf "$(command -v basename)" "$minimal/basename"
   PATH="$minimal" "$HOME/.local/bin/pi" --version >"$TEST_ROOT/launcher-output"
   assert_equal "$(<"$TEST_ROOT/launcher-output")" "1.5.3"
 }
@@ -145,6 +146,58 @@ test_launcher_makes_node_available_to_children() {
   PATH="$TEST_ROOT/minimal-bin" "$HOME/.local/bin/pi" --child-node >"$TEST_ROOT/child-output"
   assert_equal "$(<"$TEST_ROOT/child-output")" "42"
 }
+
+test_launcher_preserves_existing_node_path_priority() (
+  mkdir -p "$TEST_ROOT/other-node"
+  printf '#!/bin/bash\nprintf "other-node\\n"\n' >"$TEST_ROOT/other-node/node"
+  chmod +x "$TEST_ROOT/other-node/node"
+  assert_equal "$(PATH="$TEST_ROOT/other-node" "$HOME/.local/bin/pi" --child-node)" "other-node"
+)
+
+test_launcher_does_not_add_an_empty_path_entry() (
+  printf '#!/bin/bash\nprintf "%%s\\n" "$PATH"\n' >"$TEST_ROOT/path-probe"
+  chmod +x "$TEST_ROOT/path-probe"
+  write_pi_launcher "$TEST_ROOT/path-launcher" "$TEST_ROOT/path-probe" /bin/bash
+  assert_equal "$(PATH="" "$TEST_ROOT/path-launcher")" /bin
+)
+
+test_launcher_falls_back_when_pinned_node_is_removed() (
+  mkdir -p "$TEST_ROOT/removable-node"
+  ln -s "$TEST_ROOT/bin/node" "$TEST_ROOT/removable-node/node"
+  PATH="$TEST_ROOT/removable-node:$PATH" install_pi 1.5.3 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
+  rm "$TEST_ROOT/removable-node/node"
+  assert_equal "$("$HOME/.local/bin/pi" --version)" "1.5.3"
+  local result=0
+  PATH="" "$HOME/.local/bin/pi" 2>"$TEST_ROOT/missing-pinned-error" || result=$?
+  assert_equal "$result" 127
+  assert_equal "$(<"$TEST_ROOT/missing-pinned-error")" \
+    "pi: pinned node $TEST_ROOT/removable-node/node is missing; rerun ~/dotfiles/programs/pi.sh"
+  install_pi 1.5.3 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
+)
+
+test_existing_install_does_not_require_npm() (
+  command() {
+    if [[ "$1" == -v && "$2" == npm ]]; then return 1; fi
+    builtin command "$@"
+  }
+  source() { fail "nvm was sourced despite node being on PATH"; }
+  install_pi 1.5.3 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
+)
+
+test_refresh_repairs_an_existing_launcher_without_installing() (
+  local log
+  log="$(<"$NPM_LOG")"
+  printf '#!/bin/bash\nexit 99\n' >"$PI_PREFIX_ROOT/1.5.3/bin/pi-launcher"
+  /bin/bash "$INSTALLER" --refresh-launcher
+  assert_equal "$("$HOME/.local/bin/pi" --version)" "1.5.3"
+  assert_equal "$(<"$NPM_LOG")" "$log"
+)
+
+test_refresh_skips_an_absent_pi_installation() (
+  export HOME="$TEST_ROOT/empty-home"
+  /bin/bash "$INSTALLER" --refresh-launcher
+  [[ ! -e "$HOME/.local/bin/pi" ]] || fail "refresh installed pi"
+)
 
 test_existing_node_does_not_source_nvm() (
   source() { fail "nvm was sourced despite node and npm being on PATH"; }
@@ -167,7 +220,7 @@ test_install_loads_nvm_when_node_is_not_on_path() (
   mkdir -p "$HOME/.nvm/bin" "$minimal"
   ln -s "$(command -v node)" "$HOME/.nvm/bin/node"
   cp "$TEST_ROOT/bin/npm" "$HOME/.nvm/bin/npm"
-  for tool in basename dirname mkdir rm mv ln readlink chmod cmp; do
+  for tool in dirname mkdir rm mv ln readlink chmod cmp; do
     ln -sf "$(command -v "$tool")" "$minimal/$tool"
   done
   printf '%s\n' \
@@ -182,7 +235,6 @@ test_install_loads_nvm_when_node_is_not_on_path() (
     bash "$INSTALLER" "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
   "$HOME/.local/bin/pi" --version >"$TEST_ROOT/nvm-output"
   assert_equal "$(<"$TEST_ROOT/nvm-output")" "1.5.4"
-  : >"$NPM_LOG"
 )
 
 test_first_install_links_versioned_binary
@@ -198,7 +250,13 @@ test_missing_npm_has_clear_error
 test_launcher_uses_node_without_shell_initialization
 test_launcher_preserves_arguments
 test_launcher_makes_node_available_to_children
+test_launcher_preserves_existing_node_path_priority
+test_launcher_does_not_add_an_empty_path_entry
+test_launcher_falls_back_when_pinned_node_is_removed
+test_existing_install_does_not_require_npm
+test_refresh_repairs_an_existing_launcher_without_installing
+test_refresh_skips_an_absent_pi_installation
 test_existing_node_does_not_source_nvm
 test_missing_node_has_clear_error
 test_install_loads_nvm_when_node_is_not_on_path
-printf '16 tests passed\n'
+printf '22 tests passed\n'

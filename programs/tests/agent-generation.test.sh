@@ -14,6 +14,8 @@ fail() {
 setup_case() {
   home="$(mktemp -d "$root/home.XXXXXX")"
   mkdir -p "$home/dotfiles/dependencies" "$home/ai-brain/.git" "$home/ai-brain-discord/.git" "$home/.local/bin" "$home/stubs"
+  mkdir -p "$home/dotfiles/programs"
+  cp "$repo/programs/pi.sh" "$home/dotfiles/programs/pi.sh"
   log="$home/calls"
   : >"$log"
   printf '#!/bin/bash\nprintf "build\\n" >>"$CALLS"\n' >"$home/dotfiles/dependencies/ai-brain-cli.bash"
