@@ -8,6 +8,7 @@ casks=(
   signal
   telegram
   ghostty
+  zen
   cursor
   discord
   discord@canary
