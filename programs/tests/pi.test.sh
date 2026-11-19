@@ -22,7 +22,7 @@ printf '%s\n' '#!/bin/bash' 'set -euo pipefail' \
   'mkdir -p "$4/bin"' \
   'mkdir -p "$4/lib/node_modules/@earendil-works/pi-coding-agent"' \
   'printf '"'"'{"version":"%s"}\n'"'"' "${5##*@}" >"$4/lib/node_modules/@earendil-works/pi-coding-agent/package.json"' \
-  'printf '"'"'#!/bin/bash\nprintf "%%s\\n" "%s"\n'"'"' "${5##*@}" >"$4/bin/pi"' \
+  'printf '"'"'#!/usr/bin/env node\nif (process.argv[2] === "--echo") console.log(JSON.stringify(process.argv.slice(3))); else if (process.argv[2] === "--child-node") console.log(require("node:child_process").execFileSync("node", ["-p", "42"], {encoding:"utf8"}).trim()); else console.log("%s");\n'"'"' "${5##*@}" >"$4/bin/pi"' \
   'chmod +x "$4/bin/pi"' >"$TEST_ROOT/bin/npm"
 chmod +x "$TEST_ROOT/bin/npm"
 
@@ -32,7 +32,7 @@ source "$INSTALLER"
 test_first_install_links_versioned_binary() {
   install_pi 1.5.2 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
   assert_equal "$(<"$NPM_LOG")" "install -g --prefix $PI_PREFIX_ROOT/1.5.2.tmp @earendil-works/pi-coding-agent@1.5.2"
-  assert_equal "$(readlink "$HOME/.local/bin/pi")" "$PI_PREFIX_ROOT/1.5.2/bin/pi"
+  assert_equal "$(readlink "$HOME/.local/bin/pi")" "$PI_PREFIX_ROOT/1.5.2/bin/pi-launcher"
   assert_equal "$("$HOME/.local/bin/pi" --version)" "1.5.2"
 }
 
@@ -51,7 +51,7 @@ test_pin_change_keeps_old_prefix() {
   local pin="$TEST_ROOT/pi-version"
   printf '1.5.3\n' >"$pin"
   install_pi "$(pi_pinned_version "$pin")" "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
-  assert_equal "$(readlink "$HOME/.local/bin/pi")" "$PI_PREFIX_ROOT/1.5.3/bin/pi"
+  assert_equal "$(readlink "$HOME/.local/bin/pi")" "$PI_PREFIX_ROOT/1.5.3/bin/pi-launcher"
   assert_equal "$("$PI_PREFIX_ROOT/1.5.2/bin/pi" --version)" "1.5.2"
   assert_equal "$("$HOME/.local/bin/pi" --version)" "1.5.3"
   assert_equal "$(wc -l <"$NPM_LOG" | tr -d ' ')" "2"
@@ -128,6 +128,63 @@ test_missing_npm_has_clear_error() {
   [[ "$(<"$TEST_ROOT/npm-error")" == *"pi.sh: npm is required"* ]] || fail "missing npm diagnostic is missing"
 }
 
+test_launcher_uses_node_without_shell_initialization() {
+  local minimal="$TEST_ROOT/minimal-bin"
+  mkdir -p "$minimal"
+  ln -sf "$(command -v basename)" "$minimal/basename"
+  PATH="$minimal" "$HOME/.local/bin/pi" --version >"$TEST_ROOT/launcher-output"
+  assert_equal "$(<"$TEST_ROOT/launcher-output")" "1.5.3"
+}
+
+test_launcher_preserves_arguments() {
+  assert_equal "$("$HOME/.local/bin/pi" --echo "space arg" "'quoted'" '$literal')" \
+    '["space arg","'"'quoted'"'","$literal"]'
+}
+
+test_launcher_makes_node_available_to_children() {
+  PATH="$TEST_ROOT/minimal-bin" "$HOME/.local/bin/pi" --child-node >"$TEST_ROOT/child-output"
+  assert_equal "$(<"$TEST_ROOT/child-output")" "42"
+}
+
+test_existing_node_does_not_source_nvm() (
+  source() { fail "nvm was sourced despite node and npm being on PATH"; }
+  install_pi 1.5.3 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
+)
+
+test_missing_node_has_clear_error() (
+  command() {
+    if [[ "$1" == -v && "$2" == node ]]; then return 1; fi
+    builtin command "$@"
+  }
+  if install_pi 9.9.9 "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi" 2>"$TEST_ROOT/node-error"; then
+    fail "missing node returned success"
+  fi
+  [[ "$(<"$TEST_ROOT/node-error")" == *"pi.sh: node is required"* ]] || fail "missing node diagnostic is missing"
+)
+
+test_install_loads_nvm_when_node_is_not_on_path() (
+  local minimal="$TEST_ROOT/minimal-bin" tool
+  mkdir -p "$HOME/.nvm/bin" "$minimal"
+  ln -s "$(command -v node)" "$HOME/.nvm/bin/node"
+  cp "$TEST_ROOT/bin/npm" "$HOME/.nvm/bin/npm"
+  for tool in basename dirname mkdir rm mv ln readlink chmod cmp; do
+    ln -sf "$(command -v "$tool")" "$minimal/$tool"
+  done
+  printf '%s\n' \
+    ': "${NVM_TEST_UNSET}"' \
+    'nvm() {' \
+    '  [[ "$*" == "use default" ]] || return 1' \
+    '  export PATH="$NVM_DIR/bin:$PATH"' \
+    '}' >"$HOME/.nvm/nvm.sh"
+  unset NVM_TEST_UNSET
+  export PATH="$minimal"
+  /bin/bash -c 'source "$1"; install_pi 1.5.4 "$2" "$3"' \
+    bash "$INSTALLER" "$PI_PREFIX_ROOT" "$HOME/.local/bin/pi"
+  "$HOME/.local/bin/pi" --version >"$TEST_ROOT/nvm-output"
+  assert_equal "$(<"$TEST_ROOT/nvm-output")" "1.5.4"
+  : >"$NPM_LOG"
+)
+
 test_first_install_links_versioned_binary
 test_second_install_keeps_link_inode
 test_pin_change_keeps_old_prefix
@@ -138,4 +195,10 @@ test_failed_generate_is_not_reported_as_missing
 test_version_check_does_not_execute_pi
 test_replacement_keeps_old_prefix_until_promotion
 test_missing_npm_has_clear_error
-printf '10 tests passed\n'
+test_launcher_uses_node_without_shell_initialization
+test_launcher_preserves_arguments
+test_launcher_makes_node_available_to_children
+test_existing_node_does_not_source_nvm
+test_missing_node_has_clear_error
+test_install_loads_nvm_when_node_is_not_on_path
+printf '16 tests passed\n'
