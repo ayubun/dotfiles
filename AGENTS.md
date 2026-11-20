@@ -1,6 +1,6 @@
 # dotfiles
 
-last verified: 2026-11-18
+last verified: 2026-11-20
 
 ## purpose
 
@@ -18,6 +18,7 @@ this repository owns machine bootstrap, shell setup, harness installation, and u
 - helpers invoked or sourced by installers belong under `dependencies/`
 - use a non-`.sh` extension for dependency helpers that must never match installer globs
 - on ubuntu, `programs/ubuntu/memwatch.sh` installs a root `memwatch.service` each boot (coder root disks reset on restart). it runs `configs/memwatch/memwatch.bash`, which writes per-boot memory samples, low-memory snapshots, and kernel, systemd, and coder agent journal lines to `~/.local/state/memwatch/` (older boots gzipped, 30 days, 300 MB cap)
+- on ubuntu, `programs/ubuntu/voice-e2e-packages.sh` runs `~/ai-brain-discord/skills/testing-voice-call-end-to-end/host-packages.sh` by path each run, so the voice-e2e apt packages return after a root disk reset. it skips when ai-brain-discord is not cloned and fails when the repo exists but the script moved; rename both together
 - on mac, `programs/mac/gui-path.sh` installs the `dev.ayu.gui-path` login agent, which runs `configs/gui-path/publish.bash` at login to publish the login shell `PATH` to launchd for gui apps such as t3 code
 - `scripts/` holds operator scripts that a human runs by hand; `install.sh` never runs them
 - the per-minute cron `updaters/update-repos.sh` fast-forwards the managed repositories
